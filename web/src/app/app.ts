@@ -1,5 +1,5 @@
 import { Component, signal, ChangeDetectionStrategy, inject } from '@angular/core';
-import { Router, RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet, RouterLink } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatIconModule } from '@angular/material/icon';
@@ -12,6 +12,7 @@ import { AuthService } from './auth/auth.service';
   selector: 'app-root',
   imports: [
     RouterOutlet,
+    RouterLink,
     MatToolbarModule,
     MatSidenavModule,
     MatIconModule,

@@ -63,14 +63,6 @@ describe('Login', () => {
     expect(passwordControl?.hasError('required')).toBe(true);
   });
 
-  it('should validate password minimum length', () => {
-    const fixture = TestBed.createComponent(Login);
-    const component = fixture.componentInstance;
-    const passwordControl = component['loginForm'].get('password');
-    passwordControl?.setValue('12345');
-    expect(passwordControl?.hasError('minlength')).toBe(true);
-  });
-
   it('should render Google sign-in button', async () => {
     const fixture = TestBed.createComponent(Login);
     fixture.detectChanges();

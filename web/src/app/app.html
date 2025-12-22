@@ -22,7 +22,7 @@
       </button>
     </mat-menu>
   } @else {
-    <a mat-button href="/login" aria-label="Sign in">
+    <a mat-button routerLink="/login" aria-label="Sign in">
       <mat-icon>login</mat-icon>
       Sign In
     </a>
@@ -32,19 +32,19 @@
 <mat-sidenav-container class="sidenav-container">
   <mat-sidenav [opened]="sidenavOpened()" mode="side" class="sidenav">
     <mat-nav-list>
-      <a mat-list-item href="/" aria-label="Navigate to home">
+      <a mat-list-item routerLink="/" aria-label="Navigate to home">
         <mat-icon matListItemIcon>home</mat-icon>
         <span matListItemTitle>Home</span>
       </a>
-      <a mat-list-item href="/clubs" aria-label="Navigate to clubs">
+      <a mat-list-item routerLink="/clubs" aria-label="Navigate to clubs">
         <mat-icon matListItemIcon>groups</mat-icon>
         <span matListItemTitle>Clubs</span>
       </a>
-      <a mat-list-item href="/events" aria-label="Navigate to events">
+      <a mat-list-item routerLink="/events" aria-label="Navigate to events">
         <mat-icon matListItemIcon>event</mat-icon>
         <span matListItemTitle>Events</span>
       </a>
-      <a mat-list-item href="/standings" aria-label="Navigate to standings">
+      <a mat-list-item routerLink="/standings" aria-label="Navigate to standings">
         <mat-icon matListItemIcon>leaderboard</mat-icon>
         <span matListItemTitle>Standings</span>
       </a>

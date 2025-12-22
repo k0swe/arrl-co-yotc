@@ -1,6 +1,6 @@
 // Firebase configuration for ARRL CO YOTC
-// This is a placeholder configuration. In production, these values should be replaced
-// with actual Firebase project credentials.
+// TODO: Replace with actual Firebase project credentials in production
+// These values should be configured via environment variables or Firebase hosting config
 export const firebaseConfig = {
   apiKey: "AIzaSyDEXAMPLE_KEY",
   authDomain: "arrl-co-yotc.firebaseapp.com",

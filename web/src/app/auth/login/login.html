@@ -109,9 +109,6 @@
             @if (loginForm.get('password')?.hasError('required')) {
               <mat-error>Password is required</mat-error>
             }
-            @if (loginForm.get('password')?.hasError('minlength')) {
-              <mat-error>Password must be at least 6 characters</mat-error>
-            }
           </mat-form-field>
 
           <button
