@@ -1,11 +1,9 @@
 // Firebase configuration for ARRL CO YOTC
-// TODO: Replace with actual Firebase project credentials in production
-// These values should be configured via environment variables or Firebase hosting config
 export const firebaseConfig = {
-  apiKey: "AIzaSyDEXAMPLE_KEY",
+  apiKey: "AIzaSyCWDCx5yR6bEoeMdkVG6-MzssbhrCWJWAU",
   authDomain: "arrl-co-yotc.firebaseapp.com",
   projectId: "arrl-co-yotc",
   storageBucket: "arrl-co-yotc.firebasestorage.app",
-  messagingSenderId: "123456789",
-  appId: "1:123456789:web:abcdef123456"
+  messagingSenderId: "285425475616",
+  appId: "1:285425475616:web:c0dd8e29386ce5f0109c45"
 };
