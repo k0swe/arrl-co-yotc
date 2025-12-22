@@ -4,7 +4,7 @@
       <mat-card-title>Welcome Back</mat-card-title>
       <mat-card-subtitle>Sign in to continue to ARRL Colorado YOTC</mat-card-subtitle>
     </mat-card-header>
-    
+
     <mat-card-content>
       @if (errorMessage()) {
         <div class="error-message" role="alert">
@@ -27,7 +27,7 @@
           @if (loading()) {
             <mat-spinner diameter="20"></mat-spinner>
           } @else {
-            <ng-container>
+            <div class="button-content">
               <mat-icon class="google-icon">
                 <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path
@@ -49,7 +49,7 @@
                 </svg>
               </mat-icon>
               <span>Sign in with Google</span>
-            </ng-container>
+            </div>
           }
         </button>
 
@@ -64,7 +64,7 @@
           @if (loading()) {
             <mat-spinner diameter="20"></mat-spinner>
           } @else {
-            <ng-container>
+            <div class="button-content">
               <mat-icon class="facebook-icon">
                 <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path
@@ -78,7 +78,7 @@
                 </svg>
               </mat-icon>
               <span>Sign in with Facebook</span>
-            </ng-container>
+            </div>
           }
         </button>
       </div>
