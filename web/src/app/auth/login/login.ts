@@ -34,7 +34,7 @@ export class Login {
   protected readonly loading = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly showEmailLogin = signal(false);
-  
+
   protected readonly loginForm = new FormGroup({
     email: new FormControl('', [Validators.required, Validators.email]),
     password: new FormControl('', [Validators.required])
@@ -43,7 +43,7 @@ export class Login {
   protected signInWithGoogle(): void {
     this.loading.set(true);
     this.errorMessage.set(null);
-    
+
     this.authService.signInWithGoogle().subscribe({
       next: () => {
         this.loading.set(false);
@@ -59,7 +59,7 @@ export class Login {
   protected signInWithFacebook(): void {
     this.loading.set(true);
     this.errorMessage.set(null);
-    
+
     this.authService.signInWithFacebook().subscribe({
       next: () => {
         this.loading.set(false);
@@ -67,6 +67,7 @@ export class Login {
       },
       error: (error) => {
         this.loading.set(false);
+        console.error('Facebook sign-in error:', error);
         this.errorMessage.set(this.getErrorMessage(error));
       }
     });
@@ -79,9 +80,9 @@ export class Login {
 
     this.loading.set(true);
     this.errorMessage.set(null);
-    
+
     const { email, password } = this.loginForm.value;
-    
+
     this.authService.signInWithEmailAndPassword(email!, password!).subscribe({
       next: () => {
         this.loading.set(false);
@@ -101,7 +102,7 @@ export class Login {
 
   private getErrorMessage(error: any): string {
     const code = error?.code || '';
-    
+
     switch (code) {
       case 'auth/user-not-found':
       case 'auth/wrong-password':
@@ -115,7 +116,12 @@ export class Login {
         return 'Sign-in cancelled. Please try again.';
       case 'auth/account-exists-with-different-credential':
         return 'An account already exists with this email. Please sign in with your original method.';
+      case 'auth/internal-error':
+        return 'Authentication configuration error. Please contact support.';
+      case 'auth/invalid-oauth-client-id':
+        return 'Social login is not properly configured. Please contact support.';
       default:
+        console.error('Unhandled auth error code:', code, error);
         return 'An error occurred. Please try again.';
     }
   }
