@@ -1,7 +1,10 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import { provideAuth, getAuth } from '@angular/fire/auth';
+import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
 import { App } from './app';
+import { firebaseConfig } from './firebase.config';
 
 describe('App', () => {
   beforeEach(async () => {
@@ -9,7 +12,9 @@ describe('App', () => {
       imports: [App],
       providers: [
         provideRouter([]),
-        provideAnimationsAsync()
+        provideAnimationsAsync(),
+        provideFirebaseApp(() => initializeApp(firebaseConfig)),
+        provideAuth(() => getAuth())
       ]
     }).compileComponents();
   });
