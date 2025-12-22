@@ -1,0 +1,175 @@
+.register-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 64px);
+  padding: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.register-card {
+  max-width: 450px;
+  width: 100%;
+  padding: 24px;
+}
+
+mat-card-header {
+  margin-bottom: 24px;
+}
+
+mat-card-title {
+  font-size: 28px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+mat-card-subtitle {
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  background-color: #ffebee;
+  border-radius: 4px;
+  color: #c62828;
+  font-size: 14px;
+}
+
+.error-message mat-icon {
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
+}
+
+/* Google Sign-Up (Prominent) */
+.social-register-section {
+  margin-bottom: 24px;
+}
+
+.google-button {
+  width: 100%;
+  height: 56px;
+  font-size: 16px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.google-icon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.google-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Divider Section */
+.divider-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 24px 0;
+}
+
+.divider-container mat-divider {
+  flex: 1;
+}
+
+.email-toggle {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.54);
+  text-transform: none;
+  padding: 0 8px;
+  min-width: auto;
+  white-space: nowrap;
+}
+
+/* Email/Password Registration (Subtle) */
+.email-register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.full-width {
+  width: 100%;
+}
+
+.email-register-button {
+  width: 100%;
+  height: 48px;
+  font-size: 15px;
+  margin-top: 8px;
+}
+
+.auth-links {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+.auth-text {
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 14px;
+}
+
+.auth-link {
+  color: #1976d2;
+  text-transform: none;
+  font-size: 14px;
+  padding: 0 4px;
+  min-width: auto;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+  .register-container {
+    padding: 16px;
+    min-height: calc(100vh - 56px);
+  }
+
+  .register-card {
+    padding: 20px;
+  }
+
+  mat-card-title {
+    font-size: 24px;
+  }
+
+  .google-button {
+    height: 52px;
+    font-size: 15px;
+  }
+
+  .email-register-button {
+    height: 44px;
+  }
+}

@@ -24,3 +24,21 @@ mat-toolbar {
   top: 0;
   z-index: 1000;
 }
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+  cursor: default;
+  color: rgba(0, 0, 0, 0.87);
+}
+
+.user-info mat-icon {
+  margin-right: 4px;
+}
+
