@@ -5,6 +5,7 @@ import {
   signInWithEmailAndPassword,
   signInWithPopup,
   GoogleAuthProvider,
+  FacebookAuthProvider,
   sendPasswordResetEmail,
   signOut,
   user,
@@ -18,6 +19,7 @@ import { from, Observable } from 'rxjs';
 export class AuthService {
   private auth = inject(Auth);
   private googleProvider = new GoogleAuthProvider();
+  private facebookProvider = new FacebookAuthProvider();
   
   // Signal to track current user
   readonly currentUser = signal<User | null>(null);
@@ -46,6 +48,15 @@ export class AuthService {
   signInWithGoogle(): Observable<void> {
     return from(
       signInWithPopup(this.auth, this.googleProvider).then(() => {})
+    );
+  }
+
+  /**
+   * Sign in with Facebook popup
+   */
+  signInWithFacebook(): Observable<void> {
+    return from(
+      signInWithPopup(this.auth, this.facebookProvider).then(() => {})
     );
   }
 

@@ -57,6 +57,22 @@ export class Register {
     });
   }
 
+  protected signUpWithFacebook(): void {
+    this.loading.set(true);
+    this.errorMessage.set(null);
+    
+    this.authService.signInWithFacebook().subscribe({
+      next: () => {
+        this.loading.set(false);
+        this.router.navigate(['/']);
+      },
+      error: (error) => {
+        this.loading.set(false);
+        this.errorMessage.set(this.getErrorMessage(error));
+      }
+    });
+  }
+
   protected signUpWithEmail(): void {
     if (this.registerForm.invalid) {
       return;
@@ -110,6 +126,8 @@ export class Register {
         return 'Network error. Please check your connection.';
       case 'auth/popup-closed-by-user':
         return 'Sign-up cancelled. Please try again.';
+      case 'auth/account-exists-with-different-credential':
+        return 'An account already exists with this email. Please sign in with your original method.';
       default:
         return 'An error occurred. Please try again.';
     }

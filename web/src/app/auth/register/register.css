@@ -46,12 +46,16 @@ mat-card-subtitle {
   font-size: 20px;
 }
 
-/* Google Sign-Up (Prominent) */
+/* Social Sign-Up (Prominent) */
 .social-register-section {
   margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.google-button {
+.google-button,
+.facebook-button {
   width: 100%;
   height: 56px;
   font-size: 16px;
@@ -63,7 +67,17 @@ mat-card-subtitle {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
-.google-icon {
+.facebook-button {
+  background-color: #1877F2;
+  color: white;
+}
+
+.facebook-button:hover:not([disabled]) {
+  background-color: #166fe5;
+}
+
+.google-icon,
+.facebook-icon {
   width: 24px;
   height: 24px;
   display: flex;
@@ -71,7 +85,8 @@ mat-card-subtitle {
   justify-content: center;
 }
 
-.google-icon svg {
+.google-icon svg,
+.facebook-icon svg {
   width: 20px;
   height: 20px;
 }

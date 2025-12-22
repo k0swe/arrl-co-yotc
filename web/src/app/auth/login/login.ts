@@ -56,6 +56,22 @@ export class Login {
     });
   }
 
+  protected signInWithFacebook(): void {
+    this.loading.set(true);
+    this.errorMessage.set(null);
+    
+    this.authService.signInWithFacebook().subscribe({
+      next: () => {
+        this.loading.set(false);
+        this.router.navigate(['/']);
+      },
+      error: (error) => {
+        this.loading.set(false);
+        this.errorMessage.set(this.getErrorMessage(error));
+      }
+    });
+  }
+
   protected signInWithEmail(): void {
     if (this.loginForm.invalid) {
       return;
@@ -97,6 +113,8 @@ export class Login {
         return 'Network error. Please check your connection.';
       case 'auth/popup-closed-by-user':
         return 'Sign-in cancelled. Please try again.';
+      case 'auth/account-exists-with-different-credential':
+        return 'An account already exists with this email. Please sign in with your original method.';
       default:
         return 'An error occurred. Please try again.';
     }
