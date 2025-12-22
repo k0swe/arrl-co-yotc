@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy, signal, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
@@ -39,7 +39,7 @@ export class Register {
     email: new FormControl('', [Validators.required, Validators.email]),
     password: new FormControl('', [Validators.required, Validators.minLength(6)]),
     confirmPassword: new FormControl('', [Validators.required])
-  }, { validators: this.passwordMatchValidator });
+  }, this.passwordMatchValidator);
 
   protected signUpWithGoogle(): void {
     this.loading.set(true);
@@ -84,7 +84,8 @@ export class Register {
     this.errorMessage.set(null);
   }
 
-  private passwordMatchValidator(group: FormGroup): { [key: string]: boolean } | null {
+  private passwordMatchValidator(control: AbstractControl): { [key: string]: boolean } | null {
+    const group = control as FormGroup;
     const password = group.get('password');
     const confirmPassword = group.get('confirmPassword');
     
