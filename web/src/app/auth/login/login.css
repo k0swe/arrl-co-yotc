@@ -68,12 +68,12 @@ mat-card-subtitle {
 }
 
 .facebook-button {
-  background-color: #1877F2;
+  background-color: #0c5bd6;
   color: white;
 }
 
 .facebook-button:hover:not([disabled]) {
-  background-color: #166fe5;
+  background-color: #0a4fc2;
 }
 
 .google-icon,
