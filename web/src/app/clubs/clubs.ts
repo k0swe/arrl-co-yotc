@@ -58,12 +58,7 @@ export class Clubs {
     this.clubService.getActiveClubs().pipe(
       catchError(() => {
         this.loading.set(false);
-        // Only show snackbar if component is still alive
-        try {
-          this.snackBar.open('Failed to load clubs', 'Close', { duration: 3000 });
-        } catch {
-          // Silently handle if injector is destroyed
-        }
+        this.showSnackBar('Failed to load clubs');
         return of([]);
       }),
       takeUntilDestroyed(this.destroyRef)
@@ -99,10 +94,18 @@ export class Clubs {
     });
   }
 
+  private showSnackBar(message: string, action: string = 'Close'): void {
+    try {
+      this.snackBar.open(message, action, { duration: 3000 });
+    } catch {
+      // Silently handle if injector is destroyed
+    }
+  }
+
   protected applyForMembership(club: ClubWithMembership): void {
     const currentUser = this.authService.currentUser();
     if (!currentUser) {
-      this.snackBar.open('Please sign in to confirm your membership', 'Close', { duration: 3000 });
+      this.showSnackBar('Please sign in to confirm your membership');
       return;
     }
 
@@ -125,7 +128,7 @@ export class Clubs {
             : c
         );
         this.clubs.set(updatedClubs);
-        this.snackBar.open('Membership confirmation submitted!', 'Close', { duration: 3000 });
+        this.showSnackBar('Membership confirmation submitted!');
       },
       error: (error) => {
         // Reset applying state
@@ -136,7 +139,7 @@ export class Clubs {
         );
         this.clubs.set(updatedClubs);
         console.error('Error applying for membership:', error);
-        this.snackBar.open('Failed to submit confirmation', 'Close', { duration: 3000 });
+        this.showSnackBar('Failed to submit confirmation');
       }
     });
   }
