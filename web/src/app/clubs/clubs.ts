@@ -1,4 +1,5 @@
-import { Component, ChangeDetectionStrategy, signal, inject, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -10,8 +11,8 @@ import { MembershipService } from '../services/membership.service';
 import { AuthService } from '../auth/auth.service';
 import { Club } from '../../../../src/app/models/club.model';
 import { ClubMembership, MembershipStatus } from '../../../../src/app/models/user.model';
-import { forkJoin, of } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 interface ClubWithMembership extends Club {
   membershipStatus?: MembershipStatus;
@@ -37,6 +38,7 @@ export class Clubs {
   private membershipService = inject(MembershipService);
   private authService = inject(AuthService);
   private snackBar = inject(MatSnackBar);
+  private destroyRef = inject(DestroyRef);
 
   protected readonly loading = signal(true);
   protected readonly clubs = signal<ClubWithMembership[]>([]);
@@ -56,14 +58,21 @@ export class Clubs {
     this.clubService.getActiveClubs().pipe(
       catchError(() => {
         this.loading.set(false);
-        this.snackBar.open('Failed to load clubs', 'Close', { duration: 3000 });
+        // Only show snackbar if component is still alive
+        try {
+          this.snackBar.open('Failed to load clubs', 'Close', { duration: 3000 });
+        } catch {
+          // Silently handle if injector is destroyed
+        }
         return of([]);
-      })
+      }),
+      takeUntilDestroyed(this.destroyRef)
     ).subscribe(clubs => {
       if (currentUser) {
         // If user is authenticated, also get their memberships
         this.membershipService.getUserMemberships(currentUser.uid).pipe(
-          catchError(() => of([]))
+          catchError(() => of([])),
+          takeUntilDestroyed(this.destroyRef)
         ).subscribe(memberships => {
           this.userMemberships.set(memberships);
           this.clubs.set(this.mergeClubsWithMemberships(clubs, memberships));
@@ -105,7 +114,9 @@ export class Clubs {
       this.clubs.set(updatedClubs);
     }
 
-    this.membershipService.applyForMembership(currentUser.uid, club.id).subscribe({
+    this.membershipService.applyForMembership(currentUser.uid, club.id).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
       next: () => {
         // Update the club's membership status
         const updatedClubs = this.clubs().map(c => 
