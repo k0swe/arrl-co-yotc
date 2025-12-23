@@ -1,0 +1,98 @@
+<h2 mat-dialog-title>Suggest a New Club</h2>
+
+<mat-dialog-content>
+  <p class="dialog-description">
+    Don't see your club listed? Submit a suggestion to add it to the directory.
+    Your submission will be reviewed by an administrator before becoming active.
+  </p>
+
+  <form [formGroup]="clubForm" (ngSubmit)="onSubmit()">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Club Name</mat-label>
+      <input
+        matInput
+        formControlName="name"
+        placeholder="e.g., Denver Radio Club"
+        required
+        aria-label="Club name"
+      />
+      <mat-icon matPrefix>groups</mat-icon>
+      @if (getErrorMessage('name')) {
+        <mat-error>{{ getErrorMessage('name') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Callsign</mat-label>
+      <input
+        matInput
+        formControlName="callsign"
+        placeholder="e.g., W0ABC"
+        required
+        aria-label="Club callsign"
+      />
+      <mat-icon matPrefix>radio</mat-icon>
+      @if (getErrorMessage('callsign')) {
+        <mat-error>{{ getErrorMessage('callsign') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Location</mat-label>
+      <input
+        matInput
+        formControlName="location"
+        placeholder="e.g., Denver, CO"
+        required
+        aria-label="Club location"
+      />
+      <mat-icon matPrefix>place</mat-icon>
+      @if (getErrorMessage('location')) {
+        <mat-error>{{ getErrorMessage('location') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Description</mat-label>
+      <textarea
+        matInput
+        formControlName="description"
+        placeholder="Brief description of the club and its activities"
+        rows="4"
+        required
+        aria-label="Club description"
+      ></textarea>
+      <mat-icon matPrefix>description</mat-icon>
+      @if (getErrorMessage('description')) {
+        <mat-error>{{ getErrorMessage('description') }}</mat-error>
+      }
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button
+    mat-button
+    type="button"
+    (click)="onCancel()"
+    [disabled]="submitting()"
+    aria-label="Cancel"
+  >
+    Cancel
+  </button>
+  <button
+    mat-raised-button
+    color="primary"
+    type="submit"
+    (click)="onSubmit()"
+    [disabled]="clubForm.invalid || submitting()"
+    aria-label="Submit club suggestion"
+  >
+    @if (submitting()) {
+      <span>Submitting...</span>
+    } @else {
+      <span>Submit Suggestion</span>
+    }
+  </button>
+</mat-dialog-actions>
+

@@ -1,0 +1,30 @@
+.dialog-description {
+  margin-bottom: 1.5rem;
+  color: rgba(0, 0, 0, 0.6);
+  line-height: 1.5;
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+mat-dialog-content {
+  min-width: 400px;
+  max-width: 600px;
+}
+
+@media (max-width: 600px) {
+  mat-dialog-content {
+    min-width: 300px;
+  }
+}
+
+mat-form-field {
+  display: block;
+}
+
+mat-icon[matPrefix] {
+  margin-right: 0.5rem;
+}
+

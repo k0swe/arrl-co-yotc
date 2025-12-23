@@ -1,18 +1,20 @@
-import { Component, ChangeDetectionStrategy, signal, inject, DestroyRef } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { ClubService } from '../services/club.service';
-import { MembershipService } from '../services/membership.service';
-import { AuthService } from '../auth/auth.service';
-import { Club } from '@arrl-co-yotc/shared/build/app/models/club.model';
-import { ClubMembership, MembershipStatus } from '@arrl-co-yotc/shared/build/app/models/user.model';
-import { of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import {ChangeDetectionStrategy, Component, DestroyRef, inject, signal} from '@angular/core';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {MatCardModule} from '@angular/material/card';
+import {MatButtonModule} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {MatChipsModule} from '@angular/material/chips';
+import {MatSnackBar, MatSnackBarModule} from '@angular/material/snack-bar';
+import {MatDialog} from '@angular/material/dialog';
+import {ClubService} from '../services/club.service';
+import {MembershipService} from '../services/membership.service';
+import {AuthService} from '../auth/auth.service';
+import {Club} from '@arrl-co-yotc/shared/build/app/models/club.model';
+import {ClubMembership, MembershipStatus} from '@arrl-co-yotc/shared/build/app/models/user.model';
+import {AddClubDialog} from './add-club-dialog/add-club-dialog';
+import {of} from 'rxjs';
+import {catchError} from 'rxjs/operators';
 
 interface ClubWithMembership extends Club {
   membershipStatus?: MembershipStatus;
@@ -38,6 +40,7 @@ export class Clubs {
   private membershipService = inject(MembershipService);
   private authService = inject(AuthService);
   private snackBar = inject(MatSnackBar);
+  private dialog = inject(MatDialog);
   private destroyRef = inject(DestroyRef);
 
   protected readonly loading = signal(true);
@@ -96,7 +99,7 @@ export class Clubs {
 
   private showSnackBar(message: string, action: string = 'Close'): void {
     try {
-      this.snackBar.open(message, action, { duration: 3000 });
+      this.snackBar.open(message, action, {duration: 3000});
     } catch {
       // Silently handle if injector is destroyed
     }
@@ -113,7 +116,7 @@ export class Clubs {
     const clubIndex = this.clubs().findIndex(c => c.id === club.id);
     if (clubIndex !== -1) {
       const updatedClubs = [...this.clubs()];
-      updatedClubs[clubIndex] = { ...updatedClubs[clubIndex], isApplying: true };
+      updatedClubs[clubIndex] = {...updatedClubs[clubIndex], isApplying: true};
       this.clubs.set(updatedClubs);
     }
 
@@ -124,7 +127,7 @@ export class Clubs {
         // Update the club's membership status
         const updatedClubs = this.clubs().map(c =>
           c.id === club.id
-            ? { ...c, membershipStatus: MembershipStatus.Pending, isApplying: false }
+            ? {...c, membershipStatus: MembershipStatus.Pending, isApplying: false}
             : c
         );
         this.clubs.set(updatedClubs);
@@ -134,7 +137,7 @@ export class Clubs {
         // Reset applying state
         const updatedClubs = this.clubs().map(c =>
           c.id === club.id
-            ? { ...c, isApplying: false }
+            ? {...c, isApplying: false}
             : c
         );
         this.clubs.set(updatedClubs);
@@ -175,5 +178,32 @@ export class Clubs {
       default:
         return '';
     }
+  }
+
+  protected openAddClubDialog(): void {
+    const dialogRef = this.dialog.open(AddClubDialog, {
+      width: '600px',
+      maxWidth: '90vw',
+      disableClose: false
+    });
+
+    dialogRef.afterClosed().pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe((result: Partial<Club> | undefined) => {
+      if (result) {
+        const currentUser = this.authService.currentUser();
+        this.clubService.suggestClub(result, currentUser?.uid).pipe(
+          takeUntilDestroyed(this.destroyRef)
+        ).subscribe({
+          next: () => {
+            this.showSnackBar('Club submitted successfully and is pending approval!');
+          },
+          error: (error) => {
+            console.error('Error submitting club suggestion:', error);
+            this.showSnackBar('Failed to submit club suggestion');
+          }
+        });
+      }
+    });
   }
 }

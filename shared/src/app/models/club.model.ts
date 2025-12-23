@@ -20,6 +20,9 @@ export interface Club {
   /** Whether the club is currently active */
   isActive: boolean;
   
+  /** User ID who suggested this club (if it was user-submitted) */
+  suggestedBy?: string;
+
   /** Timestamp when the club was created */
   createdAt: Date;
   

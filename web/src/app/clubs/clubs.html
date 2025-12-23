@@ -1,9 +1,23 @@
 <div class="clubs-container">
   <header class="clubs-header">
-    <h1>Colorado Amateur Radio Clubs</h1>
-    <p class="subtitle">
-      Browse and confirm your club membership to participate in Year of the Club activities
-    </p>
+    <div class="header-content">
+      <div class="header-text">
+        <h1>Colorado Amateur Radio Clubs</h1>
+        <p class="subtitle">
+          Browse and confirm your club membership to participate in Year of the Club activities
+        </p>
+      </div>
+      <button
+        mat-raised-button
+        color="accent"
+        (click)="openAddClubDialog()"
+        class="add-club-button"
+        aria-label="Suggest a new club"
+      >
+        <mat-icon>add</mat-icon>
+        <span>Suggest a Club</span>
+      </button>
+    </div>
   </header>
 
   @if (loading()) {
@@ -34,7 +48,7 @@
               <mat-icon>radio</mat-icon>
               <strong>{{ club.callsign }}</strong>
             </div>
-            
+
             <p class="club-description">{{ club.description }}</p>
 
             @if (club.membershipStatus) {
