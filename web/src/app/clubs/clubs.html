@@ -1,0 +1,99 @@
+<div class="clubs-container">
+  <header class="clubs-header">
+    <h1>Colorado Amateur Radio Clubs</h1>
+    <p class="subtitle">
+      Browse and join active amateur radio clubs in the Colorado Section
+    </p>
+  </header>
+
+  @if (loading()) {
+    <div class="loading-container" role="status" aria-live="polite">
+      <mat-spinner></mat-spinner>
+      <p>Loading clubs...</p>
+    </div>
+  } @else if (clubs().length === 0) {
+    <div class="empty-state" role="status">
+      <mat-icon class="empty-icon">groups_off</mat-icon>
+      <h2>No Clubs Available</h2>
+      <p>There are currently no active clubs registered in the system.</p>
+    </div>
+  } @else {
+    <div class="clubs-grid">
+      @for (club of clubs(); track club.id) {
+        <mat-card class="club-card">
+          <mat-card-header>
+            <mat-card-title>{{ club.name }}</mat-card-title>
+            <mat-card-subtitle>
+              <mat-icon class="location-icon">place</mat-icon>
+              {{ club.location }}
+            </mat-card-subtitle>
+          </mat-card-header>
+
+          <mat-card-content>
+            <div class="club-callsign">
+              <mat-icon>radio</mat-icon>
+              <strong>{{ club.callsign }}</strong>
+            </div>
+            
+            <p class="club-description">{{ club.description }}</p>
+
+            @if (club.membershipStatus) {
+              <mat-chip-set aria-label="Membership status">
+                <mat-chip [highlighted]="club.membershipStatus === MembershipStatus.Active">
+                  <mat-icon matChipAvatar>
+                    @switch (club.membershipStatus) {
+                      @case (MembershipStatus.Pending) {
+                        <span>schedule</span>
+                      }
+                      @case (MembershipStatus.Active) {
+                        <span>check_circle</span>
+                      }
+                      @case (MembershipStatus.Denied) {
+                        <span>cancel</span>
+                      }
+                      @case (MembershipStatus.Inactive) {
+                        <span>remove_circle</span>
+                      }
+                    }
+                  </mat-icon>
+                  {{ getMembershipStatusText(club.membershipStatus) }}
+                </mat-chip>
+              </mat-chip-set>
+            }
+          </mat-card-content>
+
+          <mat-card-actions>
+            @if (canApply(club)) {
+              <button
+                mat-raised-button
+                color="primary"
+                (click)="applyForMembership(club)"
+                [disabled]="club.isApplying"
+                aria-label="Apply for membership in {{ club.name }}"
+              >
+                @if (club.isApplying) {
+                  <mat-spinner diameter="20"></mat-spinner>
+                  <span>Applying...</span>
+                } @else {
+                  <ng-container>
+                    <mat-icon>person_add</mat-icon>
+                    <span>Apply for Membership</span>
+                  </ng-container>
+                }
+              </button>
+            } @else if (!isAuthenticated()) {
+              <button
+                mat-button
+                disabled
+                aria-label="Sign in required to apply"
+              >
+                <mat-icon>lock</mat-icon>
+                <span>Sign in to Apply</span>
+              </button>
+            }
+          </mat-card-actions>
+        </mat-card>
+      }
+    </div>
+  }
+</div>
