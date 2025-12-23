@@ -9,8 +9,8 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ClubService } from '../services/club.service';
 import { MembershipService } from '../services/membership.service';
 import { AuthService } from '../auth/auth.service';
-import { Club } from '../../../../src/app/models/club.model';
-import { ClubMembership, MembershipStatus } from '../../../../src/app/models/user.model';
+import { Club } from '@arrl-co-yotc/shared/build/app/models/club.model';
+import { ClubMembership, MembershipStatus } from '@arrl-co-yotc/shared/build/app/models/user.model';
 import { of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
@@ -53,7 +53,7 @@ export class Clubs {
   private loadClubs(): void {
     this.loading.set(true);
     const currentUser = this.authService.currentUser();
-    
+
     // Get clubs
     this.clubService.getActiveClubs().pipe(
       catchError(() => {
@@ -81,7 +81,7 @@ export class Clubs {
   }
 
   private mergeClubsWithMemberships(
-    clubs: Club[], 
+    clubs: Club[],
     memberships: ClubMembership[]
   ): ClubWithMembership[] {
     return clubs.map(club => {
@@ -122,8 +122,8 @@ export class Clubs {
     ).subscribe({
       next: () => {
         // Update the club's membership status
-        const updatedClubs = this.clubs().map(c => 
-          c.id === club.id 
+        const updatedClubs = this.clubs().map(c =>
+          c.id === club.id
             ? { ...c, membershipStatus: MembershipStatus.Pending, isApplying: false }
             : c
         );
@@ -132,8 +132,8 @@ export class Clubs {
       },
       error: (error) => {
         // Reset applying state
-        const updatedClubs = this.clubs().map(c => 
-          c.id === club.id 
+        const updatedClubs = this.clubs().map(c =>
+          c.id === club.id
             ? { ...c, isApplying: false }
             : c
         );

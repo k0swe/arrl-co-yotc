@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { Firestore, collection, collectionData, query, where, orderBy } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
-import { Club } from '../../../../src/app/models/club.model';
+import { Club } from '@arrl-co-yotc/shared/build/app/models/club.model';
 
 /**
  * Service for managing club data from Firestore.
@@ -18,7 +18,7 @@ export class ClubService {
    */
   getActiveClubs(): Observable<Club[]> {
     const q = query(
-      this.clubsCollection, 
+      this.clubsCollection,
       where('isActive', '==', true),
       orderBy('name', 'asc')
     );

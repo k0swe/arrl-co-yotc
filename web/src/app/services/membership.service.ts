@@ -1,15 +1,15 @@
 import { inject, Injectable } from '@angular/core';
-import { 
-  Firestore, 
-  collection, 
-  collectionData, 
-  addDoc, 
-  query, 
+import {
+  Firestore,
+  collection,
+  collectionData,
+  addDoc,
+  query,
   where,
-  Timestamp 
+  Timestamp
 } from '@angular/fire/firestore';
 import { Observable, from } from 'rxjs';
-import { ClubMembership, MembershipRole, MembershipStatus } from '../../../../src/app/models/user.model';
+import { ClubMembership, MembershipRole, MembershipStatus } from '@arrl-co-yotc/shared/build/app/models/user.model';
 
 /**
  * Service for managing club membership confirmations and data.

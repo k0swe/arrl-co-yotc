@@ -1,0 +1,16 @@
+{
+  "name": "@arrl-co-yotc/shared",
+  "version": "1.0.0",
+  "description": "Shared constants and types for arrl-co-yotc",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch"
+  },
+  "author": "",
+  "private": true,
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}
