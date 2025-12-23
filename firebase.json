@@ -5,15 +5,12 @@
     "rules": "firestore/firestore.rules",
     "indexes": "firestore/firestore.indexes.json"
   },
-  "apphosting": {
-    "backendId": "web-backend",
-    "rootDir": "web/",
+  "hosting": {
+    "source": "web/",
     "ignore": [
-      "node_modules",
-      ".git",
-      "firebase-debug.log",
-      "firebase-debug.*.log",
-      "functions"
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
     ]
   }
 }
