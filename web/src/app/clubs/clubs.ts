@@ -93,7 +93,7 @@ export class Clubs {
   protected applyForMembership(club: ClubWithMembership): void {
     const currentUser = this.authService.currentUser();
     if (!currentUser) {
-      this.snackBar.open('Please sign in to apply for membership', 'Close', { duration: 3000 });
+      this.snackBar.open('Please sign in to confirm your membership', 'Close', { duration: 3000 });
       return;
     }
 
@@ -114,7 +114,7 @@ export class Clubs {
             : c
         );
         this.clubs.set(updatedClubs);
-        this.snackBar.open('Membership application submitted!', 'Close', { duration: 3000 });
+        this.snackBar.open('Membership confirmation submitted!', 'Close', { duration: 3000 });
       },
       error: (error) => {
         // Reset applying state
@@ -125,7 +125,7 @@ export class Clubs {
         );
         this.clubs.set(updatedClubs);
         console.error('Error applying for membership:', error);
-        this.snackBar.open('Failed to submit application', 'Close', { duration: 3000 });
+        this.snackBar.open('Failed to submit confirmation', 'Close', { duration: 3000 });
       }
     });
   }
@@ -137,11 +137,11 @@ export class Clubs {
   protected getMembershipStatusText(status: MembershipStatus): string {
     switch (status) {
       case MembershipStatus.Pending:
-        return 'Application Pending';
+        return 'Confirmation Pending';
       case MembershipStatus.Active:
-        return 'Active Member';
+        return 'Confirmed Member';
       case MembershipStatus.Denied:
-        return 'Application Denied';
+        return 'Confirmation Denied';
       case MembershipStatus.Inactive:
         return 'Membership Inactive';
       default:

@@ -12,7 +12,7 @@ import { Observable, from } from 'rxjs';
 import { ClubMembership, MembershipRole, MembershipStatus } from '../../../../src/app/models/user.model';
 
 /**
- * Service for managing club membership applications and data.
+ * Service for managing club membership confirmations and data.
  */
 @Injectable({
   providedIn: 'root'
@@ -33,7 +33,7 @@ export class MembershipService {
   }
 
   /**
-   * Apply for membership in a club
+   * Confirm membership in a club
    */
   applyForMembership(userId: string, clubId: string): Observable<void> {
     const now = Timestamp.now();
@@ -52,7 +52,7 @@ export class MembershipService {
   }
 
   /**
-   * Check if a user has already applied or is a member of a club
+   * Check if a user has already confirmed membership or has an existing record for a club
    */
   checkExistingMembership(userId: string, clubId: string): Observable<ClubMembership[]> {
     const q = query(

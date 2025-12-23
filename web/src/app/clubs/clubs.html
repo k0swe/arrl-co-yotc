@@ -2,7 +2,7 @@
   <header class="clubs-header">
     <h1>Colorado Amateur Radio Clubs</h1>
     <p class="subtitle">
-      Browse and join active amateur radio clubs in the Colorado Section
+      Browse and confirm your club membership to participate in Year of the Club activities
     </p>
   </header>
 
@@ -69,15 +69,15 @@
                 color="primary"
                 (click)="applyForMembership(club)"
                 [disabled]="club.isApplying"
-                aria-label="Apply for membership in {{ club.name }}"
+                aria-label="Confirm membership in {{ club.name }}"
               >
                 @if (club.isApplying) {
                   <mat-spinner diameter="20"></mat-spinner>
-                  <span>Applying...</span>
+                  <span>Confirming...</span>
                 } @else {
                   <ng-container>
-                    <mat-icon>person_add</mat-icon>
-                    <span>Apply for Membership</span>
+                    <mat-icon>verified_user</mat-icon>
+                    <span>Confirm Membership</span>
                   </ng-container>
                 }
               </button>
@@ -85,10 +85,10 @@
               <button
                 mat-button
                 disabled
-                aria-label="Sign in required to apply"
+                aria-label="Sign in required to confirm"
               >
                 <mat-icon>lock</mat-icon>
-                <span>Sign in to Apply</span>
+                <span>Sign in to Confirm</span>
               </button>
             }
           </mat-card-actions>
