@@ -1,0 +1,28 @@
+/**
+ * Represents an amateur radio club in the ARRL Colorado Section.
+ */
+export interface Club {
+  /** Unique identifier for the club */
+  id: string;
+  
+  /** Club name */
+  name: string;
+  
+  /** Club description */
+  description: string;
+  
+  /** Club's main callsign */
+  callsign: string;
+  
+  /** Physical location or meeting location */
+  location: string;
+  
+  /** Whether the club is currently active */
+  isActive: boolean;
+  
+  /** Timestamp when the club was created */
+  createdAt: Date;
+  
+  /** Timestamp when the club was last updated */
+  updatedAt: Date;
+}
