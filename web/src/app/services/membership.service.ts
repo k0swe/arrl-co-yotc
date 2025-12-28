@@ -6,11 +6,13 @@ import {
   collectionGroup,
   setDoc,
   doc,
+  docData,
   query,
   where,
   serverTimestamp
 } from '@angular/fire/firestore';
-import { Observable, from } from 'rxjs';
+import { Observable, from, of } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { ClubMembership, MembershipRole, MembershipStatus } from '@arrl-co-yotc/shared/build/app/models/user.model';
 
 /**
@@ -56,14 +58,12 @@ export class MembershipService {
 
   /**
    * Check if a user has already confirmed membership or has an existing record for a club
+   * Directly fetches the membership document at clubs/{clubId}/memberships/{userId}
    */
   checkExistingMembership(userId: string, clubId: string): Observable<ClubMembership[]> {
-    const membershipsGroup = collectionGroup(this.firestore, 'memberships');
-    const q = query(
-      membershipsGroup,
-      where('userId', '==', userId),
-      where('clubId', '==', clubId)
+    const membershipRef = doc(this.firestore, `clubs/${clubId}/memberships/${userId}`);
+    return docData(membershipRef, { idField: 'id' }).pipe(
+      map(membership => membership ? [membership as ClubMembership] : [])
     );
-    return collectionData(q, { idField: 'id' }) as Observable<ClubMembership[]>;
   }
 }
