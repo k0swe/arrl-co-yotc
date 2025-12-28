@@ -32,10 +32,10 @@ Events are activities hosted by clubs, and include:
 - Start and end date-times
 - Club ownership and management
 
-Events are mainly imagined as operating on the air with the club callsign, either during contests or
-just informal operations.
+Events consist of operating on the air with the club callsign, either during contests or just
+informal operations. These could be done from club locations, home stations or portable locations.
 
-As a future enhancement, events could be recurring.
+As a future enhancement, events could be recurring (monthly, every 2 weeks, etc).
 
 ### Users
 
@@ -113,14 +113,14 @@ System administrators maintain platform integrity:
 2. Events appear in public calendar and club pages
 3. Club members RSVP to participate as attendees or operators
 4. Leaders can modify event details as needed
+5. After an event, any attendee can upload an [ADIF](https://www.adif.org/) log for record-keeping
 
 ## Administrative Notes
 
-**Role Assignment**: App administrator and club leader roles are assigned through out-of-band
-communication with ARRL Colorado Section leadership. The application does not provide self-service
-role requests or assignments—this ensures proper validation of leadership credentials and maintains
-system integrity.
-
-** Club Membership**: The application relies on club leaders to confirm membership requests. Clubs
-typically have their own new member application and fee processing outside of this platform. The app
-simply tracks confirmed members for event participation.
+- **Role Assignment**: App administrator and club leader roles are assigned through out-of-band
+  communication with ARRL Colorado Section leadership. The application does not provide self-service
+  role requests or assignments — this ensures proper validation of leadership credentials and
+  maintains system integrity.
+- **Club Membership**: The application relies on club leaders to confirm membership requests. Clubs
+  typically have their own new member application and fee processing outside of this platform. The
+  app simply tracks confirmed members for event participation.
