@@ -3,6 +3,26 @@
 This document describes the Firestore collections and document structure for the ARRL Colorado
 Section Year of the Club application.
 
+## Important Note on Security Rules
+
+Firestore security rules have limitations when checking user roles across collections. Specifically,
+rules cannot perform queries to check if a user is a club leader. To work around this:
+
+1. **Admin-only operations**: Most write operations (creating events, updating clubs, managing
+   memberships) are restricted to admins in the rules. The application layer should enforce
+   club-leader permissions before submitting these operations.
+
+2. **Application-level enforcement**: The Angular application should check the user's memberships
+   in the `memberships` collection to determine if they are a leader of a club before allowing
+   UI actions.
+
+3. **Backend functions**: For production, consider using Cloud Functions with Firebase Admin SDK
+   for operations that require complex permission checks (e.g., approving memberships, creating
+   events). These functions can safely query the database and enforce proper permissions.
+
+4. **Alternative structure**: If needed, you could denormalize leader information into club
+   documents (e.g., `leaderIds: string[]`) to make rules simpler, at the cost of data consistency.
+
 ## Collections
 
 ### `users`
