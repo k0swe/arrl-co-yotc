@@ -1,11 +1,11 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { provideAuth, getAuth } from '@angular/fire/auth';
-import { provideFirestore, getFirestore } from '@angular/fire/firestore';
+import { provideAuth, getAuth, connectAuthEmulator } from '@angular/fire/auth';
+import { provideFirestore, getFirestore, connectFirestoreEmulator } from '@angular/fire/firestore';
 import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
 import { Clubs } from './clubs';
-import { firebaseConfig } from '../firebase.config';
+import { firebaseTestConfig } from '../firebase-test.config';
 
 describe('Clubs', () => {
   beforeEach(async () => {
@@ -14,9 +14,17 @@ describe('Clubs', () => {
       providers: [
         provideRouter([]),
         provideAnimationsAsync(),
-        provideFirebaseApp(() => initializeApp(firebaseConfig)),
-        provideAuth(() => getAuth()),
-        provideFirestore(() => getFirestore())
+        provideFirebaseApp(() => initializeApp(firebaseTestConfig)),
+        provideAuth(() => {
+          const auth = getAuth();
+          connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
+          return auth;
+        }),
+        provideFirestore(() => {
+          const firestore = getFirestore();
+          connectFirestoreEmulator(firestore, '127.0.0.1', 8080);
+          return firestore;
+        })
       ]
     }).compileComponents();
   });
