@@ -11,17 +11,22 @@
         {
           "fieldPath": "name",
           "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "__name__",
-          "order": "ASCENDING"
         }
-      ],
-      "density": "SPARSE_ALL"
+      ]
+    },
+    {
+      "collectionGroup": "clubs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "leaderIds",
+          "arrayConfig": "CONTAINS"
+        }
+      ]
     },
     {
       "collectionGroup": "memberships",
-      "queryScope": "COLLECTION",
+      "queryScope": "COLLECTION_GROUP",
       "fields": [
         {
           "fieldPath": "userId",
@@ -38,10 +43,6 @@
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "clubId",
-          "order": "ASCENDING"
-        },
-        {
           "fieldPath": "status",
           "order": "ASCENDING"
         }
@@ -51,10 +52,6 @@
       "collectionGroup": "memberships",
       "queryScope": "COLLECTION",
       "fields": [
-        {
-          "fieldPath": "clubId",
-          "order": "ASCENDING"
-        },
         {
           "fieldPath": "role",
           "order": "ASCENDING"
@@ -67,12 +64,8 @@
     },
     {
       "collectionGroup": "events",
-      "queryScope": "COLLECTION",
+      "queryScope": "COLLECTION_GROUP",
       "fields": [
-        {
-          "fieldPath": "clubId",
-          "order": "ASCENDING"
-        },
         {
           "fieldPath": "startTime",
           "order": "DESCENDING"
@@ -91,28 +84,10 @@
     },
     {
       "collectionGroup": "rsvps",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "eventId",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "userId",
-          "order": "ASCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "rsvps",
-      "queryScope": "COLLECTION",
+      "queryScope": "COLLECTION_GROUP",
       "fields": [
         {
           "fieldPath": "userId",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "eventId",
           "order": "ASCENDING"
         }
       ]
@@ -121,10 +96,6 @@
       "collectionGroup": "logs",
       "queryScope": "COLLECTION",
       "fields": [
-        {
-          "fieldPath": "eventId",
-          "order": "ASCENDING"
-        },
         {
           "fieldPath": "uploadedAt",
           "order": "DESCENDING"
