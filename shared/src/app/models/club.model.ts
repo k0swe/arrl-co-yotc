@@ -23,6 +23,9 @@ export interface Club {
   /** User ID who suggested this club (if it was user-submitted) */
   suggestedBy?: string;
 
+  /** Array of user IDs who are leaders of this club (for permission checks) */
+  leaderIds: string[];
+
   /** Timestamp when the club was created */
   createdAt: Date;
   
