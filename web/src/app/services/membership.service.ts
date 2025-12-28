@@ -29,8 +29,7 @@ export class MembershipService {
     const membershipsGroup = collectionGroup(this.firestore, 'memberships');
     const q = query(
       membershipsGroup,
-      where('userId', '==', userId),
-      where('status', '==', 'active')
+      where('userId', '==', userId)
     );
     return collectionData(q, { idField: 'id' }) as Observable<ClubMembership[]>;
   }
@@ -42,7 +41,6 @@ export class MembershipService {
   applyForMembership(userId: string, clubId: string): Observable<void> {
     const membershipRef = doc(this.firestore, `clubs/${clubId}/memberships/${userId}`);
     const membership = {
-      id: userId,
       userId,
       clubId,
       role: MembershipRole.Member,
