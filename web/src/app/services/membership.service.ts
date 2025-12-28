@@ -60,10 +60,10 @@ export class MembershipService {
    * Check if a user has already confirmed membership or has an existing record for a club
    * Directly fetches the membership document at clubs/{clubId}/memberships/{userId}
    */
-  checkExistingMembership(userId: string, clubId: string): Observable<ClubMembership[]> {
+  checkExistingMembership(userId: string, clubId: string): Observable<ClubMembership | null> {
     const membershipRef = doc(this.firestore, `clubs/${clubId}/memberships/${userId}`);
     return docData(membershipRef, { idField: 'id' }).pipe(
-      map(membership => membership ? [membership as ClubMembership] : [])
+      map(membership => membership ? membership as ClubMembership : null)
     );
   }
 }
