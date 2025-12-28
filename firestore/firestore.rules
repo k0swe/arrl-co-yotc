@@ -92,11 +92,6 @@ service cloud.firestore {
       // Authenticated users can read their own memberships
       allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
       
-      // Authenticated users can read memberships for clubs where they are a leader
-      allow read: if isAuthenticated() && 
-                     exists(/databases/$(database)/documents/memberships/$(membershipId)) &&
-                     existsAfter(/databases/$(database)/documents/memberships/$(membershipId));
-      
       // Admins can read all memberships
       allow read: if isAdmin();
       
