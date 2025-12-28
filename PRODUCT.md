@@ -104,7 +104,7 @@ System administrators maintain platform integrity:
 1. Users suggest new clubs with complete details (name, callsign, website)
 2. The suggestion is populated as a pending club in the system
 3. App admins review suggestions for ARRL affiliation and Colorado Section location
-4. Approved clubs are added to the system
+4. Approved clubs are set to Active status and become visible publicly
 5. Admin assigns initial club leaders
 
 ### Event Management
