@@ -3,10 +3,12 @@ import {
   Firestore,
   collection,
   collectionData,
-  addDoc,
+  collectionGroup,
+  setDoc,
+  doc,
   query,
   where,
-  Timestamp
+  serverTimestamp
 } from '@angular/fire/firestore';
 import { Observable, from } from 'rxjs';
 import { ClubMembership, MembershipRole, MembershipStatus } from '@arrl-co-yotc/shared/build/app/models/user.model';
@@ -19,35 +21,38 @@ import { ClubMembership, MembershipRole, MembershipStatus } from '@arrl-co-yotc/
 })
 export class MembershipService {
   private firestore = inject(Firestore);
-  private membershipsCollection = collection(this.firestore, 'memberships');
 
   /**
-   * Get all memberships for a specific user
+   * Get all memberships for a specific user using collection group query
    */
   getUserMemberships(userId: string): Observable<ClubMembership[]> {
+    const membershipsGroup = collectionGroup(this.firestore, 'memberships');
     const q = query(
-      this.membershipsCollection,
-      where('userId', '==', userId)
+      membershipsGroup,
+      where('userId', '==', userId),
+      where('status', '==', 'active')
     );
     return collectionData(q, { idField: 'id' }) as Observable<ClubMembership[]>;
   }
 
   /**
-   * Confirm membership in a club
+   * Apply for membership in a club
+   * Creates a membership document at clubs/{clubId}/memberships/{userId}
    */
   applyForMembership(userId: string, clubId: string): Observable<void> {
-    const now = Timestamp.now();
+    const membershipRef = doc(this.firestore, `clubs/${clubId}/memberships/${userId}`);
     const membership = {
+      id: userId,
       userId,
       clubId,
       role: MembershipRole.Member,
       status: MembershipStatus.Pending,
-      appliedAt: now,
-      updatedAt: now
+      appliedAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
     };
 
     return from(
-      addDoc(this.membershipsCollection, membership).then(() => {})
+      setDoc(membershipRef, membership).then(() => {})
     );
   }
 
@@ -55,8 +60,9 @@ export class MembershipService {
    * Check if a user has already confirmed membership or has an existing record for a club
    */
   checkExistingMembership(userId: string, clubId: string): Observable<ClubMembership[]> {
+    const membershipsGroup = collectionGroup(this.firestore, 'memberships');
     const q = query(
-      this.membershipsCollection,
+      membershipsGroup,
       where('userId', '==', userId),
       where('clubId', '==', clubId)
     );

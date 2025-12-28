@@ -57,6 +57,7 @@ export class ClubService {
       location: suggestion.location,
       isActive: false,
       suggestedBy: userId,
+      leaderIds: [],
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     };

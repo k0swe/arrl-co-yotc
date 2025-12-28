@@ -63,6 +63,9 @@ export interface EventLog {
   /** ID of the event */
   eventId: string;
   
+  /** ID of the club (denormalized for convenience) */
+  clubId: string;
+  
   /** ID of the user who uploaded the log */
   uploadedBy: string;
   
