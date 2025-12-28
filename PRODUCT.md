@@ -77,7 +77,8 @@ Club leaders manage their organization's presence:
 - **Manage club details** including description and logo
 - **Create and edit events** for their club
 - **Confirm membership requests** from users wanting to join
-- **Manage event details** including descriptions and scheduling
+- **Manage event details** including descriptions and scheduling, and adding and removing club
+  members from event attendees
 
 Users can serve as leaders in one club while being general members in others.
 
