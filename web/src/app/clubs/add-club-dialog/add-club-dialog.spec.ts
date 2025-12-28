@@ -7,10 +7,12 @@ import {Club} from '@arrl-co-yotc/shared/build/app/models/club.model';
 describe('AddClubDialog', () => {
   let component: AddClubDialog;
   let fixture: ComponentFixture<AddClubDialog>;
-  let mockDialogRef: jasmine.SpyObj<MatDialogRef<AddClubDialog>>;
+  let mockDialogRef: Partial<MatDialogRef<AddClubDialog>>;
 
   beforeEach(async () => {
-    mockDialogRef = jasmine.createSpyObj('MatDialogRef', ['close']);
+    mockDialogRef = {
+      close: vi.fn()
+    };
 
     await TestBed.configureTestingModule({
       imports: [AddClubDialog],
