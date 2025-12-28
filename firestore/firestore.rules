@@ -1,18 +1,193 @@
-rules_version='2'
+rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      // This rule allows anyone with your database reference to view, edit,
-      // and delete all data in your database. It is useful for getting
-      // started, but it is configured to expire after 30 days because it
-      // leaves your app open to attackers. At that time, all client
-      // requests to your database will be denied.
-      //
-      // Make sure to write security rules for your app before that time, or
-      // else all client requests to your database will be denied until you
-      // update your rules.
-      allow read, write: if request.time < timestamp.date(2026, 1, 20);
+    
+    // Helper functions
+    
+    // Check if the user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Check if the user is an admin
+    function isAdmin() {
+      return isAuthenticated() && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
+    
+    // Check if the user is a leader of a specific club
+    function isClubLeader(clubId) {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/memberships/$(getMembershipId(request.auth.uid, clubId))) &&
+             get(/databases/$(database)/documents/memberships/$(getMembershipId(request.auth.uid, clubId))).data.role == 'leader' &&
+             get(/databases/$(database)/documents/memberships/$(getMembershipId(request.auth.uid, clubId))).data.status == 'active';
+    }
+    
+    // Check if the user is an active member of a specific club
+    function isActiveMember(clubId) {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/memberships/$(getMembershipId(request.auth.uid, clubId))) &&
+             get(/databases/$(database)/documents/memberships/$(getMembershipId(request.auth.uid, clubId))).data.status == 'active';
+    }
+    
+    // Generate a deterministic membership ID from userId and clubId
+    function getMembershipId(userId, clubId) {
+      return userId + '_' + clubId;
+    }
+    
+    // Check if a club is active
+    function isClubActive(clubId) {
+      return get(/databases/$(database)/documents/clubs/$(clubId)).data.isActive == true;
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      // Users can read their own document
+      // Admins can read and write all user documents
+      allow read: if isAuthenticated() && request.auth.uid == userId;
+      allow write: if isAdmin();
+    }
+    
+    // Clubs collection
+    match /clubs/{clubId} {
+      // Anyone can read active clubs
+      allow read: if resource.data.isActive == true;
+      
+      // Authenticated users can read all clubs (including pending suggestions)
+      allow read: if isAuthenticated();
+      
+      // Authenticated users can create new clubs (as suggestions with isActive = false)
+      allow create: if isAuthenticated() && 
+                       request.resource.data.isActive == false &&
+                       request.resource.data.suggestedBy == request.auth.uid &&
+                       request.resource.data.createdAt == request.time &&
+                       request.resource.data.updatedAt == request.time;
+      
+      // Club leaders can update their club's details (but not isActive status)
+      allow update: if isClubLeader(clubId) && 
+                       request.resource.data.isActive == resource.data.isActive &&
+                       request.resource.data.updatedAt == request.time;
+      
+      // Admins can do anything with clubs
+      allow write: if isAdmin();
+    }
+    
+    // Memberships collection
+    match /memberships/{membershipId} {
+      // Authenticated users can read their own memberships
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      
+      // Club leaders can read memberships for their club
+      allow read: if isClubLeader(resource.data.clubId);
+      
+      // Admins can read all memberships
+      allow read: if isAdmin();
+      
+      // Authenticated users can create membership requests for themselves
+      allow create: if isAuthenticated() && 
+                       request.resource.data.userId == request.auth.uid &&
+                       request.resource.data.status == 'pending' &&
+                       request.resource.data.role == 'member' &&
+                       request.resource.data.appliedAt == request.time &&
+                       request.resource.data.updatedAt == request.time;
+      
+      // Club leaders can update memberships for their club (approve, deny, change role)
+      allow update: if isClubLeader(resource.data.clubId) &&
+                       request.resource.data.userId == resource.data.userId &&
+                       request.resource.data.clubId == resource.data.clubId &&
+                       request.resource.data.updatedAt == request.time;
+      
+      // Admins can do anything with memberships
+      allow write: if isAdmin();
+    }
+    
+    // Events collection
+    match /events/{eventId} {
+      // Anyone can read events for active clubs
+      allow read: if isClubActive(resource.data.clubId);
+      
+      // Authenticated users can read all events
+      allow read: if isAuthenticated();
+      
+      // Club leaders can create events for their club
+      allow create: if isClubLeader(request.resource.data.clubId) &&
+                       request.resource.data.createdBy == request.auth.uid &&
+                       request.resource.data.createdAt == request.time &&
+                       request.resource.data.updatedAt == request.time;
+      
+      // Club leaders can update their club's events
+      allow update: if isClubLeader(resource.data.clubId) &&
+                       request.resource.data.clubId == resource.data.clubId &&
+                       request.resource.data.createdBy == resource.data.createdBy &&
+                       request.resource.data.updatedAt == request.time;
+      
+      // Club leaders can delete their club's events
+      allow delete: if isClubLeader(resource.data.clubId);
+      
+      // Admins can do anything with events
+      allow write: if isAdmin();
+    }
+    
+    // RSVPs collection
+    match /rsvps/{rsvpId} {
+      // Authenticated users can read their own RSVPs
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      
+      // Club leaders can read RSVPs for their club's events
+      allow read: if isClubLeader(resource.data.clubId);
+      
+      // Admins can read all RSVPs
+      allow read: if isAdmin();
+      
+      // Active club members can create RSVPs for their club's events
+      allow create: if isAuthenticated() && 
+                       request.resource.data.userId == request.auth.uid &&
+                       isActiveMember(request.resource.data.clubId) &&
+                       request.resource.data.createdAt == request.time &&
+                       request.resource.data.updatedAt == request.time;
+      
+      // Users can delete their own RSVPs
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      
+      // Club leaders can create or delete RSVPs for their club's events
+      allow create, delete: if isClubLeader(request.resource.data.clubId);
+      
+      // Admins can do anything with RSVPs
+      allow write: if isAdmin();
+    }
+    
+    // Logs collection
+    match /logs/{logId} {
+      // Authenticated users can read logs for events they attended
+      allow read: if isAuthenticated() && 
+                     exists(/databases/$(database)/documents/rsvps/$(getRsvpId(request.auth.uid, resource.data.eventId)));
+      
+      // Club leaders can read logs for their club's events
+      allow read: if isClubLeader(getEventClubId(resource.data.eventId));
+      
+      // Admins can read all logs
+      allow read: if isAdmin();
+      
+      // Event attendees can upload logs for events they attended
+      allow create: if isAuthenticated() && 
+                       request.resource.data.uploadedBy == request.auth.uid &&
+                       exists(/databases/$(database)/documents/rsvps/$(getRsvpId(request.auth.uid, request.resource.data.eventId))) &&
+                       request.resource.data.uploadedAt == request.time;
+      
+      // Admins can do anything with logs
+      allow write: if isAdmin();
+    }
+    
+    // Helper function to get RSVP ID (would need to query, but Firestore rules don't support queries)
+    // This is a simplified version - in practice, you'd structure RSVP IDs deterministically
+    function getRsvpId(userId, eventId) {
+      return userId + '_' + eventId;
+    }
+    
+    // Helper function to get the club ID from an event
+    function getEventClubId(eventId) {
+      return get(/databases/$(database)/documents/events/$(eventId)).data.clubId;
     }
   }
 }
