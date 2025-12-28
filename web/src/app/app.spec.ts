@@ -1,10 +1,10 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { provideAuth, getAuth } from '@angular/fire/auth';
+import { provideAuth, getAuth, connectAuthEmulator } from '@angular/fire/auth';
 import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
 import { App } from './app';
-import { firebaseConfig } from './firebase.config';
+import { firebaseTestConfig } from './firebase-test.config';
 
 describe('App', () => {
   beforeEach(async () => {
@@ -13,8 +13,12 @@ describe('App', () => {
       providers: [
         provideRouter([]),
         provideAnimationsAsync(),
-        provideFirebaseApp(() => initializeApp(firebaseConfig)),
-        provideAuth(() => getAuth())
+        provideFirebaseApp(() => initializeApp(firebaseTestConfig)),
+        provideAuth(() => {
+          const auth = getAuth();
+          connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
+          return auth;
+        })
       ]
     }).compileComponents();
   });

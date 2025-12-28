@@ -1,8 +1,8 @@
 import { TestBed } from '@angular/core/testing';
-import { provideFirestore, getFirestore } from '@angular/fire/firestore';
+import { provideFirestore, getFirestore, connectFirestoreEmulator } from '@angular/fire/firestore';
 import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
 import { ClubService } from './club.service';
-import { firebaseConfig } from '../firebase.config';
+import { firebaseTestConfig } from '../firebase-test.config';
 
 describe('ClubService', () => {
   let service: ClubService;
@@ -10,8 +10,12 @@ describe('ClubService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        provideFirebaseApp(() => initializeApp(firebaseConfig)),
-        provideFirestore(() => getFirestore())
+        provideFirebaseApp(() => initializeApp(firebaseTestConfig)),
+        provideFirestore(() => {
+          const firestore = getFirestore();
+          connectFirestoreEmulator(firestore, '127.0.0.1', 8080);
+          return firestore;
+        })
       ]
     });
     service = TestBed.inject(ClubService);
