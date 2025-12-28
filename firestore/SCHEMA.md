@@ -100,8 +100,7 @@ Stores the relationship between users and a specific club, including membership 
 - Get user's membership in a club: `clubs/{clubId}/memberships/{userId}`
 - List all members of a club: `clubs/{clubId}/memberships` where `status == 'active'`
 - List club leaders: `clubs/{clubId}/memberships` where `role == 'leader'` and `status == 'active'`
-
-**Note**: To find all clubs a user is a member of, you'll need to maintain a denormalized list in the user document or use collection group queries.
+- Find all clubs a user is a member of: Use collection group query on `memberships` where `userId == {userId}` and `status == 'active'`
 
 ---
 

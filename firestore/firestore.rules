@@ -51,7 +51,7 @@ service cloud.firestore {
       allow read: if isAuthenticated() && request.auth.uid == userId;
       
       // Admins can read and write all user documents
-      allow write: if isAdmin();
+      allow read, write: if isAdmin();
       
       // Allow user creation when they first sign in
       allow create: if isAuthenticated() && 
@@ -172,6 +172,7 @@ service cloud.firestore {
           allow delete: if isAuthenticated() && rsvpId == request.auth.uid;
           
           // Club leaders can create or delete RSVPs for their club's events
+          // This allows leaders to add/remove attendees for administrative purposes
           allow create, delete: if isClubLeader(clubId);
           
           // Admins can do anything with RSVPs
