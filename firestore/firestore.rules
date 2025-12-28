@@ -1,4 +1,4 @@
-rules_version = '2';
+rules_version='2';
 
 // Firestore Security Rules for ARRL Colorado Year of the Club
 //
@@ -6,10 +6,16 @@ rules_version = '2';
 // are restricted to admins. This is due to Firestore rules limitations - they cannot perform
 // queries to check if a user is a club leader across collections.
 //
+// PERFORMANCE NOTES:
+// - isAdmin() and isClubActive() functions perform document reads that count against quotas
+// - For production, consider using Firebase Auth Custom Claims for admin status
+// - Consider denormalizing frequently-checked data to minimize read operations
+//
 // For production use, consider:
 // 1. Application-level permission checks before write operations
 // 2. Cloud Functions with Admin SDK for complex permission logic
-// 3. Denormalizing leader information into club documents if needed
+// 3. Custom Claims for admin status to avoid repeated database reads
+// 4. Denormalizing leader information into club documents if needed
 //
 // Current security model:
 // - Public: Read active clubs and their events (no authentication required)

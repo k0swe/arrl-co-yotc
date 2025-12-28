@@ -20,8 +20,15 @@ rules cannot perform queries to check if a user is a club leader. To work around
    for operations that require complex permission checks (e.g., approving memberships, creating
    events). These functions can safely query the database and enforce proper permissions.
 
-4. **Alternative structure**: If needed, you could denormalize leader information into club
-   documents (e.g., `leaderIds: string[]`) to make rules simpler, at the cost of data consistency.
+4. **Performance optimization**: The security rules perform document reads for admin checks and
+   club status verification. For production:
+   - Use Firebase Auth Custom Claims to store admin status (avoids database reads)
+   - Consider denormalizing frequently-checked data to minimize read operations
+   - Monitor Firestore quotas and costs
+
+5. **Alternative structure**: If needed, you could denormalize leader information into club
+   documents (e.g., `leaderIds: string[]`) to make rules simpler and more performant, at the
+   cost of data consistency maintenance.
 
 ## Collections
 
