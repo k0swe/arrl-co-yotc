@@ -7,7 +7,8 @@ clubs in the Colorado Section plan and promote their events for the Year of the 
 
 ## Administrative Scripts
 
-For system administrators, see the [`scripts/`](scripts/) directory for administrative tools, including:
+For system administrators, see the [`scripts/`](scripts/) directory for administrative tools,
+including:
 
 - **set-admin-claim.js** - Grant application admin permissions to Firebase Auth users
 
