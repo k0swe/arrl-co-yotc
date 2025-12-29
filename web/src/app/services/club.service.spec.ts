@@ -35,6 +35,21 @@ describe('ClubService', () => {
     expect(typeof service.getAllClubs).toBe('function');
   });
 
+  it('should have getPendingClubs method', () => {
+    expect(service.getPendingClubs).toBeDefined();
+    expect(typeof service.getPendingClubs).toBe('function');
+  });
+
+  it('should have approveClub method', () => {
+    expect(service.approveClub).toBeDefined();
+    expect(typeof service.approveClub).toBe('function');
+  });
+
+  it('should have rejectClub method', () => {
+    expect(service.rejectClub).toBeDefined();
+    expect(typeof service.rejectClub).toBe('function');
+  });
+
   it('should return an observable from getActiveClubs', () => {
     const result = service.getActiveClubs();
     expect(result).toBeDefined();
@@ -43,6 +58,12 @@ describe('ClubService', () => {
 
   it('should return an observable from getAllClubs', () => {
     const result = service.getAllClubs();
+    expect(result).toBeDefined();
+    expect(result.subscribe).toBeDefined();
+  });
+
+  it('should return an observable from getPendingClubs', () => {
+    const result = service.getPendingClubs();
     expect(result).toBeDefined();
     expect(result.subscribe).toBeDefined();
   });

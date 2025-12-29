@@ -3,10 +3,12 @@ import {
   addDoc,
   collection,
   collectionData,
+  doc,
   Firestore,
   orderBy,
   query,
   serverTimestamp,
+  updateDoc,
   where,
 } from '@angular/fire/firestore';
 import { from, Observable } from 'rxjs';
@@ -39,6 +41,18 @@ export class ClubService {
   }
 
   /**
+   * Get all pending clubs (suggestions awaiting approval) ordered by creation date
+   */
+  getPendingClubs(): Observable<Club[]> {
+    const q = query(
+      this.clubsCollection,
+      where('isActive', '==', false),
+      orderBy('createdAt', 'desc'),
+    );
+    return collectionData(q, { idField: 'id' }) as Observable<Club[]>;
+  }
+
+  /**
    * Submit a suggestion for a new club
    * Creates an inactive club that requires admin approval
    */
@@ -55,5 +69,34 @@ export class ClubService {
       updatedAt: serverTimestamp(),
     };
     return from(addDoc(this.clubsCollection, clubData).then(() => void 0));
+  }
+
+  /**
+   * Approve a club suggestion by setting it to active
+   */
+  approveClub(clubId: string): Observable<void> {
+    const clubDoc = doc(this.firestore, 'clubs', clubId);
+    return from(
+      updateDoc(clubDoc, {
+        isActive: true,
+        updatedAt: serverTimestamp(),
+      }).then(() => void 0),
+    );
+  }
+
+  /**
+   * Reject a club suggestion by deleting it
+   * Note: In a production system, you might want to soft-delete or archive instead
+   */
+  rejectClub(clubId: string): Observable<void> {
+    const clubDoc = doc(this.firestore, 'clubs', clubId);
+    // Instead of deleting, we'll keep it as inactive
+    // This preserves the record for auditing purposes
+    return from(
+      updateDoc(clubDoc, {
+        isActive: false,
+        updatedAt: serverTimestamp(),
+      }).then(() => void 0),
+    );
   }
 }
