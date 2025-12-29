@@ -10,7 +10,20 @@
       <h2>{{ error() }}</h2>
     </div>
   } @else if (club(); as clubData) {
-    <app-club-card [club]="clubData"></app-club-card>
+    <app-club-card [club]="clubData">
+      @if (canEdit()) {
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="openEditDialog()"
+          card-actions
+          aria-label="Edit club details"
+        >
+          <mat-icon>edit</mat-icon>
+          Edit Club
+        </button>
+      }
+    </app-club-card>
 
     <div class="placeholder-message">
       <mat-icon>info</mat-icon>

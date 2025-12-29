@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
+import { provideAuth, getAuth, connectAuthEmulator } from '@angular/fire/auth';
 import { provideFirestore, getFirestore, connectFirestoreEmulator } from '@angular/fire/firestore';
 import { ClubDetail } from './club-detail';
 import { firebaseTestConfig } from '../../firebase-test.config';
@@ -14,6 +15,11 @@ describe('ClubDetail', () => {
         provideRouter([]),
         provideAnimationsAsync(),
         provideFirebaseApp(() => initializeApp(firebaseTestConfig)),
+        provideAuth(() => {
+          const auth = getAuth();
+          connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
+          return auth;
+        }),
         provideFirestore(() => {
           const firestore = getFirestore();
           connectFirestoreEmulator(firestore, '127.0.0.1', 8080);
