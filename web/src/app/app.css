@@ -45,28 +45,31 @@ mat-toolbar {
 .nav-expansion-panel {
   box-shadow: none !important;
   border-radius: 0 !important;
+  background: transparent !important;
 }
 
-.nav-expansion-panel .mat-expansion-panel-header {
-  padding: 0 16px;
-  height: 48px;
+.nav-expansion-header {
+  padding: 0 16px !important;
+  height: 48px !important;
+}
+
+.nav-expansion-header .mat-expansion-indicator {
+  margin-left: auto;
 }
 
 .nav-expansion-panel .mat-expansion-panel-body {
   padding: 0;
 }
 
-.nav-expansion-panel .mat-panel-title {
+.nav-expansion-title {
   display: flex;
   align-items: center;
-  gap: 12px;
-}
-
-.expansion-icon {
-  margin-right: 0;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 48px;
 }
 
 .nested-nav-item {
-  padding-left: 48px !important;
+  padding-left: 72px !important;
 }
 
