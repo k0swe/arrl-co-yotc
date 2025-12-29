@@ -1,0 +1,13 @@
+{
+  "name": "arrl-co-yotc-scripts",
+  "version": "1.0.0",
+  "description": "Administrative scripts for ARRL Colorado Year of the Club",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "set-admin": "node set-admin-claim.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.0.2"
+  }
+}
