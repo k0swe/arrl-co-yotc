@@ -22,7 +22,7 @@
  *   node set-admin-claim.js "user123abc"
  */
 
-import { initializeApp, cert } from 'firebase-admin/app';
+import { initializeApp } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 
 // Parse command line arguments
@@ -54,8 +54,11 @@ async function setAdminClaim() {
   try {
     console.log('Initializing Firebase Admin SDK...');
     
-    // Get project ID from environment or use default
+    // Get project ID from environment or use repository default
+    // The default is set to this repository's Firebase project
     const projectId = process.env.FIREBASE_PROJECT_ID || 'arrl-co-yotc';
+    
+    console.log(`Using Firebase project: ${projectId}`);
     
     // Initialize Firebase Admin
     // This will use GOOGLE_APPLICATION_CREDENTIALS environment variable
