@@ -17,6 +17,9 @@ export interface Club {
   /** Physical location or meeting location */
   location: string;
 
+  /** Club website URL */
+  website?: string;
+
   /** Whether the club is currently active */
   isActive: boolean;
 

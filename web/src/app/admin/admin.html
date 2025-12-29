@@ -49,6 +49,18 @@
             <mat-card-actions class="action-buttons">
               <button
                 mat-raised-button
+                (click)="editClub(club)"
+                [disabled]="isProcessing(club.id)"
+                aria-label="Edit {{ club.name }}"
+                class="action-button"
+              >
+                @if (!isProcessing(club.id)) {
+                  <mat-icon>edit</mat-icon>
+                }
+                <span>Edit</span>
+              </button>
+              <button
+                mat-raised-button
                 color="primary"
                 (click)="approveClub(club)"
                 [disabled]="isProcessing(club.id)"
