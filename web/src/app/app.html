@@ -48,6 +48,12 @@
         <mat-icon matListItemIcon>leaderboard</mat-icon>
         <span matListItemTitle>Standings</span>
       </a>
+      @if (authService.isAdmin()) {
+        <a mat-list-item routerLink="/admin" aria-label="Navigate to admin">
+          <mat-icon matListItemIcon>admin_panel_settings</mat-icon>
+          <span matListItemTitle>Admin</span>
+        </a>
+      }
     </mat-nav-list>
   </mat-sidenav>
   

@@ -24,12 +24,24 @@ export class AuthService {
   // Signal to track current user
   readonly currentUser = signal<User | null>(null);
   readonly isAuthenticated = signal<boolean>(false);
+  readonly isAdmin = signal<boolean>(false);
 
   constructor() {
     // Subscribe to auth state changes
     user(this.auth).subscribe((firebaseUser) => {
       this.currentUser.set(firebaseUser);
       this.isAuthenticated.set(!!firebaseUser);
+      
+      // Get custom claims from ID token
+      if (firebaseUser) {
+        firebaseUser.getIdTokenResult().then((idTokenResult) => {
+          this.isAdmin.set(!!idTokenResult.claims['admin']);
+        }).catch(() => {
+          this.isAdmin.set(false);
+        });
+      } else {
+        this.isAdmin.set(false);
+      }
     });
   }
 
