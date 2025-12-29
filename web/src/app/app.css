@@ -10,7 +10,7 @@
 }
 
 .sidenav {
-  width: 250px;
+  width: fit-content;
 }
 
 .main-content {
@@ -49,27 +49,20 @@ mat-toolbar {
 }
 
 .nav-expansion-header {
-  padding: 0 !important;
-  height: 48px !important;
+  padding-left: 0 !important;
 }
 
 .nav-expansion-header .mat-content {
-  margin: 0 !important;
   align-items: stretch !important;
+}
+
+nav-expansion-panel-body {
+  padding: 0 0 0 16px;
 }
 
 .expansion-list-item {
   flex: 1;
   pointer-events: none;
-}
-
-.nav-expansion-header .mat-expansion-indicator {
-  align-self: center;
-  margin-right: 16px;
-}
-
-.nav-expansion-panel .mat-expansion-panel-body {
-  padding: 0;
 }
 
 .nested-nav-item {
