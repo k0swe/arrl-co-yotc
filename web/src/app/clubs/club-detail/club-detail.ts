@@ -39,7 +39,8 @@ export class ClubDetail {
     this.clubService
       .getClubById(clubId)
       .pipe(
-        catchError(() => {
+        catchError((err) => {
+          console.error(`Error loading club ${clubId}:`, err);
           this.error.set('Failed to load club');
           this.loading.set(false);
           return of(null);
