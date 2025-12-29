@@ -1,6 +1,13 @@
 import { Component, ChangeDetectionStrategy, signal, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
+import {
+  AbstractControl,
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  ValidationErrors,
+  Validators,
+} from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
@@ -21,11 +28,11 @@ import { AuthService } from '../auth.service';
     MatFormFieldModule,
     MatIconModule,
     MatDividerModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
   ],
   templateUrl: './register.html',
   styleUrl: './register.css',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Register {
   private authService = inject(AuthService);
@@ -34,17 +41,20 @@ export class Register {
   protected readonly loading = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly showEmailRegister = signal(false);
-  
-  protected readonly registerForm = new FormGroup({
-    email: new FormControl('', [Validators.required, Validators.email]),
-    password: new FormControl('', [Validators.required, Validators.minLength(6)]),
-    confirmPassword: new FormControl('', [Validators.required])
-  }, this.passwordMatchValidator);
+
+  protected readonly registerForm = new FormGroup(
+    {
+      email: new FormControl('', [Validators.required, Validators.email]),
+      password: new FormControl('', [Validators.required, Validators.minLength(6)]),
+      confirmPassword: new FormControl('', [Validators.required]),
+    },
+    this.passwordMatchValidator,
+  );
 
   protected signUpWithGoogle(): void {
     this.loading.set(true);
     this.errorMessage.set(null);
-    
+
     this.authService.signInWithGoogle().subscribe({
       next: () => {
         this.loading.set(false);
@@ -53,14 +63,14 @@ export class Register {
       error: (error) => {
         this.loading.set(false);
         this.errorMessage.set(this.getErrorMessage(error));
-      }
+      },
     });
   }
 
   protected signUpWithFacebook(): void {
     this.loading.set(true);
     this.errorMessage.set(null);
-    
+
     this.authService.signInWithFacebook().subscribe({
       next: () => {
         this.loading.set(false);
@@ -69,7 +79,7 @@ export class Register {
       error: (error) => {
         this.loading.set(false);
         this.errorMessage.set(this.getErrorMessage(error));
-      }
+      },
     });
   }
 
@@ -80,9 +90,9 @@ export class Register {
 
     this.loading.set(true);
     this.errorMessage.set(null);
-    
+
     const { email, password } = this.registerForm.value;
-    
+
     this.authService.createUserWithEmailAndPassword(email!, password!).subscribe({
       next: () => {
         this.loading.set(false);
@@ -91,12 +101,12 @@ export class Register {
       error: (error) => {
         this.loading.set(false);
         this.errorMessage.set(this.getErrorMessage(error));
-      }
+      },
     });
   }
 
   protected toggleEmailRegister(): void {
-    this.showEmailRegister.update(value => !value);
+    this.showEmailRegister.update((value) => !value);
     this.errorMessage.set(null);
   }
 
@@ -104,17 +114,17 @@ export class Register {
     const group = control as FormGroup;
     const password = group.get('password');
     const confirmPassword = group.get('confirmPassword');
-    
+
     if (!password || !confirmPassword) {
       return null;
     }
-    
+
     return password.value === confirmPassword.value ? null : { passwordMismatch: true };
   }
 
   private getErrorMessage(error: any): string {
     const code = error?.code || '';
-    
+
     switch (code) {
       case 'auth/email-already-in-use':
         return 'This email is already registered. Please sign in instead.';

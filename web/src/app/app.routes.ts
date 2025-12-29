@@ -14,5 +14,5 @@ export const routes: Routes = [
   { path: 'login', component: Login },
   { path: 'register', component: Register },
   { path: 'forgot-password', component: ForgotPassword },
-  { path: '**', redirectTo: '' }
+  { path: '**', redirectTo: '' },
 ];

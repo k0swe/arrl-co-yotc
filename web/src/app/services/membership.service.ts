@@ -72,7 +72,7 @@ export class MembershipService {
       catchError((error) => {
         console.error(`Error fetching membership for user ${userId} in club ${clubId}:`, error);
         return of(null);
-      })
+      }),
     );
   }
 }

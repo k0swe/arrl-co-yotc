@@ -1,8 +1,8 @@
-import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {MatDialogRef} from '@angular/material/dialog';
-import {AddClubDialog} from './add-club-dialog';
-import {provideAnimations} from '@angular/platform-browser/animations';
-import {Club} from '@arrl-co-yotc/shared/build/app/models/club.model';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MatDialogRef } from '@angular/material/dialog';
+import { AddClubDialog } from './add-club-dialog';
+import { provideAnimations } from '@angular/platform-browser/animations';
+import { Club } from '@arrl-co-yotc/shared/build/app/models/club.model';
 
 describe('AddClubDialog', () => {
   let component: AddClubDialog;
@@ -11,15 +11,12 @@ describe('AddClubDialog', () => {
 
   beforeEach(async () => {
     mockDialogRef = {
-      close: vi.fn()
+      close: vi.fn(),
     };
 
     await TestBed.configureTestingModule({
       imports: [AddClubDialog],
-      providers: [
-        {provide: MatDialogRef, useValue: mockDialogRef},
-        provideAnimations()
-      ]
+      providers: [{ provide: MatDialogRef, useValue: mockDialogRef }, provideAnimations()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(AddClubDialog);
@@ -49,7 +46,7 @@ describe('AddClubDialog', () => {
       name: 'Test Club',
       callsign: 'W0TEST',
       description: 'A test club for testing purposes',
-      location: 'Denver, CO'
+      location: 'Denver, CO',
     });
 
     expect(form.valid).toBeTruthy();
@@ -62,7 +59,7 @@ describe('AddClubDialog', () => {
       name: 'Test Club',
       callsign: 'W0TEST',
       description: 'A test club for testing purposes',
-      location: 'Denver, CO'
+      location: 'Denver, CO',
     });
 
     component['onSubmit']();
@@ -71,7 +68,7 @@ describe('AddClubDialog', () => {
       name: 'Test Club',
       callsign: 'W0TEST',
       description: 'A test club for testing purposes',
-      location: 'Denver, CO'
+      location: 'Denver, CO',
     };
     expect(mockDialogRef.close).toHaveBeenCalledWith(expectedData);
   });
@@ -101,4 +98,3 @@ describe('AddClubDialog', () => {
     expect(descControl?.hasError('minlength')).toBeFalsy();
   });
 });
-

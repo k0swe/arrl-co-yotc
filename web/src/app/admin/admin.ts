@@ -5,8 +5,6 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
   imports: [],
   templateUrl: './admin.html',
   styleUrl: './admin.css',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Admin {
-
-}
+export class Admin {}

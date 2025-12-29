@@ -6,5 +6,5 @@ export const firebaseTestConfig = {
   projectId: 'demo-test-project',
   storageBucket: 'demo-test-project.appspot.com',
   messagingSenderId: '000000000000',
-  appId: '1:000000000000:web:test'
+  appId: '1:000000000000:web:test',
 };

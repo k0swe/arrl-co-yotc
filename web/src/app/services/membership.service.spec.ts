@@ -15,8 +15,8 @@ describe('MembershipService', () => {
           const firestore = getFirestore();
           connectFirestoreEmulator(firestore, '127.0.0.1', 8080);
           return firestore;
-        })
-      ]
+        }),
+      ],
     });
     service = TestBed.inject(MembershipService);
   });

@@ -17,11 +17,11 @@ export type ClubSuggestion = Pick<Club, 'name' | 'callsign' | 'description' | 'l
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    MatIconModule
+    MatIconModule,
   ],
   templateUrl: './add-club-dialog.html',
   styleUrl: './add-club-dialog.css',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AddClubDialog {
   private fb = inject(FormBuilder);
@@ -31,9 +31,12 @@ export class AddClubDialog {
 
   protected readonly clubForm = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
-    callsign: ['', [Validators.required, Validators.pattern(/^[A-Z0-9]+$/i), Validators.maxLength(10)]],
+    callsign: [
+      '',
+      [Validators.required, Validators.pattern(/^[A-Z0-9]+$/i), Validators.maxLength(10)],
+    ],
     description: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(500)]],
-    location: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]]
+    location: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
   });
 
   protected onCancel(): void {
@@ -74,4 +77,3 @@ export class AddClubDialog {
     return '';
   }
 }
-

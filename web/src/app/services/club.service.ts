@@ -1,4 +1,4 @@
-import {inject, Injectable} from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import {
   addDoc,
   collection,
@@ -7,16 +7,16 @@ import {
   orderBy,
   query,
   serverTimestamp,
-  where
+  where,
 } from '@angular/fire/firestore';
-import {from, Observable} from 'rxjs';
-import {Club} from '@arrl-co-yotc/shared/build/app/models/club.model';
+import { from, Observable } from 'rxjs';
+import { Club } from '@arrl-co-yotc/shared/build/app/models/club.model';
 
 /**
  * Service for managing club data from Firestore.
  */
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ClubService {
   private firestore = inject(Firestore);
@@ -26,12 +26,8 @@ export class ClubService {
    * Get all active clubs ordered by name
    */
   getActiveClubs(): Observable<Club[]> {
-    const q = query(
-      this.clubsCollection,
-      where('isActive', '==', true),
-      orderBy('name', 'asc')
-    );
-    return collectionData(q, {idField: 'id'}) as Observable<Club[]>;
+    const q = query(this.clubsCollection, where('isActive', '==', true), orderBy('name', 'asc'));
+    return collectionData(q, { idField: 'id' }) as Observable<Club[]>;
   }
 
   /**
@@ -39,17 +35,14 @@ export class ClubService {
    */
   getAllClubs(): Observable<Club[]> {
     const q = query(this.clubsCollection, orderBy('name', 'asc'));
-    return collectionData(q, {idField: 'id'}) as Observable<Club[]>;
+    return collectionData(q, { idField: 'id' }) as Observable<Club[]>;
   }
 
   /**
    * Submit a suggestion for a new club
    * Creates an inactive club that requires admin approval
    */
-  suggestClub(
-    suggestion: Partial<Club>,
-    userId: string
-  ): Observable<void> {
+  suggestClub(suggestion: Partial<Club>, userId: string): Observable<void> {
     const clubData = {
       name: suggestion.name,
       callsign: suggestion.callsign,
@@ -59,7 +52,7 @@ export class ClubService {
       suggestedBy: userId,
       leaderIds: [],
       createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
+      updatedAt: serverTimestamp(),
     };
     return from(addDoc(this.clubsCollection, clubData).then(() => void 0));
   }

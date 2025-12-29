@@ -18,11 +18,11 @@ import { AuthService } from './auth/auth.service';
     MatIconModule,
     MatButtonModule,
     MatListModule,
-    MatMenuModule
+    MatMenuModule,
   ],
   templateUrl: './app.html',
   styleUrl: './app.css',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class App {
   private router = inject(Router);
@@ -32,7 +32,7 @@ export class App {
   protected readonly sidenavOpened = signal(true);
 
   protected toggleSidenav(): void {
-    this.sidenavOpened.update(value => !value);
+    this.sidenavOpened.update((value) => !value);
   }
 
   protected signOut(): void {

@@ -4,22 +4,22 @@
 export interface User {
   /** Unique identifier for the user */
   id: string;
-  
+
   /** User's full name */
   name: string;
-  
+
   /** User's amateur radio callsign */
   callsign: string;
-  
+
   /** Email address for the user */
   email: string;
-  
+
   /** Whether this user is an application administrator */
   isAdmin: boolean;
-  
+
   /** Timestamp when the user account was created */
   createdAt: Date;
-  
+
   /** Timestamp when the user account was last updated */
   updatedAt: Date;
 }
@@ -30,28 +30,28 @@ export interface User {
 export interface ClubMembership {
   /** Unique identifier for the membership record */
   id: string;
-  
+
   /** ID of the user */
   userId: string;
-  
+
   /** ID of the club */
   clubId: string;
-  
+
   /** The user's role in this club */
   role: MembershipRole;
-  
+
   /** Current status of the membership */
   status: MembershipStatus;
-  
+
   /** Timestamp when the membership was requested */
   appliedAt: Date;
-  
+
   /** Timestamp when the membership was approved (if applicable) */
   approvedAt?: Date;
-  
+
   /** ID of the user who approved the membership */
   approvedBy?: string;
-  
+
   /** Timestamp when the membership was last updated */
   updatedAt: Date;
 }
@@ -61,10 +61,10 @@ export interface ClubMembership {
  */
 export enum MembershipRole {
   /** Regular club member */
-  Member = 'member',
-  
+  Member = "member",
+
   /** Club leader with approval permissions */
-  Leader = 'leader',
+  Leader = "leader",
 }
 
 /**
@@ -72,14 +72,14 @@ export enum MembershipRole {
  */
 export enum MembershipStatus {
   /** Application submitted, awaiting approval */
-  Pending = 'pending',
-  
+  Pending = "pending",
+
   /** Membership approved and active */
-  Active = 'active',
-  
+  Active = "active",
+
   /** Membership denied */
-  Denied = 'denied',
-  
+  Denied = "denied",
+
   /** Membership revoked or user left */
-  Inactive = 'inactive',
+  Inactive = "inactive",
 }

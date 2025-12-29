@@ -9,18 +9,18 @@ import {
   sendPasswordResetEmail,
   signOut,
   user,
-  User
+  User,
 } from '@angular/fire/auth';
 import { from, Observable } from 'rxjs';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
   private auth = inject(Auth);
   private googleProvider = new GoogleAuthProvider();
   private facebookProvider = new FacebookAuthProvider();
-  
+
   // Signal to track current user
   readonly currentUser = signal<User | null>(null);
   readonly isAuthenticated = signal<boolean>(false);
@@ -31,14 +31,17 @@ export class AuthService {
     user(this.auth).subscribe((firebaseUser) => {
       this.currentUser.set(firebaseUser);
       this.isAuthenticated.set(!!firebaseUser);
-      
+
       // Get custom claims from ID token
       if (firebaseUser) {
-        firebaseUser.getIdTokenResult().then((idTokenResult) => {
-          this.isAdmin.set(!!idTokenResult.claims['admin']);
-        }).catch(() => {
-          this.isAdmin.set(false);
-        });
+        firebaseUser
+          .getIdTokenResult()
+          .then((idTokenResult) => {
+            this.isAdmin.set(!!idTokenResult.claims['admin']);
+          })
+          .catch(() => {
+            this.isAdmin.set(false);
+          });
       } else {
         this.isAdmin.set(false);
       }
@@ -49,36 +52,28 @@ export class AuthService {
    * Sign in with email and password
    */
   signInWithEmailAndPassword(email: string, password: string): Observable<void> {
-    return from(
-      signInWithEmailAndPassword(this.auth, email, password).then(() => {})
-    );
+    return from(signInWithEmailAndPassword(this.auth, email, password).then(() => {}));
   }
 
   /**
    * Sign in with Google popup
    */
   signInWithGoogle(): Observable<void> {
-    return from(
-      signInWithPopup(this.auth, this.googleProvider).then(() => {})
-    );
+    return from(signInWithPopup(this.auth, this.googleProvider).then(() => {}));
   }
 
   /**
    * Sign in with Facebook popup
    */
   signInWithFacebook(): Observable<void> {
-    return from(
-      signInWithPopup(this.auth, this.facebookProvider).then(() => {})
-    );
+    return from(signInWithPopup(this.auth, this.facebookProvider).then(() => {}));
   }
 
   /**
    * Create a new user account with email and password
    */
   createUserWithEmailAndPassword(email: string, password: string): Observable<void> {
-    return from(
-      createUserWithEmailAndPassword(this.auth, email, password).then(() => {})
-    );
+    return from(createUserWithEmailAndPassword(this.auth, email, password).then(() => {}));
   }
 
   /**

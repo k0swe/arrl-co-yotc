@@ -21,11 +21,11 @@ import { AuthService } from '../auth.service';
     MatFormFieldModule,
     MatIconModule,
     MatDividerModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
   ],
   templateUrl: './login.html',
   styleUrl: './login.css',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Login {
   private authService = inject(AuthService);
@@ -37,7 +37,7 @@ export class Login {
 
   protected readonly loginForm = new FormGroup({
     email: new FormControl('', [Validators.required, Validators.email]),
-    password: new FormControl('', [Validators.required])
+    password: new FormControl('', [Validators.required]),
   });
 
   protected signInWithGoogle(): void {
@@ -52,7 +52,7 @@ export class Login {
       error: (error) => {
         this.loading.set(false);
         this.errorMessage.set(this.getErrorMessage(error));
-      }
+      },
     });
   }
 
@@ -69,7 +69,7 @@ export class Login {
         this.loading.set(false);
         console.error('Facebook sign-in error:', error);
         this.errorMessage.set(this.getErrorMessage(error));
-      }
+      },
     });
   }
 
@@ -91,12 +91,12 @@ export class Login {
       error: (error) => {
         this.loading.set(false);
         this.errorMessage.set(this.getErrorMessage(error));
-      }
+      },
     });
   }
 
   protected toggleEmailLogin(): void {
-    this.showEmailLogin.update(value => !value);
+    this.showEmailLogin.update((value) => !value);
     this.errorMessage.set(null);
   }
 

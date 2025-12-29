@@ -15,8 +15,8 @@ describe('AuthService', () => {
           const auth = getAuth();
           connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
           return auth;
-        })
-      ]
+        }),
+      ],
     });
     service = TestBed.inject(AuthService);
   });

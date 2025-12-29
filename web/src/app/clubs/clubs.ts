@@ -92,7 +92,7 @@ export class Clubs {
           this.showSnackBar('Failed to load clubs');
           return of([]);
         }),
-        takeUntilDestroyed(this.destroyRef)
+        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe((clubs) => {
         const currentUserInCallback = this.authService.currentUser();
@@ -129,8 +129,8 @@ export class Clubs {
         catchError((error) => {
           console.error(`Error checking membership for club ${club.id}:`, error);
           return of(null);
-        })
-      )
+        }),
+      ),
     );
 
     // Use forkJoin to wait for all membership checks to complete
@@ -193,7 +193,7 @@ export class Clubs {
           const updatedClubs = this.clubs().map((c) =>
             c.id === club.id
               ? { ...c, membershipStatus: MembershipStatus.Pending, isApplying: false }
-              : c
+              : c,
           );
           this.clubs.set(updatedClubs);
           this.showSnackBar('Membership confirmation submitted!');
@@ -201,7 +201,7 @@ export class Clubs {
         error: (error) => {
           // Reset applying state
           const updatedClubs = this.clubs().map((c) =>
-            c.id === club.id ? { ...c, isApplying: false } : c
+            c.id === club.id ? { ...c, isApplying: false } : c,
           );
           this.clubs.set(updatedClubs);
           console.error('Error applying for membership:', error);

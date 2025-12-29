@@ -17,11 +17,11 @@ import { AuthService } from '../auth.service';
     MatButtonModule,
     MatInputModule,
     MatFormFieldModule,
-    MatIconModule
+    MatIconModule,
   ],
   templateUrl: './forgot-password.html',
   styleUrl: './forgot-password.css',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ForgotPassword {
   private authService = inject(AuthService);
@@ -29,9 +29,9 @@ export class ForgotPassword {
   protected readonly loading = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly successMessage = signal<string | null>(null);
-  
+
   protected readonly resetForm = new FormGroup({
-    email: new FormControl('', [Validators.required, Validators.email])
+    email: new FormControl('', [Validators.required, Validators.email]),
   });
 
   protected sendResetEmail(): void {
@@ -42,27 +42,27 @@ export class ForgotPassword {
     this.loading.set(true);
     this.errorMessage.set(null);
     this.successMessage.set(null);
-    
+
     const { email } = this.resetForm.value;
-    
+
     this.authService.sendPasswordResetEmail(email!).subscribe({
       next: () => {
         this.loading.set(false);
         this.successMessage.set(
-          'Password reset email sent! Please check your inbox for instructions.'
+          'Password reset email sent! Please check your inbox for instructions.',
         );
         this.resetForm.reset();
       },
       error: (error) => {
         this.loading.set(false);
         this.errorMessage.set(this.getErrorMessage(error));
-      }
+      },
     });
   }
 
   private getErrorMessage(error: any): string {
     const code = error?.code || '';
-    
+
     switch (code) {
       case 'auth/user-not-found':
         return 'No account found with this email address.';
