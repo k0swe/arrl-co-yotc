@@ -37,19 +37,18 @@ export class ClubDetail {
   private loadClub(clubId: string): void {
     this.loading.set(true);
     this.clubService
-      .getAllClubs()
+      .getClubById(clubId)
       .pipe(
         catchError(() => {
           this.error.set('Failed to load club');
           this.loading.set(false);
-          return of([]);
+          return of(null);
         }),
         takeUntilDestroyed(this.destroyRef),
       )
-      .subscribe((clubs) => {
-        const foundClub = clubs.find((c) => c.id === clubId);
-        if (foundClub) {
-          this.club.set(foundClub);
+      .subscribe((club) => {
+        if (club) {
+          this.club.set(club);
         } else {
           this.error.set('Club not found');
         }

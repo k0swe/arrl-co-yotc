@@ -1,4 +1,12 @@
-import { Component, signal, ChangeDetectionStrategy, inject, computed, effect } from '@angular/core';
+import {
+  Component,
+  signal,
+  ChangeDetectionStrategy,
+  inject,
+  computed,
+  effect,
+  DestroyRef,
+} from '@angular/core';
 import { Router, RouterOutlet, RouterLink } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -38,6 +46,7 @@ export class App {
   protected authService = inject(AuthService);
   private membershipService = inject(MembershipService);
   private clubService = inject(ClubService);
+  private destroyRef = inject(DestroyRef);
 
   protected readonly title = signal('ARRL Colorado Section - Year of the Club');
   protected readonly sidenavOpened = signal(true);
@@ -65,7 +74,7 @@ export class App {
         .getActiveClubs()
         .pipe(
           catchError(() => of([])),
-          takeUntilDestroyed(),
+          takeUntilDestroyed(this.destroyRef),
         )
         .subscribe((clubs) => {
           this.userClubs.set(clubs);
@@ -84,7 +93,7 @@ export class App {
             return clubs.filter((c) => confirmedClubIds.includes(c.id));
           }),
           catchError(() => of([])),
-          takeUntilDestroyed(),
+          takeUntilDestroyed(this.destroyRef),
         )
         .subscribe((clubs) => {
           this.userClubs.set(clubs);

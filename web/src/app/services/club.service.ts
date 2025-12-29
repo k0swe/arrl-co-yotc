@@ -5,6 +5,7 @@ import {
   collectionData,
   doc,
   Firestore,
+  getDoc,
   orderBy,
   query,
   serverTimestamp,
@@ -30,6 +31,21 @@ export class ClubService {
   getActiveClubs(): Observable<Club[]> {
     const q = query(this.clubsCollection, where('isActive', '==', true), orderBy('name', 'asc'));
     return collectionData(q, { idField: 'id' }) as Observable<Club[]>;
+  }
+
+  /**
+   * Get a specific club by ID
+   */
+  getClubById(clubId: string): Observable<Club | null> {
+    const clubDoc = doc(this.firestore, 'clubs', clubId);
+    return from(
+      getDoc(clubDoc).then((docSnapshot) => {
+        if (docSnapshot.exists()) {
+          return { id: docSnapshot.id, ...docSnapshot.data() } as Club;
+        }
+        return null;
+      }),
+    );
   }
 
   /**
