@@ -68,7 +68,7 @@ export class Admin {
         next: () => {
           this.showSnackBar(`${club.name} has been approved!`);
           this.setProcessing(club.id, false);
-          // Remove from pending list
+          // Remove from pending review queue. The club is now active and visible to the public.
           this.pendingClubs.set(this.pendingClubs().filter((c) => c.id !== club.id));
         },
         error: (error) => {
@@ -88,7 +88,8 @@ export class Admin {
         next: () => {
           this.showSnackBar(`${club.name} has been rejected`);
           this.setProcessing(club.id, false);
-          // Remove from pending list
+          // Remove from pending review queue. The club remains in the database as inactive
+          // for auditing purposes, but it no longer needs admin review.
           this.pendingClubs.set(this.pendingClubs().filter((c) => c.id !== club.id));
         },
         error: (error) => {

@@ -86,7 +86,9 @@ export class ClubService {
 
   /**
    * Reject a club suggestion by keeping it as inactive
-   * This preserves the record for auditing purposes
+   * This preserves the record for auditing purposes in the database.
+   * Note: Rejected clubs remain in the database but are removed from the
+   * pending review queue since they have been reviewed and rejected.
    */
   rejectClub(clubId: string): Observable<void> {
     const clubDoc = doc(this.firestore, 'clubs', clubId);
