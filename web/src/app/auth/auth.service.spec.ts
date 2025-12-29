@@ -30,6 +30,11 @@ describe('AuthService', () => {
     expect(typeof service.isAuthenticated()).toBe('boolean');
   });
 
+  it('should have isAdmin signal', () => {
+    expect(service.isAdmin).toBeDefined();
+    expect(typeof service.isAdmin()).toBe('boolean');
+  });
+
   it('should have currentUser signal', () => {
     expect(service.currentUser).toBeDefined();
   });
