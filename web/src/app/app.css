@@ -42,3 +42,31 @@ mat-toolbar {
   margin-right: 4px;
 }
 
+.nav-expansion-panel {
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+
+.nav-expansion-panel .mat-expansion-panel-header {
+  padding: 0 16px;
+  height: 48px;
+}
+
+.nav-expansion-panel .mat-expansion-panel-body {
+  padding: 0;
+}
+
+.nav-expansion-panel .mat-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.expansion-icon {
+  margin-right: 0;
+}
+
+.nested-nav-item {
+  padding-left: 48px !important;
+}
+

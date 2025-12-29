@@ -36,10 +36,26 @@
         <mat-icon matListItemIcon>home</mat-icon>
         <span matListItemTitle>Home</span>
       </a>
-      <a mat-list-item routerLink="/clubs" aria-label="Navigate to clubs">
-        <mat-icon matListItemIcon>groups</mat-icon>
-        <span matListItemTitle>Clubs</span>
-      </a>
+      @if (hasConfirmedMemberships()) {
+        <mat-expansion-panel class="nav-expansion-panel">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <mat-icon class="expansion-icon">groups</mat-icon>
+              <span>Clubs</span>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          @for (club of userClubs(); track club.id) {
+            <a mat-list-item [routerLink]="['/clubs', club.id]" class="nested-nav-item" [attr.aria-label]="'Navigate to ' + club.name">
+              <span matListItemTitle>{{ club.name }}</span>
+            </a>
+          }
+        </mat-expansion-panel>
+      } @else {
+        <a mat-list-item routerLink="/clubs" aria-label="Navigate to clubs">
+          <mat-icon matListItemIcon>groups</mat-icon>
+          <span matListItemTitle>Clubs</span>
+        </a>
+      }
       <a mat-list-item routerLink="/events" aria-label="Navigate to events">
         <mat-icon matListItemIcon>event</mat-icon>
         <span matListItemTitle>Events</span>
