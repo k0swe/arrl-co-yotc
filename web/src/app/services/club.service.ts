@@ -48,7 +48,7 @@ export class ClubService {
    */
   suggestClub(
     suggestion: Partial<Club>,
-    userId?: string
+    userId: string
   ): Observable<void> {
     const clubData = {
       name: suggestion.name,

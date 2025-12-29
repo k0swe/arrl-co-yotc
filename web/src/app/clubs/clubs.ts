@@ -181,6 +181,12 @@ export class Clubs {
   }
 
   protected openAddClubDialog(): void {
+    const currentUser = this.authService.currentUser();
+    if (!currentUser) {
+      this.showSnackBar('Please sign in to suggest a new club');
+      return;
+    }
+
     const dialogRef = this.dialog.open(AddClubDialog, {
       width: '600px',
       maxWidth: '90vw',
@@ -191,8 +197,7 @@ export class Clubs {
       takeUntilDestroyed(this.destroyRef)
     ).subscribe((result: Partial<Club> | undefined) => {
       if (result) {
-        const currentUser = this.authService.currentUser();
-        this.clubService.suggestClub(result, currentUser?.uid).pipe(
+        this.clubService.suggestClub(result, currentUser.uid).pipe(
           takeUntilDestroyed(this.destroyRef)
         ).subscribe({
           next: () => {

@@ -7,16 +7,18 @@
           Browse and confirm your club membership to participate in Year of the Club activities
         </p>
       </div>
-      <button
-        mat-raised-button
-        color="accent"
-        (click)="openAddClubDialog()"
-        class="add-club-button"
-        aria-label="Suggest a new club"
-      >
-        <mat-icon>add</mat-icon>
-        <span>Suggest a Club</span>
-      </button>
+      @if (isAuthenticated()) {
+        <button
+          mat-raised-button
+          color="accent"
+          (click)="openAddClubDialog()"
+          class="add-club-button"
+          aria-label="Suggest a new club"
+        >
+          <mat-icon>add</mat-icon>
+          <span>Suggest a Club</span>
+        </button>
+      }
     </div>
   </header>
 
