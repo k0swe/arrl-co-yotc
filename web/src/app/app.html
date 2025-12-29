@@ -39,8 +39,10 @@
       @if (hasConfirmedMemberships()) {
         <mat-expansion-panel class="nav-expansion-panel">
           <mat-expansion-panel-header class="nav-expansion-header">
-            <mat-icon matListItemIcon>groups</mat-icon>
-            <span class="nav-expansion-title">Clubs</span>
+            <div mat-list-item class="expansion-list-item">
+              <mat-icon matListItemIcon>groups</mat-icon>
+              <span matListItemTitle>Clubs</span>
+            </div>
           </mat-expansion-panel-header>
           @for (club of userClubs(); track club.id) {
             <a mat-list-item [routerLink]="['/clubs', club.id]" class="nested-nav-item" [attr.aria-label]="'Navigate to ' + club.name">

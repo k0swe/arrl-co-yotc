@@ -49,24 +49,27 @@ mat-toolbar {
 }
 
 .nav-expansion-header {
-  padding: 0 16px !important;
+  padding: 0 !important;
   height: 48px !important;
 }
 
+.nav-expansion-header .mat-content {
+  margin: 0 !important;
+  align-items: stretch !important;
+}
+
+.expansion-list-item {
+  flex: 1;
+  pointer-events: none;
+}
+
 .nav-expansion-header .mat-expansion-indicator {
-  margin-left: auto;
+  align-self: center;
+  margin-right: 16px;
 }
 
 .nav-expansion-panel .mat-expansion-panel-body {
   padding: 0;
-}
-
-.nav-expansion-title {
-  display: flex;
-  align-items: center;
-  font-size: 16px;
-  font-weight: 400;
-  line-height: 48px;
 }
 
 .nested-nav-item {
