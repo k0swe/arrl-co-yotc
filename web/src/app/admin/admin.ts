@@ -6,6 +6,7 @@ import {
   DestroyRef,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { doc, docData, Firestore } from '@angular/fire/firestore';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -13,7 +14,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ClubService } from '../services/club.service';
 import { Club } from '@arrl-co-yotc/shared/build/app/models/club.model';
-import { catchError, of } from 'rxjs';
+import { User } from '@arrl-co-yotc/shared/build/app/models/user.model';
+import { catchError, of, forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-admin',
@@ -30,12 +32,14 @@ import { catchError, of } from 'rxjs';
 })
 export class Admin {
   private clubService = inject(ClubService);
+  private firestore = inject(Firestore);
   private snackBar = inject(MatSnackBar);
   private destroyRef = inject(DestroyRef);
 
   protected readonly loading = signal(true);
   protected readonly pendingClubs = signal<Club[]>([]);
   protected readonly processingClubIds = signal<Set<string>>(new Set());
+  protected readonly userNames = signal<Map<string, string>>(new Map());
 
   constructor() {
     this.loadPendingClubs();
@@ -55,8 +59,46 @@ export class Admin {
       )
       .subscribe((clubs) => {
         this.pendingClubs.set(clubs);
+        this.loadUserNames(clubs);
         this.loading.set(false);
       });
+  }
+
+  private loadUserNames(clubs: Club[]): void {
+    // Get unique user IDs from clubs
+    const userIds = [...new Set(clubs.map((club) => club.suggestedBy).filter(Boolean))] as string[];
+
+    if (userIds.length === 0) {
+      return;
+    }
+
+    // Fetch user data for each user ID
+    const userFetches = userIds.map((userId) =>
+      docData(doc(this.firestore, 'users', userId), { idField: 'id' }).pipe(
+        catchError(() => of(null)),
+      ),
+    );
+
+    forkJoin(userFetches)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((users) => {
+        const nameMap = new Map<string, string>();
+        users.forEach((user, index) => {
+          if (user) {
+            const userData = user as User;
+            // Display name with callsign for better identification
+            nameMap.set(userIds[index], `${userData.name} (${userData.callsign})`);
+          }
+        });
+        this.userNames.set(nameMap);
+      });
+  }
+
+  protected getUserName(userId: string | undefined): string {
+    if (!userId) {
+      return 'Unknown';
+    }
+    return this.userNames().get(userId) || userId;
   }
 
   protected approveClub(club: Club): void {
