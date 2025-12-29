@@ -3,7 +3,6 @@ import {
   ChangeDetectionStrategy,
   signal,
   inject,
-  input,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -70,7 +69,6 @@ export class EditClubDialog {
       return;
     }
 
-    this.submitting.set(true);
     const formData: ClubFormData = this.clubForm.getRawValue();
     this.dialogRef.close(formData);
   }
