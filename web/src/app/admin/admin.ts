@@ -73,6 +73,9 @@ export class Admin {
     }
 
     // Fetch user data for each user ID
+    // Note: User data could be cached in a future enhancement to avoid redundant Firestore requests
+    // across multiple loadPendingClubs() calls. However, since admin reviews are infrequent and
+    // user data rarely changes, the current implementation is acceptable.
     const userFetches = userIds.map((userId) =>
       docData(doc(this.firestore, 'users', userId), { idField: 'id' }).pipe(
         catchError(() => of(null)),
@@ -84,7 +87,7 @@ export class Admin {
       .subscribe((users) => {
         const nameMap = new Map<string, string>();
         users.forEach((user, index) => {
-          if (user) {
+          if (user && typeof user === 'object' && 'name' in user && 'callsign' in user) {
             const userData = user as User;
             // Display name with callsign for better identification
             nameMap.set(userIds[index], `${userData.name} (${userData.callsign})`);
