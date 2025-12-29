@@ -6,7 +6,7 @@ import {
   DestroyRef,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { doc, docData, Firestore } from '@angular/fire/firestore';
+import { doc, getDoc, Firestore } from '@angular/fire/firestore';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -15,7 +15,8 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ClubService } from '../services/club.service';
 import { Club } from '@arrl-co-yotc/shared/build/app/models/club.model';
 import { User } from '@arrl-co-yotc/shared/build/app/models/user.model';
-import { catchError, of, forkJoin } from 'rxjs';
+import { catchError, of, from, forkJoin } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-admin',
@@ -72,28 +73,43 @@ export class Admin {
       return;
     }
 
-    // Fetch user data for each user ID
+    // Fetch user data for each user ID using getDoc for one-time reads
     // Note: User data could be cached in a future enhancement to avoid redundant Firestore requests
     // across multiple loadPendingClubs() calls. However, since admin reviews are infrequent and
     // user data rarely changes, the current implementation is acceptable.
     const userFetches = userIds.map((userId) =>
-      docData(doc(this.firestore, 'users', userId), { idField: 'id' }).pipe(
-        catchError(() => of(null)),
+      from(getDoc(doc(this.firestore, 'users', userId))).pipe(
+        map((docSnap) => {
+          if (docSnap.exists()) {
+            return { id: docSnap.id, ...docSnap.data() };
+          }
+          return null;
+        }),
+        catchError((error) => {
+          console.error(`Error fetching user ${userId}:`, error);
+          return of(null);
+        }),
       ),
     );
 
     forkJoin(userFetches)
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((users) => {
-        const nameMap = new Map<string, string>();
-        users.forEach((user, index) => {
-          if (user && typeof user === 'object' && 'name' in user && 'callsign' in user) {
-            const userData = user as User;
-            // Display name with callsign for better identification
-            nameMap.set(userIds[index], `${userData.name} (${userData.callsign})`);
-          }
-        });
-        this.userNames.set(nameMap);
+      .subscribe({
+        next: (users) => {
+          const nameMap = new Map<string, string>();
+          users.forEach((user, index) => {
+            if (user && typeof user === 'object' && 'name' in user && 'callsign' in user) {
+              const userData = user as User;
+              // Display name with callsign for better identification
+              nameMap.set(userIds[index], `${userData.name} (${userData.callsign})`);
+            }
+          });
+          this.userNames.set(nameMap);
+          console.log('User names loaded:', nameMap);
+        },
+        error: (error) => {
+          console.error('Error loading user names:', error);
+        },
       });
   }
 
