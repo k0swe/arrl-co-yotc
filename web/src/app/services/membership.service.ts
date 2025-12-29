@@ -7,19 +7,24 @@ import {
   setDoc,
   doc,
   docData,
+  getDoc,
   query,
   where,
-  serverTimestamp
+  serverTimestamp,
 } from '@angular/fire/firestore';
 import { Observable, from, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
-import { ClubMembership, MembershipRole, MembershipStatus } from '@arrl-co-yotc/shared/build/app/models/user.model';
+import {
+  ClubMembership,
+  MembershipRole,
+  MembershipStatus,
+} from '@arrl-co-yotc/shared/build/app/models/user.model';
 
 /**
  * Service for managing club membership confirmations and data.
  */
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class MembershipService {
   private firestore = inject(Firestore);
@@ -29,10 +34,7 @@ export class MembershipService {
    */
   getUserMemberships(userId: string): Observable<ClubMembership[]> {
     const membershipsGroup = collectionGroup(this.firestore, 'memberships');
-    const q = query(
-      membershipsGroup,
-      where('userId', '==', userId)
-    );
+    const q = query(membershipsGroup, where('userId', '==', userId));
     return collectionData(q, { idField: 'id' }) as Observable<ClubMembership[]>;
   }
 
@@ -48,12 +50,10 @@ export class MembershipService {
       role: MembershipRole.Member,
       status: MembershipStatus.Pending,
       appliedAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
+      updatedAt: serverTimestamp(),
     };
 
-    return from(
-      setDoc(membershipRef, membership).then(() => {})
-    );
+    return from(setDoc(membershipRef, membership).then(() => {}));
   }
 
   /**
@@ -62,9 +62,17 @@ export class MembershipService {
    */
   checkExistingMembership(userId: string, clubId: string): Observable<ClubMembership | null> {
     const membershipRef = doc(this.firestore, `clubs/${clubId}/memberships/${userId}`);
-    return docData(membershipRef, { idField: 'id' }).pipe(
-      map(membership => membership ? membership as ClubMembership : null),
-      catchError(() => of(null))
+    return from(getDoc(membershipRef)).pipe(
+      map((docSnapshot) => {
+        const membership = docSnapshot.exists()
+          ? ({ id: docSnapshot.id, ...docSnapshot.data() } as ClubMembership)
+          : null;
+        return membership;
+      }),
+      catchError((error) => {
+        console.error(`Error fetching membership for user ${userId} in club ${clubId}:`, error);
+        return of(null);
+      })
     );
   }
 }
