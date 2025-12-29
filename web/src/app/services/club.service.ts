@@ -12,7 +12,8 @@ import {
   updateDoc,
   where,
 } from '@angular/fire/firestore';
-import { from, Observable } from 'rxjs';
+import { from, Observable, of } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 import { Club } from '@arrl-co-yotc/shared/build/app/models/club.model';
 
 /**
@@ -49,6 +50,39 @@ export class ClubService {
   }
 
   /**
+   * Get a specific club by slug
+   */
+  getClubBySlug(slug: string): Observable<Club | null> {
+    const q = query(this.clubsCollection, where('slug', '==', slug));
+    return (collectionData(q, { idField: 'id' }) as Observable<Club[]>).pipe(
+      map((clubs) => {
+        if (clubs.length > 0) {
+          return clubs[0];
+        }
+        return null;
+      }),
+    );
+  }
+
+  /**
+   * Get a specific club by slug or ID
+   * Tries to fetch by slug first, falls back to ID if slug lookup fails
+   */
+  getClubBySlugOrId(slugOrId: string): Observable<Club | null> {
+    // First try to get by slug
+    return this.getClubBySlug(slugOrId).pipe(
+      switchMap((club) => {
+        // If found by slug, return it
+        if (club) {
+          return of(club);
+        }
+        // Otherwise try by ID
+        return this.getClubById(slugOrId);
+      }),
+    );
+  }
+
+  /**
    * Get all clubs (active and inactive) ordered by name
    */
   getAllClubs(): Observable<Club[]> {
@@ -71,6 +105,7 @@ export class ClubService {
   /**
    * Submit a suggestion for a new club
    * Creates an inactive club that requires admin approval
+   * The slug will be set to the Firestore-generated document ID
    */
   suggestClub(suggestion: Partial<Club>, userId: string): Observable<void> {
     const clubData = {
@@ -78,13 +113,19 @@ export class ClubService {
       callsign: suggestion.callsign,
       description: suggestion.description,
       location: suggestion.location,
+      slug: '', // Will be updated to document ID after creation
       isActive: false,
       suggestedBy: userId,
       leaderIds: [],
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     };
-    return from(addDoc(this.clubsCollection, clubData).then(() => void 0));
+    return from(
+      addDoc(this.clubsCollection, clubData).then((docRef) => {
+        // Update the slug to match the document ID
+        return updateDoc(docRef, { slug: docRef.id }).then(() => void 0);
+      }),
+    );
   }
 
   /**
