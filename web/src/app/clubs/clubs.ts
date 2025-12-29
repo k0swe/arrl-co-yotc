@@ -11,9 +11,9 @@ import {ClubService} from '../services/club.service';
 import {MembershipService} from '../services/membership.service';
 import {AuthService} from '../auth/auth.service';
 import {Club} from '@arrl-co-yotc/shared/build/app/models/club.model';
-import {ClubMembership, MembershipStatus} from '@arrl-co-yotc/shared/build/app/models/user.model';
+import {MembershipStatus} from '@arrl-co-yotc/shared/build/app/models/user.model';
 import {AddClubDialog} from './add-club-dialog/add-club-dialog';
-import {of} from 'rxjs';
+import {of, forkJoin} from 'rxjs';
 import {catchError} from 'rxjs/operators';
 
 interface ClubWithMembership extends Club {
@@ -45,7 +45,6 @@ export class Clubs {
 
   protected readonly loading = signal(true);
   protected readonly clubs = signal<ClubWithMembership[]>([]);
-  protected readonly userMemberships = signal<ClubMembership[]>([]);
   protected readonly isAuthenticated = this.authService.isAuthenticated;
   protected readonly MembershipStatus = MembershipStatus;
 
@@ -67,15 +66,8 @@ export class Clubs {
       takeUntilDestroyed(this.destroyRef)
     ).subscribe(clubs => {
       if (currentUser) {
-        // If user is authenticated, also get their memberships
-        this.membershipService.getUserMemberships(currentUser.uid).pipe(
-          catchError(() => of([])),
-          takeUntilDestroyed(this.destroyRef)
-        ).subscribe(memberships => {
-          this.userMemberships.set(memberships);
-          this.clubs.set(this.mergeClubsWithMemberships(clubs, memberships));
-          this.loading.set(false);
-        });
+        // If user is authenticated, check membership for each club individually
+        this.loadMembershipsForClubs(clubs, currentUser.uid);
       } else {
         this.clubs.set(clubs);
         this.loading.set(false);
@@ -83,17 +75,35 @@ export class Clubs {
     });
   }
 
-  private mergeClubsWithMemberships(
-    clubs: Club[],
-    memberships: ClubMembership[]
-  ): ClubWithMembership[] {
-    return clubs.map(club => {
-      const membership = memberships.find(m => m.clubId === club.id);
-      return {
-        ...club,
-        membershipStatus: membership?.status,
-        isApplying: false
-      };
+  private loadMembershipsForClubs(clubs: Club[], userId: string): void {
+    if (clubs.length === 0) {
+      this.clubs.set([]);
+      this.loading.set(false);
+      return;
+    }
+
+    // Check membership for each club individually using direct document reads
+    // This is more reliable than collectionGroup queries with security rules
+    const membershipChecks = clubs.map(club =>
+      this.membershipService.checkExistingMembership(userId, club.id).pipe(
+        catchError(() => of(null))
+      )
+    );
+
+    // Use forkJoin to wait for all membership checks to complete
+    forkJoin(membershipChecks).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(memberships => {
+      const clubsWithMemberships = clubs.map((club, index) => {
+        const membership = memberships[index];
+        return {
+          ...club,
+          membershipStatus: membership?.status,
+          isApplying: false
+        };
+      });
+      this.clubs.set(clubsWithMemberships);
+      this.loading.set(false);
     });
   }
 

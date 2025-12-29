@@ -49,13 +49,6 @@ describe('Clubs', () => {
     expect(Array.isArray(component['clubs']())).toBe(true);
   });
 
-  it('should have userMemberships signal', () => {
-    const fixture = TestBed.createComponent(Clubs);
-    const component = fixture.componentInstance;
-    expect(component['userMemberships']).toBeDefined();
-    expect(Array.isArray(component['userMemberships']())).toBe(true);
-  });
-
   it('should have applyForMembership method', () => {
     const fixture = TestBed.createComponent(Clubs);
     const component = fixture.componentInstance;
