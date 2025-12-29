@@ -52,6 +52,7 @@ describe('EditClubDialog', () => {
       form.patchValue({
         name: 'Test Club',
         callsign: 'W0TEST',
+        slug: 'test-club',
         description: 'A test club for testing purposes',
         location: 'Denver, CO',
       });
@@ -65,6 +66,7 @@ describe('EditClubDialog', () => {
       form.patchValue({
         name: 'Test Club',
         callsign: 'W0TEST',
+        slug: 'test-club',
         description: 'A test club for testing purposes',
         location: 'Denver, CO',
       });
@@ -74,9 +76,9 @@ describe('EditClubDialog', () => {
       const expectedData: Partial<Club> = {
         name: 'Test Club',
         callsign: 'W0TEST',
+        slug: 'test-club',
         description: 'A test club for testing purposes',
         location: 'Denver, CO',
-        slug: '',
         website: '',
       };
       expect(mockDialogRef.close).toHaveBeenCalledWith(expectedData);
@@ -120,7 +122,7 @@ describe('EditClubDialog', () => {
       expect(slugControl?.hasError('pattern')).toBeFalsy();
 
       slugControl?.setValue('');
-      expect(slugControl?.valid).toBeTruthy(); // Slug is optional
+      expect(slugControl?.hasError('required')).toBeTruthy(); // Slug is required
     });
   });
 

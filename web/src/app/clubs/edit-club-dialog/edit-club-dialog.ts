@@ -52,7 +52,7 @@ export class EditClubDialog {
     ],
     slug: [
       this.data?.club?.slug || '',
-      [Validators.pattern(/^[a-z0-9-]*$/), Validators.maxLength(100)],
+      [Validators.required, Validators.pattern(/^[a-z0-9-]*$/), Validators.maxLength(100)],
     ],
     description: [
       this.data?.club?.description || '',

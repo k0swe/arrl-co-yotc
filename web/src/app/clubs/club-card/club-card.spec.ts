@@ -14,6 +14,7 @@ describe('ClubCard', () => {
     callsign: 'W0TEST',
     location: 'Denver, CO',
     website: 'https://example.com',
+    slug: 'test-club-1',
     isActive: true,
     leaderIds: [],
     createdAt: new Date(),

@@ -105,6 +105,7 @@ export class ClubService {
   /**
    * Submit a suggestion for a new club
    * Creates an inactive club that requires admin approval
+   * The slug will be set to the Firestore-generated document ID
    */
   suggestClub(suggestion: Partial<Club>, userId: string): Observable<void> {
     const clubData = {
@@ -112,13 +113,19 @@ export class ClubService {
       callsign: suggestion.callsign,
       description: suggestion.description,
       location: suggestion.location,
+      slug: '', // Will be updated to document ID after creation
       isActive: false,
       suggestedBy: userId,
       leaderIds: [],
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     };
-    return from(addDoc(this.clubsCollection, clubData).then(() => void 0));
+    return from(
+      addDoc(this.clubsCollection, clubData).then((docRef) => {
+        // Update the slug to match the document ID
+        return updateDoc(docRef, { slug: docRef.id }).then(() => void 0);
+      }),
+    );
   }
 
   /**
