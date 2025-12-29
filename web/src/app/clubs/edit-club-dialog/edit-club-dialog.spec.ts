@@ -38,6 +38,7 @@ describe('EditClubDialog', () => {
       expect(component['clubForm'].get('callsign')).toBeTruthy();
       expect(component['clubForm'].get('description')).toBeTruthy();
       expect(component['clubForm'].get('location')).toBeTruthy();
+      expect(component['clubForm'].get('website')).toBeTruthy();
     });
 
     it('should mark form as invalid when empty', () => {
@@ -74,6 +75,7 @@ describe('EditClubDialog', () => {
         callsign: 'W0TEST',
         description: 'A test club for testing purposes',
         location: 'Denver, CO',
+        website: '',
       };
       expect(mockDialogRef.close).toHaveBeenCalledWith(expectedData);
     });
@@ -85,6 +87,22 @@ describe('EditClubDialog', () => {
 
     it('should be in create mode', () => {
       expect(component['isEditMode']).toBeFalsy();
+    });
+
+    it('should validate website URL pattern', () => {
+      const websiteControl = component['clubForm'].get('website');
+
+      websiteControl?.setValue('invalid-url');
+      expect(websiteControl?.hasError('pattern')).toBeTruthy();
+
+      websiteControl?.setValue('http://example.com');
+      expect(websiteControl?.hasError('pattern')).toBeFalsy();
+
+      websiteControl?.setValue('https://example.com');
+      expect(websiteControl?.hasError('pattern')).toBeFalsy();
+
+      websiteControl?.setValue('');
+      expect(websiteControl?.valid).toBeTruthy(); // Website is optional
     });
   });
 
@@ -137,6 +155,7 @@ describe('EditClubDialog', () => {
       expect(form.get('callsign')?.value).toBe(existingClub.callsign);
       expect(form.get('description')?.value).toBe(existingClub.description);
       expect(form.get('location')?.value).toBe(existingClub.location);
+      expect(form.get('website')?.value).toBe('');
     });
 
     it('should close dialog with updated data on submit', () => {
@@ -154,6 +173,7 @@ describe('EditClubDialog', () => {
         callsign: existingClub.callsign,
         description: 'Updated description for the club',
         location: existingClub.location,
+        website: '',
       });
     });
 

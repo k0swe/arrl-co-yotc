@@ -16,7 +16,7 @@ export interface EditClubDialogData {
   club?: Club;
 }
 
-export type ClubFormData = Pick<Club, 'name' | 'callsign' | 'description' | 'location'>;
+export type ClubFormData = Pick<Club, 'name' | 'callsign' | 'description' | 'location' | 'website'>;
 
 @Component({
   selector: 'app-edit-club-dialog',
@@ -57,6 +57,10 @@ export class EditClubDialog {
       this.data?.club?.location || '',
       [Validators.required, Validators.minLength(3), Validators.maxLength(100)],
     ],
+    website: [
+      this.data?.club?.website || '',
+      [Validators.pattern(/^https?:\/\/.+/i), Validators.maxLength(200)],
+    ],
   });
 
   protected onCancel(): void {
@@ -91,7 +95,13 @@ export class EditClubDialog {
       return `Maximum length is ${maxLength} characters`;
     }
     if (field.hasError('pattern')) {
-      return 'Only letters and numbers allowed';
+      if (fieldName === 'callsign') {
+        return 'Only letters and numbers allowed';
+      }
+      if (fieldName === 'website') {
+        return 'Must be a valid URL starting with http:// or https://';
+      }
+      return 'Invalid format';
     }
     return '';
   }

@@ -56,6 +56,20 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Website</mat-label>
+      <input
+        matInput
+        formControlName="website"
+        placeholder="e.g., https://example.com"
+        aria-label="Club website"
+      />
+      <mat-icon matPrefix>link</mat-icon>
+      @if (getErrorMessage('website')) {
+        <mat-error>{{ getErrorMessage('website') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
       <mat-label>Description</mat-label>
       <textarea
         matInput
