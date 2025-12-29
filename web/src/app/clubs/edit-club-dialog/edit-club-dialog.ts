@@ -59,7 +59,7 @@ export class EditClubDialog {
     ],
     website: [
       this.data?.club?.website || '',
-      [Validators.pattern(/^https?:\/\/.+/i), Validators.maxLength(200)],
+      [Validators.pattern(/^https?:\/\/[^\s\/$.?#].[^\s]*$/i), Validators.maxLength(200)],
     ],
   });
 
