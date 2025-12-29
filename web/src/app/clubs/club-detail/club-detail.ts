@@ -30,18 +30,18 @@ export class ClubDetail {
     this.route.paramMap
       .pipe(
         switchMap((params) => {
-          const clubId = params.get('clubId');
-          if (!clubId) {
-            this.error.set('No club ID provided');
+          const slug = params.get('slug');
+          if (!slug) {
+            this.error.set('No club slug provided');
             this.loading.set(false);
             return of(null);
           }
           this.loading.set(true);
           this.error.set(null);
           this.club.set(null);
-          return this.clubService.getClubById(clubId).pipe(
+          return this.clubService.getClubBySlug(slug).pipe(
             catchError((err) => {
-              console.error(`Error loading club ${clubId}:`, err);
+              console.error(`Error loading club with slug ${slug}:`, err);
               this.error.set('Failed to load club');
               this.loading.set(false);
               return of(null);

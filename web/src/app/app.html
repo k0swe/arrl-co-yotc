@@ -49,7 +49,7 @@
         @for (club of userClubs(); track club.id) {
         <a
           mat-list-item
-          [routerLink]="['/clubs', club.id]"
+          [routerLink]="['/clubs', club.slug]"
           class="nested-nav-item"
           [attr.aria-label]="'Navigate to ' + club.name"
         >

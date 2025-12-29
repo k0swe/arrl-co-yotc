@@ -13,6 +13,7 @@ import {
   where,
 } from '@angular/fire/firestore';
 import { from, Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { Club } from '@arrl-co-yotc/shared/build/app/models/club.model';
 
 /**
@@ -42,6 +43,21 @@ export class ClubService {
       getDoc(clubDoc).then((docSnapshot) => {
         if (docSnapshot.exists()) {
           return { id: docSnapshot.id, ...docSnapshot.data() } as Club;
+        }
+        return null;
+      }),
+    );
+  }
+
+  /**
+   * Get a specific club by slug
+   */
+  getClubBySlug(slug: string): Observable<Club | null> {
+    const q = query(this.clubsCollection, where('slug', '==', slug));
+    return (collectionData(q, { idField: 'id' }) as Observable<Club[]>).pipe(
+      map((clubs) => {
+        if (clubs.length > 0) {
+          return clubs[0];
         }
         return null;
       }),

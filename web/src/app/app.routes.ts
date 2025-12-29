@@ -11,7 +11,7 @@ import { adminGuard } from './auth/admin.guard';
 export const routes: Routes = [
   { path: '', component: Home },
   { path: 'clubs', component: Clubs },
-  { path: 'clubs/:clubId', component: ClubDetail },
+  { path: 'clubs/:slug', component: ClubDetail },
   { path: 'admin', component: Admin, canActivate: [adminGuard] },
   { path: 'login', component: Login },
   { path: 'register', component: Register },
