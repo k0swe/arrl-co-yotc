@@ -1,0 +1,90 @@
+.club-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.club-card mat-card-header {
+  margin-bottom: 1rem;
+}
+
+.club-card mat-card-subtitle {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+}
+
+.location-icon {
+  font-size: 1.125rem;
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.club-card mat-card-content {
+  flex: 1;
+}
+
+.club-callsign {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  background-color: rgba(0, 0, 0, 0.04);
+  border-radius: 4px;
+}
+
+.club-callsign mat-icon {
+  font-size: 1.25rem;
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.club-description {
+  margin: 0 0 1rem 0;
+  line-height: 1.6;
+}
+
+.club-website {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.club-website a {
+  color: var(--mat-primary, #1976d2);
+  text-decoration: none;
+}
+
+.club-website a:hover {
+  text-decoration: underline;
+}
+
+.club-card mat-card-actions {
+  padding: 1rem;
+  margin: 0;
+}
+
+.club-card mat-card-actions:empty {
+  display: none;
+}
+
+.club-card mat-card-actions button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.club-card mat-card-actions button mat-icon {
+  font-size: 1.25rem;
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.club-card mat-card-actions button mat-spinner {
+  margin-right: 0.5rem;
+}

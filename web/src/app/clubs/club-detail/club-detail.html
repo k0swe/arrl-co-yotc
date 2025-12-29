@@ -10,33 +10,7 @@
       <h2>{{ error() }}</h2>
     </div>
   } @else if (club(); as clubData) {
-    <mat-card class="club-detail-card">
-      <mat-card-header>
-        <mat-card-title>{{ clubData.name }}</mat-card-title>
-        <mat-card-subtitle>
-          <mat-icon class="location-icon">place</mat-icon>
-          {{ clubData.location }}
-        </mat-card-subtitle>
-      </mat-card-header>
-
-      <mat-card-content>
-        <div class="club-callsign">
-          <mat-icon>radio</mat-icon>
-          <strong>{{ clubData.callsign }}</strong>
-        </div>
-
-        <p class="club-description">{{ clubData.description }}</p>
-
-        @if (clubData.website) {
-          <div class="club-website">
-            <mat-icon>language</mat-icon>
-            <a [href]="clubData.website" target="_blank" rel="noopener noreferrer">
-              {{ clubData.website }}
-            </a>
-          </div>
-        }
-      </mat-card-content>
-    </mat-card>
+    <app-club-card [club]="clubData" [showWebsite]="true"></app-club-card>
 
     <div class="placeholder-message">
       <mat-icon>info</mat-icon>

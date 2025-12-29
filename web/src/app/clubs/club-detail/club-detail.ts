@@ -5,12 +5,13 @@ import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { ClubService } from '../../services/club.service';
+import { ClubCard } from '../club-card/club-card';
 import { Club } from '@arrl-co-yotc/shared/build/app/models/club.model';
 import { catchError, of, switchMap } from 'rxjs';
 
 @Component({
   selector: 'app-club-detail',
-  imports: [MatCardModule, MatProgressSpinnerModule, MatIconModule],
+  imports: [MatCardModule, MatProgressSpinnerModule, MatIconModule, ClubCard],
   templateUrl: './club-detail.html',
   styleUrl: './club-detail.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

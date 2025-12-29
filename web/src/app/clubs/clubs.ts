@@ -20,6 +20,7 @@ import { AuthService } from '../auth/auth.service';
 import { Club } from '@arrl-co-yotc/shared/build/app/models/club.model';
 import { MembershipStatus } from '@arrl-co-yotc/shared/build/app/models/user.model';
 import { AddClubDialog } from './add-club-dialog/add-club-dialog';
+import { ClubCard } from './club-card/club-card';
 import { of, forkJoin, Subscription } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
@@ -37,6 +38,7 @@ interface ClubWithMembership extends Club {
     MatProgressSpinnerModule,
     MatChipsModule,
     MatSnackBarModule,
+    ClubCard,
   ],
   templateUrl: './clubs.html',
   styleUrl: './clubs.css',

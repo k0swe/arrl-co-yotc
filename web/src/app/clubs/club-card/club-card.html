@@ -1,0 +1,35 @@
+<mat-card class="club-card">
+  <mat-card-header>
+    <mat-card-title>{{ club().name }}</mat-card-title>
+    <mat-card-subtitle>
+      <mat-icon class="location-icon">place</mat-icon>
+      {{ club().location }}
+    </mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content>
+    <div class="club-callsign">
+      <mat-icon>radio</mat-icon>
+      <strong>{{ club().callsign }}</strong>
+    </div>
+
+    <p class="club-description">{{ club().description }}</p>
+
+    @if (showWebsite() && club().website) {
+      <div class="club-website">
+        <mat-icon>language</mat-icon>
+        <a [href]="club().website" target="_blank" rel="noopener noreferrer">
+          {{ club().website }}
+        </a>
+      </div>
+    }
+
+    <!-- Content projection for additional content like membership chips or suggested-by info -->
+    <ng-content select="[card-content]"></ng-content>
+  </mat-card-content>
+
+  <!-- Content projection for card actions -->
+  <mat-card-actions>
+    <ng-content select="[card-actions]"></ng-content>
+  </mat-card-actions>
+</mat-card>

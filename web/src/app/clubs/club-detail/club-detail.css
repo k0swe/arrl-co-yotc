@@ -22,42 +22,9 @@
   margin-bottom: 16px;
 }
 
-.club-detail-card {
+app-club-card {
+  display: block;
   margin-bottom: 24px;
-}
-
-.location-icon {
-  vertical-align: middle;
-  margin-right: 4px;
-}
-
-.club-callsign {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 16px;
-  color: var(--mat-primary);
-}
-
-.club-description {
-  margin: 16px 0;
-  line-height: 1.6;
-}
-
-.club-website {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 16px;
-}
-
-.club-website a {
-  color: var(--mat-primary);
-  text-decoration: none;
-}
-
-.club-website a:hover {
-  text-decoration: underline;
 }
 
 .placeholder-message {
