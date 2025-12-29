@@ -16,6 +16,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ClubService } from '../services/club.service';
 import { Club } from '@arrl-co-yotc/shared/build/app/models/club.model';
 import { User } from '@arrl-co-yotc/shared/build/app/models/user.model';
+import { ClubCard } from '../clubs/club-card/club-card';
 import { catchError, of, from, forkJoin } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { EditClubDialog, ClubFormData } from '../clubs/edit-club-dialog/edit-club-dialog';
@@ -29,6 +30,7 @@ import { EditClubDialog, ClubFormData } from '../clubs/edit-club-dialog/edit-clu
     MatProgressSpinnerModule,
     MatSnackBarModule,
     MatDialogModule,
+    ClubCard,
   ],
   templateUrl: './admin.html',
   styleUrl: './admin.css',
