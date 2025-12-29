@@ -105,7 +105,6 @@ export class Admin {
             }
           });
           this.userNames.set(nameMap);
-          console.log('User names loaded:', nameMap);
         },
         error: (error) => {
           console.error('Error loading user names:', error);
