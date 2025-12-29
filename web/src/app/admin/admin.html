@@ -1,12 +1,88 @@
 <div class="admin-container">
-  <h1>Admin Dashboard</h1>
-  
-  <section class="admin-content">
-    <p>
-      This is the administration area. Manage clubs, events, and user permissions from this dashboard.
-    </p>
-    <p>
-      Administrative features coming soon...
-    </p>
+  <header class="admin-header">
+    <h1>Admin Dashboard</h1>
+    <p class="subtitle">Review and manage club suggestions</p>
+  </header>
+
+  <section class="pending-clubs-section">
+    <h2>Pending Club Suggestions</h2>
+
+    @if (loading()) {
+      <div class="loading-container" role="status" aria-live="polite">
+        <mat-spinner></mat-spinner>
+        <p>Loading pending clubs...</p>
+      </div>
+    } @else if (pendingClubs().length === 0) {
+      <div class="empty-state" role="status">
+        <mat-icon class="empty-icon">check_circle</mat-icon>
+        <h3>No Pending Suggestions</h3>
+        <p>All club suggestions have been reviewed.</p>
+      </div>
+    } @else {
+      <div class="clubs-grid">
+        @for (club of pendingClubs(); track club.id) {
+          <mat-card class="club-card">
+            <mat-card-header>
+              <mat-card-title>{{ club.name }}</mat-card-title>
+              <mat-card-subtitle>
+                <mat-icon class="location-icon">place</mat-icon>
+                {{ club.location }}
+              </mat-card-subtitle>
+            </mat-card-header>
+
+            <mat-card-content>
+              <div class="club-callsign">
+                <mat-icon>radio</mat-icon>
+                <strong>{{ club.callsign }}</strong>
+              </div>
+
+              <p class="club-description">{{ club.description }}</p>
+
+              @if (club.suggestedBy) {
+                <div class="suggested-by">
+                  <mat-icon>person</mat-icon>
+                  <span>Suggested by: {{ getUserName(club.suggestedBy) }}</span>
+                </div>
+              }
+            </mat-card-content>
+
+            <mat-card-actions class="action-buttons">
+              <button
+                mat-raised-button
+                color="primary"
+                (click)="approveClub(club)"
+                [disabled]="isProcessing(club.id)"
+                aria-label="Approve {{ club.name }}"
+                class="action-button"
+              >
+                @if (isProcessing(club.id)) {
+                  <mat-spinner diameter="20"></mat-spinner>
+                }
+                @if (!isProcessing(club.id)) {
+                  <mat-icon>check_circle</mat-icon>
+                }
+                <span>{{ isProcessing(club.id) ? 'Approving...' : 'Approve' }}</span>
+              </button>
+              <button
+                mat-raised-button
+                color="warn"
+                (click)="rejectClub(club)"
+                [disabled]="isProcessing(club.id)"
+                aria-label="Reject {{ club.name }}"
+                class="action-button"
+              >
+                @if (isProcessing(club.id)) {
+                  <mat-spinner diameter="20"></mat-spinner>
+                }
+                @if (!isProcessing(club.id)) {
+                  <mat-icon>cancel</mat-icon>
+                }
+                <span>{{ isProcessing(club.id) ? 'Rejecting...' : 'Reject' }}</span>
+              </button>
+            </mat-card-actions>
+          </mat-card>
+        }
+      </div>
+    }
   </section>
 </div>
