@@ -10,7 +10,7 @@
 }
 
 .sidenav {
-  width: 250px;
+  width: fit-content;
 }
 
 .main-content {
@@ -40,5 +40,32 @@ mat-toolbar {
 
 .user-info mat-icon {
   margin-right: 4px;
+}
+
+.nav-expansion-panel {
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+.nav-expansion-header {
+  padding-left: 0 !important;
+}
+
+.nav-expansion-header .mat-content {
+  align-items: stretch !important;
+}
+
+nav-expansion-panel-body {
+  padding: 0 0 0 16px;
+}
+
+.expansion-list-item {
+  flex: 1;
+  pointer-events: none;
+}
+
+.nested-nav-item {
+  padding-left: 72px !important;
 }
 
