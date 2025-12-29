@@ -85,13 +85,11 @@ export class ClubService {
   }
 
   /**
-   * Reject a club suggestion by deleting it
-   * Note: In a production system, you might want to soft-delete or archive instead
+   * Reject a club suggestion by keeping it as inactive
+   * This preserves the record for auditing purposes
    */
   rejectClub(clubId: string): Observable<void> {
     const clubDoc = doc(this.firestore, 'clubs', clubId);
-    // Instead of deleting, we'll keep it as inactive
-    // This preserves the record for auditing purposes
     return from(
       updateDoc(clubDoc, {
         isActive: false,

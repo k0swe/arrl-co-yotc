@@ -113,7 +113,7 @@ export class Admin {
     this.processingClubIds.set(current);
   }
 
-  private showSnackBar(message: string, action: string = 'Close'): void {
-    this.snackBar.open(message, action, { duration: 3000 });
+  private showSnackBar(message: string): void {
+    this.snackBar.open(message, 'Close', { duration: 3000 });
   }
 }
