@@ -12,7 +12,7 @@ import {
   serverTimestamp
 } from '@angular/fire/firestore';
 import { Observable, from, of } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, catchError } from 'rxjs/operators';
 import { ClubMembership, MembershipRole, MembershipStatus } from '@arrl-co-yotc/shared/build/app/models/user.model';
 
 /**
@@ -63,7 +63,8 @@ export class MembershipService {
   checkExistingMembership(userId: string, clubId: string): Observable<ClubMembership | null> {
     const membershipRef = doc(this.firestore, `clubs/${clubId}/memberships/${userId}`);
     return docData(membershipRef, { idField: 'id' }).pipe(
-      map(membership => membership ? membership as ClubMembership : null)
+      map(membership => membership ? membership as ClubMembership : null),
+      catchError(() => of(null))
     );
   }
 }
