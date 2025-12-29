@@ -12,11 +12,13 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ClubService } from '../services/club.service';
 import { Club } from '@arrl-co-yotc/shared/build/app/models/club.model';
 import { User } from '@arrl-co-yotc/shared/build/app/models/user.model';
 import { catchError, of, from, forkJoin } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { EditClubDialog, ClubFormData } from '../clubs/edit-club-dialog/edit-club-dialog';
 
 @Component({
   selector: 'app-admin',
@@ -26,6 +28,7 @@ import { map } from 'rxjs/operators';
     MatIconModule,
     MatProgressSpinnerModule,
     MatSnackBarModule,
+    MatDialogModule,
   ],
   templateUrl: './admin.html',
   styleUrl: './admin.css',
@@ -36,6 +39,7 @@ export class Admin {
   private firestore = inject(Firestore);
   private snackBar = inject(MatSnackBar);
   private destroyRef = inject(DestroyRef);
+  private dialog = inject(MatDialog);
 
   protected readonly loading = signal(true);
   protected readonly pendingClubs = signal<Club[]>([]);
@@ -117,6 +121,41 @@ export class Admin {
       return 'Unknown';
     }
     return this.userNames().get(userId) || userId;
+  }
+
+  protected editClub(club: Club): void {
+    const dialogRef = this.dialog.open(EditClubDialog, {
+      width: '600px',
+      data: { club },
+    });
+
+    dialogRef
+      .afterClosed()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((result: ClubFormData | undefined) => {
+        if (result) {
+          this.setProcessing(club.id, true);
+          this.clubService
+            .updateClub(club.id, result)
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({
+              next: () => {
+                this.showSnackBar(`${result.name} has been updated!`);
+                // Update the local club data with the new values
+                const updatedClubs = this.pendingClubs().map((c) =>
+                  c.id === club.id ? { ...c, ...result } : c,
+                );
+                this.pendingClubs.set(updatedClubs);
+                this.setProcessing(club.id, false);
+              },
+              error: (error) => {
+                console.error('Error updating club:', error);
+                this.showSnackBar('Failed to update club');
+                this.setProcessing(club.id, false);
+              },
+            });
+        }
+      });
   }
 
   protected approveClub(club: Club): void {

@@ -99,4 +99,18 @@ export class ClubService {
       }).then(() => void 0),
     );
   }
+
+  /**
+   * Update club details (name, callsign, description, location)
+   * Used by admins to edit pending clubs or by club leaders to manage their club
+   */
+  updateClub(clubId: string, updates: Partial<Club>): Observable<void> {
+    const clubDoc = doc(this.firestore, 'clubs', clubId);
+    return from(
+      updateDoc(clubDoc, {
+        ...updates,
+        updatedAt: serverTimestamp(),
+      }).then(() => void 0),
+    );
+  }
 }
