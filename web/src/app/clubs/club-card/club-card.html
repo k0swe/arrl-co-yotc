@@ -15,7 +15,7 @@
 
     <p class="club-description">{{ club().description }}</p>
 
-    @if (showWebsite() && club().website) {
+    @if (club().website) {
       <div class="club-website">
         <mat-icon>language</mat-icon>
         <a [href]="club().website" target="_blank" rel="noopener noreferrer">

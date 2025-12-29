@@ -60,14 +60,7 @@ describe('ClubCard', () => {
     expect(description?.textContent).toContain('A test club for unit testing');
   });
 
-  it('should not display website by default', () => {
-    const compiled = fixture.nativeElement as HTMLElement;
-    const website = compiled.querySelector('.club-website');
-    expect(website).toBeFalsy();
-  });
-
-  it('should display website when showWebsite is true', () => {
-    fixture.componentRef.setInput('showWebsite', true);
+  it('should display website when club has one', () => {
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
     const website = compiled.querySelector('.club-website');
@@ -79,7 +72,6 @@ describe('ClubCard', () => {
   it('should not display website section when club has no website', () => {
     const clubWithoutWebsite = { ...mockClub, website: undefined };
     fixture.componentRef.setInput('club', clubWithoutWebsite);
-    fixture.componentRef.setInput('showWebsite', true);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
     const website = compiled.querySelector('.club-website');

@@ -15,9 +15,4 @@ export class ClubCard {
    * The club data to display
    */
   club = input.required<Club>();
-
-  /**
-   * Whether to show the website link (default: false)
-   */
-  showWebsite = input<boolean>(false);
 }
