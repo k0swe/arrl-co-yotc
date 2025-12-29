@@ -41,6 +41,24 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Slug</mat-label>
+      <input
+        matInput
+        formControlName="slug"
+        placeholder="e.g., denver-radio-club"
+        aria-label="Club slug for URL"
+      />
+      <mat-icon matPrefix>link</mat-icon>
+      @if (isClubActive) {
+        <mat-hint>Slug cannot be changed once club is active</mat-hint>
+      } @else if (getErrorMessage('slug')) {
+        <mat-error>{{ getErrorMessage('slug') }}</mat-error>
+      } @else {
+        <mat-hint>URL-friendly identifier (lowercase letters, numbers, and hyphens)</mat-hint>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
       <mat-label>Location</mat-label>
       <input
         matInput

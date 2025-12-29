@@ -20,6 +20,9 @@ export interface Club {
   /** Club website URL */
   website?: string;
 
+  /** URL-friendly slug for the club (used in routes) */
+  slug?: string;
+
   /** Whether the club is currently active */
   isActive: boolean;
 

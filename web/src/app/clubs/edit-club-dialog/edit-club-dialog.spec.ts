@@ -36,6 +36,7 @@ describe('EditClubDialog', () => {
     it('should have a form with all required fields', () => {
       expect(component['clubForm'].get('name')).toBeTruthy();
       expect(component['clubForm'].get('callsign')).toBeTruthy();
+      expect(component['clubForm'].get('slug')).toBeTruthy();
       expect(component['clubForm'].get('description')).toBeTruthy();
       expect(component['clubForm'].get('location')).toBeTruthy();
       expect(component['clubForm'].get('website')).toBeTruthy();
@@ -75,6 +76,7 @@ describe('EditClubDialog', () => {
         callsign: 'W0TEST',
         description: 'A test club for testing purposes',
         location: 'Denver, CO',
+        slug: '',
         website: '',
       };
       expect(mockDialogRef.close).toHaveBeenCalledWith(expectedData);
@@ -104,6 +106,22 @@ describe('EditClubDialog', () => {
       websiteControl?.setValue('');
       expect(websiteControl?.valid).toBeTruthy(); // Website is optional
     });
+
+    it('should validate slug pattern', () => {
+      const slugControl = component['clubForm'].get('slug');
+
+      slugControl?.setValue('Invalid Slug');
+      expect(slugControl?.hasError('pattern')).toBeTruthy();
+
+      slugControl?.setValue('UPPERCASE');
+      expect(slugControl?.hasError('pattern')).toBeTruthy();
+
+      slugControl?.setValue('valid-slug-123');
+      expect(slugControl?.hasError('pattern')).toBeFalsy();
+
+      slugControl?.setValue('');
+      expect(slugControl?.valid).toBeTruthy(); // Slug is optional
+    });
   });
 
   describe('Edit mode (with existing club)', () => {
@@ -113,6 +131,7 @@ describe('EditClubDialog', () => {
       callsign: 'W0EXIST',
       description: 'An existing club for testing',
       location: 'Boulder, CO',
+      slug: 'existing-club',
       isActive: true,
       leaderIds: [],
       createdAt: new Date(),
@@ -153,9 +172,15 @@ describe('EditClubDialog', () => {
 
       expect(form.get('name')?.value).toBe(existingClub.name);
       expect(form.get('callsign')?.value).toBe(existingClub.callsign);
+      expect(form.get('slug')?.value).toBe(existingClub.slug);
       expect(form.get('description')?.value).toBe(existingClub.description);
       expect(form.get('location')?.value).toBe(existingClub.location);
       expect(form.get('website')?.value).toBe('');
+    });
+
+    it('should disable slug field when club is active', () => {
+      const slugControl = component['clubForm'].get('slug');
+      expect(slugControl?.disabled).toBeTruthy();
     });
 
     it('should close dialog with updated data on submit', () => {
@@ -171,6 +196,7 @@ describe('EditClubDialog', () => {
       expect(mockDialogRef.close).toHaveBeenCalledWith({
         name: 'Updated Club Name',
         callsign: existingClub.callsign,
+        slug: existingClub.slug,
         description: 'Updated description for the club',
         location: existingClub.location,
         website: '',
@@ -195,6 +221,47 @@ describe('EditClubDialog', () => {
 
       descControl?.setValue('A longer description that meets the minimum length');
       expect(descControl?.hasError('minlength')).toBeFalsy();
+    });
+  });
+
+  describe('Edit mode (with inactive club)', () => {
+    const inactiveClub: Club = {
+      id: 'inactive-id',
+      name: 'Inactive Club',
+      callsign: 'W0INACT',
+      description: 'An inactive club for testing',
+      location: 'Aurora, CO',
+      slug: 'inactive-club',
+      isActive: false,
+      leaderIds: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    beforeEach(async () => {
+      mockDialogRef = {
+        close: vi.fn(),
+      };
+
+      const dialogData: EditClubDialogData = { club: inactiveClub };
+
+      await TestBed.configureTestingModule({
+        imports: [EditClubDialog],
+        providers: [
+          { provide: MatDialogRef, useValue: mockDialogRef },
+          { provide: MAT_DIALOG_DATA, useValue: dialogData },
+          provideAnimations(),
+        ],
+      }).compileComponents();
+
+      fixture = TestBed.createComponent(EditClubDialog);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+    });
+
+    it('should allow editing slug field when club is inactive', () => {
+      const slugControl = component['clubForm'].get('slug');
+      expect(slugControl?.disabled).toBeFalsy();
     });
   });
 });

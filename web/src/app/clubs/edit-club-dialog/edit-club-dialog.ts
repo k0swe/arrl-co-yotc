@@ -16,7 +16,7 @@ export interface EditClubDialogData {
   club?: Club;
 }
 
-export type ClubFormData = Pick<Club, 'name' | 'callsign' | 'description' | 'location' | 'website'>;
+export type ClubFormData = Pick<Club, 'name' | 'callsign' | 'description' | 'location' | 'website' | 'slug'>;
 
 @Component({
   selector: 'app-edit-club-dialog',
@@ -39,6 +39,7 @@ export class EditClubDialog {
 
   protected readonly submitting = signal(false);
   protected readonly isEditMode = !!this.data?.club;
+  protected readonly isClubActive = this.data?.club?.isActive ?? false;
 
   protected readonly clubForm = this.fb.nonNullable.group({
     name: [
@@ -48,6 +49,10 @@ export class EditClubDialog {
     callsign: [
       this.data?.club?.callsign || '',
       [Validators.required, Validators.pattern(/^[A-Z0-9]+$/i), Validators.maxLength(10)],
+    ],
+    slug: [
+      this.data?.club?.slug || '',
+      [Validators.pattern(/^[a-z0-9-]+$/), Validators.maxLength(100)],
     ],
     description: [
       this.data?.club?.description || '',
@@ -62,6 +67,13 @@ export class EditClubDialog {
       [Validators.pattern(/^https?:\/\/[^\s\/$.?#].[^\s]*$/i), Validators.maxLength(200)],
     ],
   });
+
+  constructor() {
+    // Disable slug field when club is active to prevent changing deep links
+    if (this.isClubActive) {
+      this.clubForm.get('slug')?.disable();
+    }
+  }
 
   protected onCancel(): void {
     this.dialogRef.close();
@@ -100,6 +112,9 @@ export class EditClubDialog {
       }
       if (fieldName === 'website') {
         return 'Must be a valid URL starting with http:// or https://';
+      }
+      if (fieldName === 'slug') {
+        return 'Only lowercase letters, numbers, and hyphens allowed';
       }
       return 'Invalid format';
     }
