@@ -12,8 +12,8 @@ import {
   updateDoc,
   where,
 } from '@angular/fire/firestore';
-import { from, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { from, Observable, of } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 import { Club } from '@arrl-co-yotc/shared/build/app/models/club.model';
 
 /**
@@ -60,6 +60,24 @@ export class ClubService {
           return clubs[0];
         }
         return null;
+      }),
+    );
+  }
+
+  /**
+   * Get a specific club by slug or ID
+   * Tries to fetch by slug first, falls back to ID if slug lookup fails
+   */
+  getClubBySlugOrId(slugOrId: string): Observable<Club | null> {
+    // First try to get by slug
+    return this.getClubBySlug(slugOrId).pipe(
+      switchMap((club) => {
+        // If found by slug, return it
+        if (club) {
+          return of(club);
+        }
+        // Otherwise try by ID
+        return this.getClubById(slugOrId);
       }),
     );
   }
