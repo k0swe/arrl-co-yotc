@@ -24,6 +24,13 @@ Before running any scripts, you need to:
    export GOOGLE_APPLICATION_CREDENTIALS="path/to/service-account-key.json"
    ```
 
+3. **(Optional) Configure Firebase project:**
+   
+   The script defaults to the `arrl-co-yotc` project. To use a different project:
+   ```bash
+   export FIREBASE_PROJECT_ID="your-project-id"
+   ```
+
 ## Scripts
 
 ### set-admin-claim.js
@@ -40,12 +47,20 @@ node set-admin-claim.js <userId>
 
 **Example:**
 ```bash
-# Set admin claim for user
+# Set admin claim for user in default project
 node set-admin-claim.js "abc123def456"
 
 # Or use npm script
 npm run set-admin -- "abc123def456"
+
+# For a different Firebase project
+export FIREBASE_PROJECT_ID="my-other-project"
+node set-admin-claim.js "abc123def456"
 ```
+
+**Environment Variables:**
+- `GOOGLE_APPLICATION_CREDENTIALS` - Required. Path to Firebase service account key JSON file
+- `FIREBASE_PROJECT_ID` - Optional. Firebase project ID (defaults to 'arrl-co-yotc')
 
 **Important Notes:**
 - The user must already exist in Firebase Auth

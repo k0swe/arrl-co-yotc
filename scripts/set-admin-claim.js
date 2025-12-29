@@ -10,12 +10,15 @@
  *   node set-admin-claim.js <userId>
  * 
  * Environment:
- *   - Must be run with appropriate Firebase Admin SDK credentials
- *   - Requires GOOGLE_APPLICATION_CREDENTIALS environment variable
- *     or runs with default credentials in Firebase environment
+ *   - GOOGLE_APPLICATION_CREDENTIALS: Path to Firebase service account key (required)
+ *   - FIREBASE_PROJECT_ID: Firebase project ID (optional, defaults to 'arrl-co-yotc')
  * 
  * Example:
  *   export GOOGLE_APPLICATION_CREDENTIALS="path/to/service-account-key.json"
+ *   node set-admin-claim.js "user123abc"
+ * 
+ *   # For a different project:
+ *   export FIREBASE_PROJECT_ID="my-other-project"
  *   node set-admin-claim.js "user123abc"
  */
 
@@ -51,11 +54,14 @@ async function setAdminClaim() {
   try {
     console.log('Initializing Firebase Admin SDK...');
     
+    // Get project ID from environment or use default
+    const projectId = process.env.FIREBASE_PROJECT_ID || 'arrl-co-yotc';
+    
     // Initialize Firebase Admin
     // This will use GOOGLE_APPLICATION_CREDENTIALS environment variable
     // or default application credentials
     initializeApp({
-      projectId: 'arrl-co-yotc'
+      projectId: projectId
     });
     
     const auth = getAuth();
