@@ -1,0 +1,26 @@
+.dialog-description {
+  font-size: 16px;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.info-section {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  background-color: #e3f2fd;
+  border-radius: 4px;
+  margin-top: 16px;
+}
+
+.info-icon {
+  color: #1976d2;
+  flex-shrink: 0;
+}
+
+.info-text {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: rgba(0, 0, 0, 0.87);
+}

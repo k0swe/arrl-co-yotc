@@ -1,0 +1,27 @@
+<h2 mat-dialog-title>Sign in with ARRL</h2>
+
+<mat-dialog-content>
+  <p class="dialog-description">
+    Wouldn't this be useful? Ask your ARRL representative about allowing ham radio developers to use OIDC with ARRL Personify.
+  </p>
+  
+  <div class="info-section">
+    <mat-icon class="info-icon">info</mat-icon>
+    <p class="info-text">
+      Single sign-on with ARRL credentials would make it easier for licensed amateur radio operators 
+      to access ham radio applications securely.
+    </p>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button
+    mat-raised-button
+    color="primary"
+    type="button"
+    (click)="onClose()"
+    aria-label="Close dialog"
+  >
+    Got it
+  </button>
+</mat-dialog-actions>
