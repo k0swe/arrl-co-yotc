@@ -57,6 +57,7 @@ export class App {
   protected readonly userClubs = signal<Club[]>([]);
   protected readonly hasConfirmedMemberships = computed(() => this.userClubs().length > 0);
   protected readonly pendingClubsCount = signal(0);
+  protected readonly pendingMembershipCounts = signal<Map<string, number>>(new Map());
 
   constructor() {
     // Load user's clubs when authentication state changes
@@ -79,6 +80,19 @@ export class App {
         this.loadPendingClubsCount();
       } else {
         this.pendingClubsCount.set(0);
+      }
+    });
+
+    // Load pending membership counts for clubs where user is a leader or admin
+    effect(() => {
+      const user = this.authService.currentUser();
+      const isAdmin = this.authService.isAdmin();
+      const clubs = this.userClubs();
+
+      if (user && clubs.length > 0) {
+        this.loadPendingMembershipCounts(user.uid, isAdmin, clubs);
+      } else {
+        this.pendingMembershipCounts.set(new Map());
       }
     });
   }
@@ -132,6 +146,39 @@ export class App {
       .subscribe((count) => {
         this.pendingClubsCount.set(count);
       });
+  }
+
+  private loadPendingMembershipCounts(userId: string, isAdmin: boolean, clubs: Club[]): void {
+    // Filter clubs where user is a leader or admin can see all
+    const clubsToCheck = isAdmin ? clubs : clubs.filter((club) => club.leaderIds?.includes(userId));
+
+    if (clubsToCheck.length === 0) {
+      this.pendingMembershipCounts.set(new Map());
+      return;
+    }
+
+    // Load pending memberships for each club
+    const pendingRequests$ = clubsToCheck.map((club) =>
+      this.membershipService.getPendingMemberships(club.id).pipe(
+        map((memberships) => ({ clubId: club.id, count: memberships.length })),
+        catchError(() => of({ clubId: club.id, count: 0 })),
+      ),
+    );
+
+    // Use of([]) when array is empty to ensure immediate completion
+    (pendingRequests$.length > 0 ? combineLatest(pendingRequests$) : of([]))
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((results) => {
+        const countsMap = new Map<string, number>();
+        results.forEach((result) => {
+          countsMap.set(result.clubId, result.count);
+        });
+        this.pendingMembershipCounts.set(countsMap);
+      });
+  }
+
+  protected getPendingMembershipCount(clubId: string): number {
+    return this.pendingMembershipCounts().get(clubId) || 0;
   }
 
   protected signOut(): void {

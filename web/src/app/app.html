@@ -65,18 +65,26 @@
           class="nested-nav-item"
           [attr.aria-label]="'Navigate to ' + club.name"
         >
-          @if (club.logoUrl) {
-          <img
+          <span
             matListItemIcon
-            [ngSrc]="club.logoUrl"
-            [alt]="'Logo for ' + club.name"
-            width="24"
-            height="24"
-            class="club-logo-icon"
-          />
-          } @else {
-          <mat-icon matListItemIcon>groups</mat-icon>
-          }
+            [matBadge]="getPendingMembershipCount(club.id)"
+            [matBadgeHidden]="getPendingMembershipCount(club.id) === 0"
+            matBadgeColor="warn"
+            matBadgeSize="small"
+            class="badge-container"
+          >
+            @if (club.logoUrl) {
+            <img
+              [ngSrc]="club.logoUrl"
+              [alt]="'Logo for ' + club.name"
+              width="24"
+              height="24"
+              class="club-logo-icon"
+            />
+            } @else {
+            <mat-icon>groups</mat-icon>
+            }
+          </span>
           <span matListItemTitle>{{ club.name }}</span>
         </a>
         }
