@@ -8,11 +8,14 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ClubService } from '../../services/club.service';
+import { MembershipService } from '../../services/membership.service';
 import { AuthService } from '../../auth/auth.service';
 import { ClubCard } from '../club-card/club-card';
 import { EditClubDialog, ClubFormData } from '../edit-club-dialog/edit-club-dialog';
 import { MembershipRequests } from './membership-requests/membership-requests';
+import { ActiveMembers } from './active-members/active-members';
 import { Club } from '@arrl-co-yotc/shared/build/app/models/club.model';
+import { MembershipStatus } from '@arrl-co-yotc/shared/build/app/models/user.model';
 import { catchError, of, switchMap } from 'rxjs';
 
 @Component({
@@ -26,6 +29,7 @@ import { catchError, of, switchMap } from 'rxjs';
     MatSnackBarModule,
     ClubCard,
     MembershipRequests,
+    ActiveMembers,
   ],
   templateUrl: './club-detail.html',
   styleUrl: './club-detail.css',
@@ -34,6 +38,7 @@ import { catchError, of, switchMap } from 'rxjs';
 export class ClubDetail {
   private route = inject(ActivatedRoute);
   private clubService = inject(ClubService);
+  private membershipService = inject(MembershipService);
   private authService = inject(AuthService);
   private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
@@ -42,6 +47,7 @@ export class ClubDetail {
   protected readonly loading = signal(true);
   protected readonly club = signal<Club | null>(null);
   protected readonly error = signal<string | null>(null);
+  protected readonly userMembershipStatus = signal<MembershipStatus | null>(null);
 
   /**
    * Computed signal that determines if the current user can edit the club.
@@ -65,6 +71,36 @@ export class ClubDetail {
     }
 
     return false;
+  });
+
+  /**
+   * Computed signal that determines if the current user can view the members list.
+   * Members can be viewed by admins, club leaders, and active club members.
+   */
+  protected readonly canViewMembers = computed(() => {
+    const currentClub = this.club();
+    if (!currentClub) {
+      return false;
+    }
+    
+    // Admins can view members of any club
+    if (this.authService.isAdmin()) {
+      return true;
+    }
+
+    const currentUser = this.authService.currentUser();
+    if (!currentUser) {
+      return false;
+    }
+
+    // Club leaders can view members
+    if (currentClub?.leaderIds?.includes(currentUser.uid)) {
+      return true;
+    }
+
+    // Active club members can view other members
+    const membershipStatus = this.userMembershipStatus();
+    return membershipStatus === MembershipStatus.Active;
   });
 
   constructor() {
@@ -95,6 +131,24 @@ export class ClubDetail {
       .subscribe((club) => {
         if (club) {
           this.club.set(club);
+          // Load user membership status if authenticated
+          const currentUser = this.authService.currentUser();
+          if (currentUser) {
+            this.membershipService
+              .checkExistingMembership(currentUser.uid, club.id)
+              .pipe(
+                catchError((err) => {
+                  console.error('Error loading user membership:', err);
+                  return of(null);
+                }),
+                takeUntilDestroyed(this.destroyRef),
+              )
+              .subscribe((membership) => {
+                this.userMembershipStatus.set(membership?.status || null);
+              });
+          } else {
+            this.userMembershipStatus.set(null);
+          }
         } else if (!this.error()) {
           this.error.set('Club not found');
         }

@@ -88,6 +88,16 @@ export class MembershipService {
   }
 
   /**
+   * Get all active members for a specific club
+   * Returns memberships with status 'active'
+   */
+  getActiveMembers(clubId: string): Observable<ClubMembership[]> {
+    const membershipsCollection = collection(this.firestore, `clubs/${clubId}/memberships`);
+    const q = query(membershipsCollection, where('status', '==', MembershipStatus.Active));
+    return collectionData(q, { idField: 'id' }) as Observable<ClubMembership[]>;
+  }
+
+  /**
    * Approve a pending membership request
    * Updates the membership status to 'active' and records who approved it
    */
