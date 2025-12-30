@@ -73,7 +73,14 @@
         <span matListItemTitle>Standings</span>
       </a>
       @if (authService.isAdmin()) {
-      <a mat-list-item routerLink="/admin" aria-label="Navigate to admin">
+      <a
+        mat-list-item
+        routerLink="/admin"
+        aria-label="Navigate to admin"
+        [matBadge]="pendingClubsCount()"
+        [matBadgeHidden]="pendingClubsCount() === 0"
+        matBadgeColor="warn"
+      >
         <mat-icon matListItemIcon>admin_panel_settings</mat-icon>
         <span matListItemTitle>Admin</span>
       </a>

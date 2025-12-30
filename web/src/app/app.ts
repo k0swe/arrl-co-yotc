@@ -16,6 +16,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { MatBadgeModule } from '@angular/material/badge';
 import { AuthService } from './auth/auth.service';
 import { MembershipService } from './services/membership.service';
 import { ClubService } from './services/club.service';
@@ -37,6 +38,7 @@ import { map, catchError } from 'rxjs/operators';
     MatListModule,
     MatMenuModule,
     MatExpansionModule,
+    MatBadgeModule,
     NgOptimizedImage,
   ],
   templateUrl: './app.html',
@@ -54,6 +56,7 @@ export class App {
   protected readonly sidenavOpened = signal(true);
   protected readonly userClubs = signal<Club[]>([]);
   protected readonly hasConfirmedMemberships = computed(() => this.userClubs().length > 0);
+  protected readonly pendingClubsCount = signal(0);
 
   constructor() {
     // Load user's clubs when authentication state changes
@@ -65,6 +68,17 @@ export class App {
         this.loadUserClubs(user.uid, isAdmin);
       } else {
         this.userClubs.set([]);
+      }
+    });
+
+    // Load pending clubs count when user is an admin
+    effect(() => {
+      const isAdmin = this.authService.isAdmin();
+
+      if (isAdmin) {
+        this.loadPendingClubsCount();
+      } else {
+        this.pendingClubsCount.set(0);
       }
     });
   }
@@ -105,6 +119,19 @@ export class App {
 
   protected toggleSidenav(): void {
     this.sidenavOpened.update((value) => !value);
+  }
+
+  private loadPendingClubsCount(): void {
+    this.clubService
+      .getPendingClubs()
+      .pipe(
+        map((clubs) => clubs.length),
+        catchError(() => of(0)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((count) => {
+        this.pendingClubsCount.set(count);
+      });
   }
 
   protected signOut(): void {
