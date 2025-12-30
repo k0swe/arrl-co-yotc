@@ -8,93 +8,77 @@
         </p>
       </div>
       @if (isAuthenticated()) {
-        <button
-          mat-raised-button
-          color="accent"
-          (click)="openAddClubDialog()"
-          class="add-club-button"
-          aria-label="Suggest a new club"
-        >
-          <mat-icon>add</mat-icon>
-          <span>Suggest a Club</span>
-        </button>
+      <button
+        mat-raised-button
+        color="accent"
+        (click)="openAddClubDialog()"
+        class="add-club-button"
+        aria-label="Suggest a new club"
+      >
+        <mat-icon>add</mat-icon>
+        <span>Suggest a Club</span>
+      </button>
       }
     </div>
   </header>
 
   @if (loading()) {
-    <div class="loading-container" role="status" aria-live="polite">
-      <mat-spinner></mat-spinner>
-      <p>Loading clubs...</p>
-    </div>
+  <div class="loading-container" role="status" aria-live="polite">
+    <mat-spinner></mat-spinner>
+    <p>Loading clubs...</p>
+  </div>
   } @else if (clubs().length === 0) {
-    <div class="empty-state" role="status">
-      <mat-icon class="empty-icon">groups_off</mat-icon>
-      <h2>No Clubs Available</h2>
-      <p>There are currently no active clubs registered in the system.</p>
-    </div>
+  <div class="empty-state" role="status">
+    <mat-icon class="empty-icon">groups_off</mat-icon>
+    <h2>No Clubs Available</h2>
+    <p>There are currently no active clubs registered in the system.</p>
+  </div>
   } @else {
-    <div class="clubs-grid">
-      @for (club of clubs(); track club.id) {
-        <app-club-card [club]="club">
-          <div card-content>
-            @if (club.membershipStatus) {
-              <mat-chip-set aria-label="Membership status">
-                <mat-chip [highlighted]="club.membershipStatus === MembershipStatus.Active">
-                  <mat-icon matChipAvatar>
-                    @switch (club.membershipStatus) {
-                      @case (MembershipStatus.Pending) {
-                        <span>schedule</span>
-                      }
-                      @case (MembershipStatus.Active) {
-                        <span>check_circle</span>
-                      }
-                      @case (MembershipStatus.Denied) {
-                        <span>cancel</span>
-                      }
-                      @case (MembershipStatus.Inactive) {
-                        <span>remove_circle</span>
-                      }
-                    }
-                  </mat-icon>
-                  {{ getMembershipStatusText(club.membershipStatus) }}
-                </mat-chip>
-              </mat-chip-set>
-            }
-          </div>
+  <div class="clubs-grid">
+    @for (club of clubs(); track club.id) {
+    <app-club-card [club]="club">
+      <div card-content>
+        @if (club.membershipStatus) {
+        <mat-chip-set aria-label="Membership status">
+          <mat-chip [highlighted]="club.membershipStatus === MembershipStatus.Active">
+            <mat-icon matChipAvatar>
+              @switch (club.membershipStatus) { @case (MembershipStatus.Pending) {
+              <span>schedule</span>
+              } @case (MembershipStatus.Active) {
+              <span>check_circle</span>
+              } @case (MembershipStatus.Denied) {
+              <span>cancel</span>
+              } @case (MembershipStatus.Inactive) {
+              <span>remove_circle</span>
+              } }
+            </mat-icon>
+            {{ getMembershipStatusText(club.membershipStatus) }}
+          </mat-chip>
+        </mat-chip-set>
+        }
+      </div>
 
-          <div card-actions>
-            @if (canApply(club)) {
-              <button
-                mat-raised-button
-                color="primary"
-                (click)="applyForMembership(club)"
-                [disabled]="club.isApplying"
-                aria-label="Confirm membership in {{ club.name }}"
-              >
-                @if (club.isApplying) {
-                  <mat-spinner diameter="20"></mat-spinner>
-                  <span>Confirming...</span>
-                } @else {
-                  <ng-container>
-                    <mat-icon>verified_user</mat-icon>
-                    <span>Confirm Membership</span>
-                  </ng-container>
-                }
-              </button>
-            } @else if (!isAuthenticated()) {
-              <button
-                mat-button
-                disabled
-                aria-label="Sign in required to confirm"
-              >
-                <mat-icon>lock</mat-icon>
-                <span>Sign in to Confirm</span>
-              </button>
-            }
-          </div>
-        </app-club-card>
-      }
-    </div>
+      <div card-actions>
+        @if (canApply(club)) {
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="applyForMembership(club)"
+          [disabled]="club.isApplying"
+          aria-label="Confirm membership in {{ club.name }}"
+        >
+          <mat-icon>verified_user</mat-icon>
+          <span>Confirm Membership</span>
+        </button>
+        } @else if (!isAuthenticated()) {
+        <button mat-button disabled aria-label="Sign in required to confirm">
+          <mat-icon>lock</mat-icon>
+          <span>Sign in to Confirm</span>
+        </button>
+        }
+      </div>
+    </app-club-card>
+    }
+  </div>
   }
 </div>
