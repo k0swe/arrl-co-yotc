@@ -86,6 +86,24 @@ h3 {
   height: 18px;
 }
 
+.route-slug {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  color: #757575;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+.route-slug mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
 .action-buttons {
   display: flex;
   gap: 0.5rem;
