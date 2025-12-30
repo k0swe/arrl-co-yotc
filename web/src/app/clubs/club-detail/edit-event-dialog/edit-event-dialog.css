@@ -1,0 +1,29 @@
+.full-width {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.date-time-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.date-field {
+  flex: 2;
+}
+
+.time-field {
+  flex: 1;
+}
+
+.align-end {
+  justify-content: flex-end;
+}
+
+mat-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.5rem 0;
+}

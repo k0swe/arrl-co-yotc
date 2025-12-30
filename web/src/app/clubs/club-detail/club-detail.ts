@@ -14,6 +14,7 @@ import { ClubCard } from '../club-card/club-card';
 import { EditClubDialog, ClubFormData } from '../edit-club-dialog/edit-club-dialog';
 import { MembershipRequests } from './membership-requests/membership-requests';
 import { ActiveMembers } from './active-members/active-members';
+import { EventList } from './event-list/event-list';
 import { Club } from '@arrl-co-yotc/shared/build/app/models/club.model';
 import { MembershipStatus } from '@arrl-co-yotc/shared/build/app/models/user.model';
 import { catchError, of, switchMap } from 'rxjs';
@@ -30,6 +31,7 @@ import { catchError, of, switchMap } from 'rxjs';
     ClubCard,
     MembershipRequests,
     ActiveMembers,
+    EventList,
   ],
   templateUrl: './club-detail.html',
   styleUrl: './club-detail.css',
