@@ -102,7 +102,14 @@ export class MembershipRequests {
         );
 
         forkJoin(userFetches)
-          .pipe(takeUntilDestroyed(this.destroyRef))
+          .pipe(
+            catchError((error) => {
+              console.error('Error fetching users:', error);
+              // Return empty array on error so we still display memberships without user data
+              return of(memberships.map(() => null));
+            }),
+            takeUntilDestroyed(this.destroyRef),
+          )
           .subscribe((users) => {
             const membershipsWithUsers = memberships.map((membership, index) => ({
               membership,
