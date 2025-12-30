@@ -165,7 +165,8 @@ export class App {
       ),
     );
 
-    combineLatest(pendingRequests$)
+    // Use of([]) when array is empty to ensure immediate completion
+    (pendingRequests$.length > 0 ? combineLatest(pendingRequests$) : of([]))
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((results) => {
         const countsMap = new Map<string, number>();
