@@ -90,12 +90,12 @@ mat-card-subtitle {
 }
 
 .arrl-button {
-  background-color: #c62828;
+  background-color: #303030;
   color: white;
 }
 
 .arrl-button:hover:not([disabled]) {
-  background-color: #b71c1c;
+  background-color: #676767;
 }
 
 .google-icon,
