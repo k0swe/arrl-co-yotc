@@ -8,7 +8,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDialog } from '@angular/material/dialog';
 import { AuthService } from '../auth.service';
+import { ArrlInfoDialog } from '../arrl-info-dialog/arrl-info-dialog';
 
 @Component({
   selector: 'app-login',
@@ -30,6 +32,7 @@ import { AuthService } from '../auth.service';
 export class Login {
   private authService = inject(AuthService);
   private router = inject(Router);
+  private dialog = inject(MatDialog);
 
   protected readonly loading = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
@@ -98,6 +101,13 @@ export class Login {
   protected toggleEmailLogin(): void {
     this.showEmailLogin.update((value) => !value);
     this.errorMessage.set(null);
+  }
+
+  protected showArrlInfo(): void {
+    this.dialog.open(ArrlInfoDialog, {
+      width: '500px',
+      maxWidth: '90vw',
+    });
   }
 
   private getErrorMessage(error: any): string {
