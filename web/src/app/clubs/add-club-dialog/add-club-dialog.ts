@@ -7,8 +7,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { Club } from '@arrl-co-yotc/shared/build/app/models/club.model';
 
-export type ClubSuggestion = Pick<Club, 'name' | 'callsign' | 'description' | 'location' | 'website'>;
-
 @Component({
   selector: 'app-add-club-dialog',
   imports: [
@@ -54,7 +52,7 @@ export class AddClubDialog {
     }
 
     this.submitting.set(true);
-    const suggestion: ClubSuggestion = this.clubForm.getRawValue();
+    const suggestion: Partial<Club> = this.clubForm.getRawValue();
     this.dialogRef.close(suggestion);
   }
 
