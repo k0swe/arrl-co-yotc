@@ -69,7 +69,12 @@ service cloud.firestore {
       
       // Authenticated users can read other users' basic profile info
       // This is needed to display member lists to club members and leaders
-      // The actual access control happens at the membership collection level
+      // Note: This rule is intentionally permissive for performance reasons.
+      // The actual access control for who can see member lists is enforced at
+      // the membership collection level. Implementing club-level checks here
+      // would require expensive collection group queries for each user read.
+      // Since user data only contains public profile information (name, callsign),
+      // this level of access is acceptable.
       allow read: if isAuthenticated();
       
       // Admins can read and write all user documents
