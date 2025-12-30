@@ -87,10 +87,10 @@ nav-expansion-panel-body {
  * The badge on the admin menu item was being clipped at the top due to
  * overflow:hidden on Material list items. This allows the badge to be visible.
  */
-a[routerlink='/admin'] {
+a[routerLink='/admin'] {
   overflow: visible !important;
 }
 
-a[routerlink='/admin'] [matlistitemtitle] {
+a[routerLink='/admin'] [matListItemTitle] {
   overflow: visible !important;
 }
