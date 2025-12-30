@@ -185,7 +185,7 @@ export class MembershipRequests {
    * Convert Firestore Timestamp to Date for display
    * Firestore returns Timestamp objects that need to be converted
    */
-  protected toDate(timestamp: any): Date | null {
+  protected toDate(timestamp: Date | { toDate(): Date } | string | null | undefined): Date | null {
     if (!timestamp) {
       return null;
     }
@@ -194,11 +194,14 @@ export class MembershipRequests {
       return timestamp;
     }
     // Check if it's a Firestore Timestamp with toDate method
-    if (timestamp.toDate && typeof timestamp.toDate === 'function') {
+    if (typeof timestamp === 'object' && 'toDate' in timestamp && typeof timestamp.toDate === 'function') {
       return timestamp.toDate();
     }
     // Try to parse as date string
-    const date = new Date(timestamp);
-    return isNaN(date.getTime()) ? null : date;
+    if (typeof timestamp === 'string') {
+      const date = new Date(timestamp);
+      return isNaN(date.getTime()) ? null : date;
+    }
+    return null;
   }
 }
