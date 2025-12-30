@@ -8,6 +8,7 @@ import {
   DestroyRef,
 } from '@angular/core';
 import { Router, RouterOutlet, RouterLink } from '@angular/router';
+import { NgOptimizedImage } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatIconModule } from '@angular/material/icon';
@@ -36,6 +37,7 @@ import { map, catchError } from 'rxjs/operators';
     MatListModule,
     MatMenuModule,
     MatExpansionModule,
+    NgOptimizedImage,
   ],
   templateUrl: './app.html',
   styleUrl: './app.css',
