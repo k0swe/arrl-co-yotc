@@ -58,7 +58,7 @@ export class ClubDetail {
 
     // Club leaders can edit their club
     const currentUser = this.authService.currentUser();
-    if (currentUser && currentClub.leaderIds.includes(currentUser.uid)) {
+    if (currentUser && currentClub?.leaderIds?.includes(currentUser.uid)) {
       return true;
     }
 
