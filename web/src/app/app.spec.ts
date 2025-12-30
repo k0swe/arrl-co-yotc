@@ -7,6 +7,7 @@ import { provideFirestore, getFirestore, connectFirestoreEmulator } from '@angul
 import { App } from './app';
 import { firebaseTestConfig } from './firebase-test.config';
 import { ClubService } from './services/club.service';
+import { MembershipService } from './services/membership.service';
 import { of } from 'rxjs';
 import { vi } from 'vitest';
 
@@ -93,5 +94,59 @@ describe('App', () => {
 
     // Verify the method was called
     expect(spy).toHaveBeenCalled();
+  });
+
+  it('should initialize pending membership counts to empty map', () => {
+    const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance;
+    expect(app['pendingMembershipCounts']().size).toBe(0);
+  });
+
+  it('should return 0 for clubs with no pending memberships', () => {
+    const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance;
+    expect(app['getPendingMembershipCount']('non-existent-club')).toBe(0);
+  });
+
+  it('should filter clubs for non-admin users when loading pending membership counts', () => {
+    const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance;
+    const membershipService = TestBed.inject(MembershipService);
+
+    // Mock clubs - user1 is only leader of club1
+    const mockClubs = [
+      { id: 'club1', name: 'Club 1', leaderIds: ['user1'] } as any,
+      { id: 'club2', name: 'Club 2', leaderIds: ['user2'] } as any,
+    ];
+
+    const spy = vi.spyOn(membershipService, 'getPendingMemberships').mockReturnValue(of([]));
+
+    // Call with non-admin user
+    app['loadPendingMembershipCounts']('user1', false, mockClubs);
+
+    // Should only call for club1 since user1 is not a leader of club2
+    expect(spy).toHaveBeenCalledWith('club1');
+    expect(spy).not.toHaveBeenCalledWith('club2');
+  });
+
+  it('should check all clubs for admin users when loading pending membership counts', () => {
+    const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance;
+    const membershipService = TestBed.inject(MembershipService);
+
+    // Mock clubs
+    const mockClubs = [
+      { id: 'club1', name: 'Club 1', leaderIds: ['user2'] } as any,
+      { id: 'club2', name: 'Club 2', leaderIds: ['user2'] } as any,
+    ];
+
+    const spy = vi.spyOn(membershipService, 'getPendingMemberships').mockReturnValue(of([]));
+
+    // Call with admin user (user1 is not a leader of any club)
+    app['loadPendingMembershipCounts']('user1', true, mockClubs);
+
+    // Admin should check both clubs
+    expect(spy).toHaveBeenCalledWith('club1');
+    expect(spy).toHaveBeenCalledWith('club2');
   });
 });
