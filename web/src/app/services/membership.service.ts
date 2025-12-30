@@ -126,4 +126,32 @@ export class MembershipService {
       }),
     );
   }
+
+  /**
+   * Promote a member to club leader
+   * Updates the membership role to 'leader'
+   */
+  promoteMemberToLeader(clubId: string, userId: string): Observable<void> {
+    const membershipRef = doc(this.firestore, `clubs/${clubId}/memberships/${userId}`);
+    return from(
+      updateDoc(membershipRef, {
+        role: MembershipRole.Leader,
+        updatedAt: serverTimestamp(),
+      }),
+    );
+  }
+
+  /**
+   * Demote a club leader to regular member
+   * Updates the membership role to 'member'
+   */
+  demoteMemberToRegular(clubId: string, userId: string): Observable<void> {
+    const membershipRef = doc(this.firestore, `clubs/${clubId}/memberships/${userId}`);
+    return from(
+      updateDoc(membershipRef, {
+        role: MembershipRole.Member,
+        updatedAt: serverTimestamp(),
+      }),
+    );
+  }
 }

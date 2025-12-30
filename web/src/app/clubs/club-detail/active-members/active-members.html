@@ -36,6 +36,31 @@
                   </span>
                 }
               </div>
+              @if (canManageRoles()) {
+                <div class="action-buttons">
+                  @if (item.membership.role === 'leader') {
+                    <button
+                      mat-icon-button
+                      color="warn"
+                      (click)="demoteToMember(item.membership.userId, item.user?.name || 'User')"
+                      [attr.aria-label]="'Demote ' + (item.user?.name || 'user') + ' to regular member'"
+                      matTooltip="Demote to regular member"
+                    >
+                      <mat-icon>arrow_downward</mat-icon>
+                    </button>
+                  } @else {
+                    <button
+                      mat-icon-button
+                      color="primary"
+                      (click)="promoteToLeader(item.membership.userId, item.user?.name || 'User')"
+                      [attr.aria-label]="'Promote ' + (item.user?.name || 'user') + ' to club leader'"
+                      matTooltip="Promote to club leader"
+                    >
+                      <mat-icon>arrow_upward</mat-icon>
+                    </button>
+                  }
+                </div>
+              }
             </div>
           </mat-list-item>
         }
