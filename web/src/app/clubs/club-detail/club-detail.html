@@ -26,6 +26,10 @@
       }
     </app-club-card>
 
+    @if (canEdit()) {
+      <app-membership-requests [clubId]="clubData.id" />
+    }
+
     <div class="placeholder-message">
       <mat-icon>info</mat-icon>
       <p>This is a placeholder page. More club details and features will be added in the future.</p>

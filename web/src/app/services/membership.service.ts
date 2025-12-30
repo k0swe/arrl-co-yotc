@@ -11,6 +11,7 @@ import {
   query,
   where,
   serverTimestamp,
+  updateDoc,
 } from '@angular/fire/firestore';
 import { Observable, from, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
@@ -73,6 +74,46 @@ export class MembershipService {
         console.error(`Error fetching membership for user ${userId} in club ${clubId}:`, error);
         return of(null);
       }),
+    );
+  }
+
+  /**
+   * Get all pending membership requests for a specific club
+   * Returns memberships with status 'pending'
+   */
+  getPendingMemberships(clubId: string): Observable<ClubMembership[]> {
+    const membershipsCollection = collection(this.firestore, `clubs/${clubId}/memberships`);
+    const q = query(membershipsCollection, where('status', '==', MembershipStatus.Pending));
+    return collectionData(q, { idField: 'id' }) as Observable<ClubMembership[]>;
+  }
+
+  /**
+   * Approve a pending membership request
+   * Updates the membership status to 'active' and records who approved it
+   */
+  approveMembership(clubId: string, userId: string, approvedBy: string): Observable<void> {
+    const membershipRef = doc(this.firestore, `clubs/${clubId}/memberships/${userId}`);
+    return from(
+      updateDoc(membershipRef, {
+        status: MembershipStatus.Active,
+        approvedAt: serverTimestamp(),
+        approvedBy,
+        updatedAt: serverTimestamp(),
+      }).then(() => {}),
+    );
+  }
+
+  /**
+   * Deny a pending membership request
+   * Updates the membership status to 'denied'
+   */
+  denyMembership(clubId: string, userId: string): Observable<void> {
+    const membershipRef = doc(this.firestore, `clubs/${clubId}/memberships/${userId}`);
+    return from(
+      updateDoc(membershipRef, {
+        status: MembershipStatus.Denied,
+        updatedAt: serverTimestamp(),
+      }).then(() => {}),
     );
   }
 }
