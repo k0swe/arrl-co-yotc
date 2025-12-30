@@ -68,12 +68,11 @@
           >
             @if (saving()) {
             <mat-spinner diameter="20"></mat-spinner>
-            }
-            @if (!saving()) {
-            <mat-icon>save</mat-icon>
-            }
-            @if (!saving()) {
-            <span>Save</span>
+            } @else {
+            <ng-container>
+              <mat-icon>save</mat-icon>
+              <span>Save</span>
+            </ng-container>
             }
           </button>
           <button

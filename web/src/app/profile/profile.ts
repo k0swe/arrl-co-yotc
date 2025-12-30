@@ -120,14 +120,16 @@ export class Profile {
         }),
         takeUntilDestroyed(this.destroyRef),
       )
-      .subscribe(() => {
-        this.saving.set(false);
-        this.snackBar.open('Profile saved successfully', 'Close', {
-          duration: 3000,
-          horizontalPosition: 'center',
-          verticalPosition: 'top',
-        });
-        this.router.navigate(['/']);
+      .subscribe((result) => {
+        if (result !== null) {
+          this.saving.set(false);
+          this.snackBar.open('Profile saved successfully', 'Close', {
+            duration: 3000,
+            horizontalPosition: 'center',
+            verticalPosition: 'top',
+          });
+          this.router.navigate(['/']);
+        }
       });
   }
 
