@@ -113,6 +113,7 @@ export class ClubService {
       callsign: suggestion.callsign,
       description: suggestion.description,
       location: suggestion.location,
+      website: suggestion.website,
       slug: '', // Will be updated to document ID after creation
       isActive: false,
       suggestedBy: userId,
