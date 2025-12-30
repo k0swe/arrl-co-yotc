@@ -32,7 +32,7 @@
                   }
                   @if (item.membership.appliedAt) {
                     <span class="applied-date">
-                      Applied: {{ item.membership.appliedAt | date: 'short' }}
+                      Applied: {{ toDate(item.membership.appliedAt) | date: 'short' }}
                     </span>
                   }
                 </div>

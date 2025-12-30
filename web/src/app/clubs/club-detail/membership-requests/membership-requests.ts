@@ -180,4 +180,25 @@ export class MembershipRequests {
   protected isProcessing(userId: string): boolean {
     return this.processingMembership() === userId;
   }
+
+  /**
+   * Convert Firestore Timestamp to Date for display
+   * Firestore returns Timestamp objects that need to be converted
+   */
+  protected toDate(timestamp: any): Date | null {
+    if (!timestamp) {
+      return null;
+    }
+    // Check if it's already a Date
+    if (timestamp instanceof Date) {
+      return timestamp;
+    }
+    // Check if it's a Firestore Timestamp with toDate method
+    if (timestamp.toDate && typeof timestamp.toDate === 'function') {
+      return timestamp.toDate();
+    }
+    // Try to parse as date string
+    const date = new Date(timestamp);
+    return isNaN(date.getTime()) ? null : date;
+  }
 }
