@@ -61,9 +61,6 @@ export class Profile {
       const user = this.authService.currentUser();
       if (user) {
         this.loadUserProfile(user.uid);
-      } else {
-        // Redirect to login if not authenticated
-        this.router.navigate(['/login']);
       }
     });
   }
