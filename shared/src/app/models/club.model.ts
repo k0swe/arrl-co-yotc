@@ -20,6 +20,9 @@ export interface Club {
   /** Club website URL */
   website?: string;
 
+  /** Club logo image URL stored in Firebase Storage */
+  logoUrl?: string;
+
   /** URL-friendly slug for the club (used in routes, defaults to document ID) */
   slug: string;
 

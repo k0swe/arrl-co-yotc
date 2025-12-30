@@ -10,6 +10,61 @@
   </p>
 
   <form [formGroup]="clubForm" (ngSubmit)="onSubmit()">
+    <!-- Club Logo Upload Section -->
+    <div class="logo-upload-section">
+      <label class="logo-label">
+        <mat-icon>image</mat-icon>
+        Club Logo
+      </label>
+      
+      @if (logoUrl()) {
+        <div class="logo-preview">
+          <img 
+            [src]="logoUrl()" 
+            alt="Club logo preview"
+            class="logo-image"
+          />
+          <button
+            mat-icon-button
+            type="button"
+            (click)="removeLogo()"
+            class="remove-logo-button"
+            aria-label="Remove logo"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      } @else {
+        <div class="logo-upload-button">
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            (change)="onLogoSelected($event)"
+            #logoInput
+            id="logo-input"
+            class="file-input"
+            aria-label="Upload club logo"
+          />
+          <button
+            mat-stroked-button
+            type="button"
+            (click)="logoInput.click()"
+          >
+            <mat-icon>upload</mat-icon>
+            Upload Logo
+          </button>
+          <span class="logo-hint">JPEG, PNG, WEBP, or GIF (Max 5MB)</span>
+        </div>
+      }
+      
+      @if (uploadError()) {
+        <div class="upload-error" role="alert">
+          <mat-icon>error</mat-icon>
+          {{ uploadError() }}
+        </div>
+      }
+    </div>
+
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Club Name</mat-label>
       <input
@@ -124,7 +179,10 @@
     [disabled]="clubForm.invalid || submitting()"
     aria-label="Save club details"
   >
-    @if (submitting()) {
+    @if (uploadingLogo()) {
+      <mat-spinner diameter="20" class="inline-spinner"></mat-spinner>
+      <span>Uploading...</span>
+    } @else if (submitting()) {
       <span>Saving...</span>
     } @else {
       <span>{{ isEditMode ? 'Save Changes' : 'Create Club' }}</span>

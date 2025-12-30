@@ -27,3 +27,84 @@ mat-form-field {
 mat-icon[matPrefix] {
   margin-right: 0.5rem;
 }
+
+.logo-upload-section {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 4px;
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.logo-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+  margin-bottom: 0.75rem;
+  color: rgba(0, 0, 0, 0.87);
+}
+
+.logo-preview {
+  position: relative;
+  display: inline-block;
+  max-width: 200px;
+  margin-top: 0.5rem;
+}
+
+.logo-image {
+  width: 100%;
+  height: auto;
+  max-height: 200px;
+  object-fit: contain;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background-color: #fff;
+}
+
+.remove-logo-button {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.logo-upload-button {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.file-input {
+  display: none;
+}
+
+.logo-hint {
+  font-size: 0.75rem;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.upload-error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background-color: #ffebee;
+  color: #c62828;
+  border-radius: 4px;
+  font-size: 0.875rem;
+}
+
+.upload-error mat-icon {
+  font-size: 1.25rem;
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.inline-spinner {
+  display: inline-block;
+  margin-right: 0.5rem;
+}

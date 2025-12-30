@@ -10,7 +10,10 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Club } from '@arrl-co-yotc/shared/build/app/models/club.model';
+import { StorageService } from '../../services/storage.service';
+import { catchError, of } from 'rxjs';
 
 export interface EditClubDialogData {
   club?: Club;
@@ -27,6 +30,7 @@ export type ClubFormData = Pick<Club, 'name' | 'callsign' | 'description' | 'loc
     MatInputModule,
     MatButtonModule,
     MatIconModule,
+    MatProgressSpinnerModule,
   ],
   templateUrl: './edit-club-dialog.html',
   styleUrl: './edit-club-dialog.css',
@@ -35,11 +39,16 @@ export type ClubFormData = Pick<Club, 'name' | 'callsign' | 'description' | 'loc
 export class EditClubDialog {
   private fb = inject(FormBuilder);
   private dialogRef = inject(MatDialogRef<EditClubDialog>);
+  private storageService = inject(StorageService);
   protected data = inject<EditClubDialogData>(MAT_DIALOG_DATA, { optional: true });
 
   protected readonly submitting = signal(false);
+  protected readonly uploadingLogo = signal(false);
   protected readonly isEditMode = !!this.data?.club;
   protected readonly isClubActive = this.data?.club?.isActive ?? false;
+  protected readonly logoUrl = signal<string | undefined>(this.data?.club?.logoUrl);
+  protected readonly logoFile = signal<File | null>(null);
+  protected readonly uploadError = signal<string | null>(null);
 
   protected readonly clubForm = this.fb.nonNullable.group({
     name: [
@@ -79,6 +88,43 @@ export class EditClubDialog {
     this.dialogRef.close();
   }
 
+  protected onLogoSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) {
+      return;
+    }
+
+    const file = input.files[0];
+    
+    // Validate file type
+    if (!file.type.match(/^image\/(jpeg|png|webp|gif)$/)) {
+      this.uploadError.set('Please select a valid image file (JPEG, PNG, WEBP, or GIF)');
+      return;
+    }
+
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      this.uploadError.set('Image file must be less than 5MB');
+      return;
+    }
+
+    this.uploadError.set(null);
+    this.logoFile.set(file);
+
+    // Create a preview URL
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      this.logoUrl.set(e.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  protected removeLogo(): void {
+    this.logoFile.set(null);
+    this.logoUrl.set(undefined);
+    this.uploadError.set(null);
+  }
+
   protected onSubmit(): void {
     if (this.clubForm.invalid) {
       this.clubForm.markAllAsTouched();
@@ -86,7 +132,43 @@ export class EditClubDialog {
     }
 
     const formData: ClubFormData = this.clubForm.getRawValue();
-    this.dialogRef.close(formData);
+    const logoFile = this.logoFile();
+    const clubId = this.data?.club?.id;
+
+    // If there's a new logo file to upload and we have a club ID, handle it
+    if (logoFile && clubId) {
+      this.submitting.set(true);
+      this.uploadingLogo.set(true);
+      
+      this.storageService.uploadClubLogo(clubId, logoFile)
+        .pipe(
+          catchError((error) => {
+            console.error('Error uploading logo:', error);
+            this.uploadError.set('Failed to upload logo. Please try again.');
+            this.submitting.set(false);
+            this.uploadingLogo.set(false);
+            return of(null);
+          })
+        )
+        .subscribe((logoUrl) => {
+          this.uploadingLogo.set(false);
+          if (logoUrl) {
+            this.dialogRef.close({ ...formData, logoUrl });
+          }
+          this.submitting.set(false);
+        });
+    } else if (logoFile && !clubId) {
+      // Cannot upload logo without a club ID (club must be created first)
+      this.uploadError.set('Club must be created before uploading a logo');
+      this.submitting.set(false);
+    } else {
+      // No new logo to upload, just return the form data
+      // If logo was removed, include logoUrl: undefined to clear it
+      const result = this.logoUrl() === undefined && this.data?.club?.logoUrl
+        ? { ...formData, logoUrl: undefined }
+        : formData;
+      this.dialogRef.close(result);
+    }
   }
 
   protected getErrorMessage(fieldName: string): string {
