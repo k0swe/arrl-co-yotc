@@ -82,3 +82,10 @@ nav-expansion-panel-body {
   border: 1px solid rgba(0, 0, 0, 0.12);
 }
 
+.badge-container {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
