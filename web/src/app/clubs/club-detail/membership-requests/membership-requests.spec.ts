@@ -7,11 +7,13 @@ import { MembershipRequests } from './membership-requests';
 import { firebaseTestConfig } from '../../../firebase-test.config';
 import { AuthService } from '../../../auth/auth.service';
 import { MembershipService } from '../../../services/membership.service';
+import { UserService } from '../../../services/user.service';
 
 describe('MembershipRequests', () => {
   let component: MembershipRequests;
   let fixture: ComponentFixture<MembershipRequests>;
   let membershipService: MembershipService;
+  let userService: UserService;
   let authService: AuthService;
 
   beforeEach(async () => {
@@ -36,6 +38,7 @@ describe('MembershipRequests', () => {
     fixture = TestBed.createComponent(MembershipRequests);
     component = fixture.componentInstance;
     membershipService = TestBed.inject(MembershipService);
+    userService = TestBed.inject(UserService);
     authService = TestBed.inject(AuthService);
 
     // Set a default clubId
@@ -55,9 +58,9 @@ describe('MembershipRequests', () => {
     expect(typeof component['loading']()).toBe('boolean');
   });
 
-  it('should have pendingMemberships signal', () => {
-    expect(component['pendingMemberships']).toBeDefined();
-    expect(Array.isArray(component['pendingMemberships']())).toBe(true);
+  it('should have pendingMembershipsWithUsers signal', () => {
+    expect(component['pendingMembershipsWithUsers']).toBeDefined();
+    expect(Array.isArray(component['pendingMembershipsWithUsers']())).toBe(true);
   });
 
   it('should have processingMembership signal', () => {

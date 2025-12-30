@@ -16,9 +16,16 @@ import { MatListModule } from '@angular/material/list';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MembershipService } from '../../../services/membership.service';
+import { UserService } from '../../../services/user.service';
 import { AuthService } from '../../../auth/auth.service';
 import { ClubMembership } from '@arrl-co-yotc/shared/build/app/models/user.model';
-import { catchError, of } from 'rxjs';
+import { User } from '@arrl-co-yotc/shared/build/app/models/user.model';
+import { catchError, of, forkJoin } from 'rxjs';
+
+interface MembershipWithUser {
+  membership: ClubMembership;
+  user: User | null;
+}
 
 @Component({
   selector: 'app-membership-requests',
@@ -37,6 +44,7 @@ import { catchError, of } from 'rxjs';
 })
 export class MembershipRequests {
   private membershipService = inject(MembershipService);
+  private userService = inject(UserService);
   private authService = inject(AuthService);
   private snackBar = inject(MatSnackBar);
   private destroyRef = inject(DestroyRef);
@@ -47,7 +55,7 @@ export class MembershipRequests {
   clubId = input.required<string>();
 
   protected readonly loading = signal(true);
-  protected readonly pendingMemberships = signal<ClubMembership[]>([]);
+  protected readonly pendingMembershipsWithUsers = signal<MembershipWithUser[]>([]);
   protected readonly processingMembership = signal<string | null>(null);
 
   constructor() {
@@ -77,12 +85,36 @@ export class MembershipRequests {
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe((memberships) => {
-        this.pendingMemberships.set(memberships);
-        this.loading.set(false);
+        if (memberships.length === 0) {
+          this.pendingMembershipsWithUsers.set([]);
+          this.loading.set(false);
+          return;
+        }
+
+        // Fetch user data for each membership
+        const userFetches = memberships.map((membership) =>
+          this.userService.getUser(membership.userId).pipe(
+            catchError((error) => {
+              console.error(`Error fetching user ${membership.userId}:`, error);
+              return of(null);
+            }),
+          ),
+        );
+
+        forkJoin(userFetches)
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe((users) => {
+            const membershipsWithUsers = memberships.map((membership, index) => ({
+              membership,
+              user: users[index],
+            }));
+            this.pendingMembershipsWithUsers.set(membershipsWithUsers);
+            this.loading.set(false);
+          });
       });
   }
 
-  protected approveMembership(membership: ClubMembership): void {
+  protected approveMembership(membershipWithUser: MembershipWithUser): void {
     const currentUser = this.authService.currentUser();
     if (!currentUser) {
       this.snackBar.open('You must be logged in to approve memberships', 'Close', {
@@ -91,6 +123,7 @@ export class MembershipRequests {
       return;
     }
 
+    const membership = membershipWithUser.membership;
     this.processingMembership.set(membership.userId);
 
     this.membershipService
@@ -100,8 +133,8 @@ export class MembershipRequests {
         next: () => {
           this.snackBar.open('Membership approved', 'Close', { duration: 3000 });
           // Remove the approved membership from the list
-          this.pendingMemberships.update((memberships) =>
-            memberships.filter((m) => m.userId !== membership.userId),
+          this.pendingMembershipsWithUsers.update((membershipsWithUsers) =>
+            membershipsWithUsers.filter((m) => m.membership.userId !== membership.userId),
           );
           this.processingMembership.set(null);
         },
@@ -113,7 +146,8 @@ export class MembershipRequests {
       });
   }
 
-  protected denyMembership(membership: ClubMembership): void {
+  protected denyMembership(membershipWithUser: MembershipWithUser): void {
+    const membership = membershipWithUser.membership;
     this.processingMembership.set(membership.userId);
 
     this.membershipService
@@ -123,8 +157,8 @@ export class MembershipRequests {
         next: () => {
           this.snackBar.open('Membership denied', 'Close', { duration: 3000 });
           // Remove the denied membership from the list
-          this.pendingMemberships.update((memberships) =>
-            memberships.filter((m) => m.userId !== membership.userId),
+          this.pendingMembershipsWithUsers.update((membershipsWithUsers) =>
+            membershipsWithUsers.filter((m) => m.membership.userId !== membership.userId),
           );
           this.processingMembership.set(null);
         },
