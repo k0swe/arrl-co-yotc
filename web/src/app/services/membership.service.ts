@@ -99,7 +99,7 @@ export class MembershipService {
         approvedAt: serverTimestamp(),
         approvedBy,
         updatedAt: serverTimestamp(),
-      }).then(() => {}),
+      }),
     );
   }
 
@@ -113,7 +113,7 @@ export class MembershipService {
       updateDoc(membershipRef, {
         status: MembershipStatus.Denied,
         updatedAt: serverTimestamp(),
-      }).then(() => {}),
+      }),
     );
   }
 }

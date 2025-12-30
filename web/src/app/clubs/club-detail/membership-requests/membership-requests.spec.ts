@@ -79,4 +79,3 @@ describe('MembershipRequests', () => {
     expect(typeof component['isProcessing']).toBe('function');
   });
 });
-
