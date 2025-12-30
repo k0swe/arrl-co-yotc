@@ -10,7 +10,7 @@
 }
 
 .sidenav {
-  width: fit-content;
+  max-width: 400px;
 }
 
 .main-content {
