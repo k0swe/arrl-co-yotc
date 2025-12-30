@@ -22,7 +22,7 @@ import { ClubService } from '../../../services/club.service';
 import { AuthService } from '../../../auth/auth.service';
 import { ClubMembership } from '@arrl-co-yotc/shared/build/app/models/user.model';
 import { User } from '@arrl-co-yotc/shared/build/app/models/user.model';
-import { catchError, of, forkJoin } from 'rxjs';
+import { catchError, of, forkJoin, switchMap } from 'rxjs';
 
 interface MemberWithUser {
   membership: ClubMembership;
@@ -140,36 +140,35 @@ export class ActiveMembers {
     const clubId = this.clubId();
     const currentLeaderIds = this.clubLeaderIds();
 
+    // Check if user is already a leader
+    if (currentLeaderIds.includes(userId)) {
+      this.snackBar.open(`${userName} is already a club leader`, 'Close', { duration: 3000 });
+      return;
+    }
+
     this.membershipService
       .promoteMemberToLeader(clubId, userId)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
+      .pipe(
+        switchMap(() => {
           // Update the club's leaderIds array
           const newLeaderIds = [...currentLeaderIds, userId];
-          this.clubService
-            .updateClubLeaderIds(clubId, newLeaderIds)
-            .pipe(takeUntilDestroyed(this.destroyRef))
-            .subscribe({
-              next: () => {
-                this.snackBar.open(`${userName} has been promoted to club leader!`, 'Close', {
-                  duration: 3000,
-                });
-                // Reload the members list to reflect the changes
-                this.loadActiveMembers();
-              },
-              error: (error) => {
-                console.error('Error updating club leaderIds:', error);
-                this.snackBar.open('Failed to update club leader list', 'Close', {
-                  duration: 3000,
-                });
-              },
-            });
-        },
-        error: (error) => {
+          return this.clubService.updateClubLeaderIds(clubId, newLeaderIds);
+        }),
+        catchError((error) => {
           console.error('Error promoting member:', error);
           this.snackBar.open('Failed to promote member', 'Close', { duration: 3000 });
-        },
+          return of(undefined);
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((result) => {
+        if (result !== undefined) {
+          this.snackBar.open(`${userName} has been promoted to club leader!`, 'Close', {
+            duration: 3000,
+          });
+          // Reload the members list to reflect the changes
+          this.loadActiveMembers();
+        }
       });
   }
 
@@ -180,36 +179,35 @@ export class ActiveMembers {
     const clubId = this.clubId();
     const currentLeaderIds = this.clubLeaderIds();
 
+    // Check if user is actually a leader
+    if (!currentLeaderIds.includes(userId)) {
+      this.snackBar.open(`${userName} is not a club leader`, 'Close', { duration: 3000 });
+      return;
+    }
+
     this.membershipService
       .demoteMemberToRegular(clubId, userId)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
+      .pipe(
+        switchMap(() => {
           // Update the club's leaderIds array
           const newLeaderIds = currentLeaderIds.filter((id) => id !== userId);
-          this.clubService
-            .updateClubLeaderIds(clubId, newLeaderIds)
-            .pipe(takeUntilDestroyed(this.destroyRef))
-            .subscribe({
-              next: () => {
-                this.snackBar.open(`${userName} has been demoted to regular member!`, 'Close', {
-                  duration: 3000,
-                });
-                // Reload the members list to reflect the changes
-                this.loadActiveMembers();
-              },
-              error: (error) => {
-                console.error('Error updating club leaderIds:', error);
-                this.snackBar.open('Failed to update club leader list', 'Close', {
-                  duration: 3000,
-                });
-              },
-            });
-        },
-        error: (error) => {
+          return this.clubService.updateClubLeaderIds(clubId, newLeaderIds);
+        }),
+        catchError((error) => {
           console.error('Error demoting member:', error);
           this.snackBar.open('Failed to demote member', 'Close', { duration: 3000 });
-        },
+          return of(undefined);
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((result) => {
+        if (result !== undefined) {
+          this.snackBar.open(`${userName} has been demoted to regular member!`, 'Close', {
+            duration: 3000,
+          });
+          // Reload the members list to reflect the changes
+          this.loadActiveMembers();
+        }
       });
   }
 }
