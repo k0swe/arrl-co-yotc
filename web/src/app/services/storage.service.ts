@@ -37,16 +37,18 @@ export class StorageService {
 
   /**
    * Delete a club logo from Firebase Storage
-   * @param logoUrl - The download URL of the logo to delete
+   * Note: This requires the storage path, not the download URL
+   * For now, we just clear the logoUrl in Firestore and let Firebase Storage lifecycle rules clean up unused files
+   * @param storagePath - The storage path of the logo to delete (e.g., 'club-logos/clubId/filename.jpg')
    * @returns Observable that completes when the file is deleted
    */
-  deleteClubLogo(logoUrl: string): Observable<void> {
+  deleteClubLogo(storagePath: string): Observable<void> {
     try {
-      const storageRef = ref(this.storage, logoUrl);
+      const storageRef = ref(this.storage, storagePath);
       return from(deleteObject(storageRef));
     } catch (error) {
-      // If URL parsing fails, just resolve without error
-      console.warn('Failed to parse logo URL for deletion:', logoUrl, error);
+      // If path parsing fails, just resolve without error
+      console.warn('Failed to delete logo from storage:', storagePath, error);
       return from(Promise.resolve());
     }
   }

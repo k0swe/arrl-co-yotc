@@ -135,7 +135,7 @@ export class EditClubDialog {
     const logoFile = this.logoFile();
     const clubId = this.data?.club?.id;
 
-    // If there's a new logo file to upload, handle it
+    // If there's a new logo file to upload and we have a club ID, handle it
     if (logoFile && clubId) {
       this.submitting.set(true);
       this.uploadingLogo.set(true);
@@ -157,6 +157,10 @@ export class EditClubDialog {
           }
           this.submitting.set(false);
         });
+    } else if (logoFile && !clubId) {
+      // Cannot upload logo without a club ID (club must be created first)
+      this.uploadError.set('Club must be created before uploading a logo');
+      this.submitting.set(false);
     } else {
       // No new logo to upload, just return the form data
       // If logo was removed, include logoUrl: undefined to clear it
