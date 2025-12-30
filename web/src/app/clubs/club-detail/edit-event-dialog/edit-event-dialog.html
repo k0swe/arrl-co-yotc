@@ -24,25 +24,45 @@
       }
     </mat-form-field>
 
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Start Date</mat-label>
-      <input matInput [matDatepicker]="startPicker" formControlName="startTime" required />
-      <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
-      <mat-datepicker #startPicker></mat-datepicker>
-      @if (getErrorMessage('startTime'); as errorMsg) {
-        <mat-error>{{ errorMsg }}</mat-error>
-      }
-    </mat-form-field>
+    <div class="date-time-row">
+      <mat-form-field appearance="outline" class="date-field">
+        <mat-label>Start Date</mat-label>
+        <input matInput [matDatepicker]="startPicker" formControlName="startDate" required />
+        <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
+        <mat-datepicker #startPicker></mat-datepicker>
+        @if (getErrorMessage('startDate'); as errorMsg) {
+          <mat-error>{{ errorMsg }}</mat-error>
+        }
+      </mat-form-field>
 
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>End Date</mat-label>
-      <input matInput [matDatepicker]="endPicker" formControlName="endTime" required />
-      <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
-      <mat-datepicker #endPicker></mat-datepicker>
-      @if (getErrorMessage('endTime'); as errorMsg) {
-        <mat-error>{{ errorMsg }}</mat-error>
-      }
-    </mat-form-field>
+      <mat-form-field appearance="outline" class="time-field">
+        <mat-label>Start Time</mat-label>
+        <input matInput type="time" formControlName="startTime" required />
+        @if (getErrorMessage('startTime'); as errorMsg) {
+          <mat-error>{{ errorMsg }}</mat-error>
+        }
+      </mat-form-field>
+    </div>
+
+    <div class="date-time-row">
+      <mat-form-field appearance="outline" class="date-field">
+        <mat-label>End Date</mat-label>
+        <input matInput [matDatepicker]="endPicker" formControlName="endDate" required />
+        <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
+        <mat-datepicker #endPicker></mat-datepicker>
+        @if (getErrorMessage('endDate'); as errorMsg) {
+          <mat-error>{{ errorMsg }}</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="time-field">
+        <mat-label>End Time</mat-label>
+        <input matInput type="time" formControlName="endTime" required />
+        @if (getErrorMessage('endTime'); as errorMsg) {
+          <mat-error>{{ errorMsg }}</mat-error>
+        }
+      </mat-form-field>
+    </div>
   </mat-dialog-content>
 
   <mat-dialog-actions [class.align-end]="true">

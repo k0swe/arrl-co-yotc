@@ -11,7 +11,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
+import { provideNativeDateAdapter } from '@angular/material/core';
 import { Event } from '@arrl-co-yotc/shared/build/app/models/event.model';
 
 export interface EditEventDialogData {
@@ -31,8 +31,8 @@ export type EventFormData = Pick<Event, 'name' | 'description' | 'startTime' | '
     MatButtonModule,
     MatIconModule,
     MatDatepickerModule,
-    MatNativeDateModule,
   ],
+  providers: [provideNativeDateAdapter()],
   templateUrl: './edit-event-dialog.html',
   styleUrl: './edit-event-dialog.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -54,12 +54,20 @@ export class EditEventDialog {
       this.data?.event?.description || '',
       [Validators.required, Validators.minLength(10), Validators.maxLength(1000)],
     ],
-    startTime: [
+    startDate: [
       this.toDate(this.data?.event?.startTime),
       [Validators.required],
     ],
-    endTime: [
+    startTime: [
+      this.toTimeString(this.data?.event?.startTime),
+      [Validators.required],
+    ],
+    endDate: [
       this.toDate(this.data?.event?.endTime),
+      [Validators.required],
+    ],
+    endTime: [
+      this.toTimeString(this.data?.event?.endTime),
       [Validators.required],
     ],
   });
@@ -76,15 +84,16 @@ export class EditEventDialog {
 
     const formData = this.eventForm.getRawValue();
     
-    // Validate that end time is after start time
-    const startTime = formData.startTime;
-    const endTime = formData.endTime;
+    // Combine date and time fields into Date objects
+    const startDateTime = this.combineDateAndTime(formData.startDate, formData.startTime);
+    const endDateTime = this.combineDateAndTime(formData.endDate, formData.endTime);
     
-    if (!startTime || !endTime) {
+    if (!startDateTime || !endDateTime) {
       return; // Should not happen due to required validators
     }
     
-    if (endTime <= startTime) {
+    // Validate that end time is after start time
+    if (endDateTime <= startDateTime) {
       // Show error on endTime field
       this.eventForm.get('endTime')?.setErrors({ endBeforeStart: true });
       this.eventForm.get('endTime')?.markAsTouched();
@@ -94,8 +103,8 @@ export class EditEventDialog {
     const result: EventFormData = {
       name: formData.name,
       description: formData.description,
-      startTime: startTime,
-      endTime: endTime,
+      startTime: startDateTime,
+      endTime: endDateTime,
     };
 
     this.dialogRef.close(result);
@@ -119,7 +128,7 @@ export class EditEventDialog {
       return `Maximum length is ${maxLength} characters`;
     }
     if (field.hasError('endBeforeStart')) {
-      return 'End date must be after start date';
+      return 'End date/time must be after start date/time';
     }
     return '';
   }
@@ -142,5 +151,36 @@ export class EditEventDialog {
       return isNaN(date.getTime()) ? null : date;
     }
     return null;
+  }
+
+  /**
+   * Extract time string (HH:MM) from a Date or Firestore Timestamp
+   */
+  private toTimeString(timestamp: Date | { toDate(): Date } | string | null | undefined): string {
+    const date = this.toDate(timestamp);
+    if (!date) {
+      return '';
+    }
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
+  }
+
+  /**
+   * Combine a date and time string into a single Date object
+   */
+  private combineDateAndTime(date: Date | null, timeString: string): Date | null {
+    if (!date || !timeString) {
+      return null;
+    }
+    
+    const [hours, minutes] = timeString.split(':').map(Number);
+    if (isNaN(hours) || isNaN(minutes)) {
+      return null;
+    }
+    
+    const combined = new Date(date);
+    combined.setHours(hours, minutes, 0, 0);
+    return combined;
   }
 }
