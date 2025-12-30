@@ -1,0 +1,84 @@
+<mat-card class="membership-requests-card">
+  <mat-card-header>
+    <mat-card-title>
+      <mat-icon>group</mat-icon>
+      Pending Membership Requests
+    </mat-card-title>
+  </mat-card-header>
+
+  <mat-card-content>
+    @if (loading()) {
+      <div class="loading-container" role="status" aria-live="polite">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Loading membership requests...</p>
+      </div>
+    } @else if (pendingMembershipsWithUsers().length === 0) {
+      <div class="empty-state" role="status">
+        <mat-icon class="empty-icon">check_circle</mat-icon>
+        <p>No pending membership requests</p>
+      </div>
+    } @else {
+      <mat-list role="list">
+        @for (item of pendingMembershipsWithUsers(); track item.membership.userId) {
+          <mat-list-item role="listitem">
+            <div class="membership-item">
+              <div class="membership-info">
+                <mat-icon class="user-icon">person</mat-icon>
+                <div class="user-details">
+                  @if (item.user) {
+                    <span class="user-name">{{ item.user.name }} ({{ item.user.callsign }})</span>
+                  } @else {
+                    <span class="user-name">User ID: {{ item.membership.userId }}</span>
+                  }
+                  @if (item.membership.appliedAt) {
+                    <span class="applied-date">
+                      Applied: {{ toDate(item.membership.appliedAt) | date: 'short' }}
+                    </span>
+                  }
+                </div>
+              </div>
+
+              <div class="membership-actions">
+                <button
+                  mat-raised-button
+                  color="primary"
+                  (click)="approveMembership(item)"
+                  [disabled]="isProcessing(item.membership.userId)"
+                  [attr.aria-label]="
+                    'Approve membership request for ' +
+                    (item.user ? item.user.name : item.membership.userId)
+                  "
+                >
+                  @if (isProcessing(item.membership.userId)) {
+                    <mat-spinner diameter="20"></mat-spinner>
+                  } @else {
+                    <mat-icon>check</mat-icon>
+                  }
+                  Approve
+                </button>
+
+                <button
+                  mat-raised-button
+                  color="warn"
+                  (click)="denyMembership(item)"
+                  [disabled]="isProcessing(item.membership.userId)"
+                  [attr.aria-label]="
+                    'Deny membership request for ' +
+                    (item.user ? item.user.name : item.membership.userId)
+                  "
+                >
+                  @if (isProcessing(item.membership.userId)) {
+                    <mat-spinner diameter="20"></mat-spinner>
+                  } @else {
+                    <mat-icon>close</mat-icon>
+                  }
+                  Deny
+                </button>
+              </div>
+            </div>
+          </mat-list-item>
+        }
+      </mat-list>
+    }
+  </mat-card-content>
+</mat-card>

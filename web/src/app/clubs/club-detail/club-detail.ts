@@ -11,6 +11,7 @@ import { ClubService } from '../../services/club.service';
 import { AuthService } from '../../auth/auth.service';
 import { ClubCard } from '../club-card/club-card';
 import { EditClubDialog, ClubFormData } from '../edit-club-dialog/edit-club-dialog';
+import { MembershipRequests } from './membership-requests/membership-requests';
 import { Club } from '@arrl-co-yotc/shared/build/app/models/club.model';
 import { catchError, of, switchMap } from 'rxjs';
 
@@ -24,6 +25,7 @@ import { catchError, of, switchMap } from 'rxjs';
     MatDialogModule,
     MatSnackBarModule,
     ClubCard,
+    MembershipRequests,
   ],
   templateUrl: './club-detail.html',
   styleUrl: './club-detail.css',
