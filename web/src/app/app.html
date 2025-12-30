@@ -73,9 +73,20 @@
             width="24"
             height="24"
             class="club-logo-icon"
+            [matBadge]="getPendingMembershipCount(club.id)"
+            [matBadgeHidden]="getPendingMembershipCount(club.id) === 0"
+            matBadgeColor="warn"
+            matBadgeSize="small"
           />
           } @else {
-          <mat-icon matListItemIcon>groups</mat-icon>
+          <mat-icon
+            matListItemIcon
+            [matBadge]="getPendingMembershipCount(club.id)"
+            [matBadgeHidden]="getPendingMembershipCount(club.id) === 0"
+            matBadgeColor="warn"
+            matBadgeSize="small"
+            >groups</mat-icon
+          >
           }
           <span matListItemTitle>{{ club.name }}</span>
         </a>
