@@ -82,3 +82,15 @@ nav-expansion-panel-body {
   border: 1px solid rgba(0, 0, 0, 0.12);
 }
 
+/* 
+ * Fix badge overflow on admin menu item
+ * The badge on the admin menu item was being clipped at the top due to
+ * overflow:hidden on Material list items. This allows the badge to be visible.
+ */
+a[routerlink='/admin'] {
+  overflow: visible !important;
+}
+
+a[routerlink='/admin'] [matlistitemtitle] {
+  overflow: visible !important;
+}
