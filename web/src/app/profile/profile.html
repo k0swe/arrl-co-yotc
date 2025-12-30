@@ -1,0 +1,92 @@
+<div class="profile-container">
+  <mat-card class="profile-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>account_circle</mat-icon>
+        Profile Settings
+      </mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      @if (loading()) {
+      <div class="loading-container">
+        <mat-spinner></mat-spinner>
+      </div>
+      } @else {
+      <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Full Name</mat-label>
+          <input
+            matInput
+            formControlName="name"
+            type="text"
+            placeholder="Enter your full name"
+            aria-label="Full name"
+            required
+          />
+          <mat-icon matPrefix>person</mat-icon>
+          @if (profileForm.controls.name.hasError('required')) {
+          <mat-error>Name is required</mat-error>
+          } @if (profileForm.controls.name.hasError('minlength')) {
+          <mat-error>Name must be at least 2 characters</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Callsign</mat-label>
+          <input
+            matInput
+            formControlName="callsign"
+            type="text"
+            placeholder="Enter your amateur radio callsign"
+            aria-label="Amateur radio callsign"
+            required
+          />
+          <mat-icon matPrefix>radio</mat-icon>
+          @if (profileForm.controls.callsign.hasError('required')) {
+          <mat-error>Callsign is required</mat-error>
+          } @if (profileForm.controls.callsign.hasError('pattern')) {
+          <mat-error>Callsign must be 3-7 alphanumeric characters</mat-error>
+          }
+          <mat-hint>Your amateur radio callsign (e.g., K0ABC)</mat-hint>
+        </mat-form-field>
+
+        @if (errorMessage()) {
+        <div class="error-message">
+          <mat-icon>error</mat-icon>
+          {{ errorMessage() }}
+        </div>
+        }
+
+        <div class="button-container">
+          <button
+            mat-raised-button
+            color="primary"
+            type="submit"
+            [disabled]="profileForm.invalid || saving()"
+            aria-label="Save profile"
+          >
+            @if (saving()) {
+            <mat-spinner diameter="20"></mat-spinner>
+            } @else {
+            <ng-container>
+              <mat-icon>save</mat-icon>
+              <span>Save</span>
+            </ng-container>
+            }
+          </button>
+          <button
+            mat-button
+            type="button"
+            (click)="cancel()"
+            [disabled]="saving()"
+            aria-label="Cancel"
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>
