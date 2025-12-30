@@ -18,7 +18,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { AuthService } from '../auth/auth.service';
 import { UserService } from '../services/user.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { catchError, of } from 'rxjs';
+import { catchError, of, EMPTY } from 'rxjs';
 
 @Component({
   selector: 'app-profile',
@@ -116,20 +116,18 @@ export class Profile {
           console.error('Error saving profile:', error);
           this.errorMessage.set('Failed to save profile. Please try again.');
           this.saving.set(false);
-          return of(null);
+          return EMPTY;
         }),
         takeUntilDestroyed(this.destroyRef),
       )
-      .subscribe((result) => {
-        if (result !== null) {
-          this.saving.set(false);
-          this.snackBar.open('Profile saved successfully', 'Close', {
-            duration: 3000,
-            horizontalPosition: 'center',
-            verticalPosition: 'top',
-          });
-          this.router.navigate(['/']);
-        }
+      .subscribe(() => {
+        this.saving.set(false);
+        this.snackBar.open('Profile saved successfully', 'Close', {
+          duration: 3000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+        });
+        this.router.navigate(['/']);
       });
   }
 
