@@ -87,13 +87,11 @@ describe('App', () => {
     // Call the method directly to test it
     app['loadPendingClubsCount']();
     
-    // Wait for async operations
-    await new Promise(resolve => setTimeout(resolve, 100));
+    // Wait for observable to complete
+    await fixture.whenStable();
     fixture.detectChanges();
 
     // Verify the method was called
     expect(spy).toHaveBeenCalled();
-    // The count should be updated (though effects may run after)
-    // Just verify the spy was called correctly as effects may reset the value
   });
 });
