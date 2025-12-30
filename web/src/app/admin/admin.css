@@ -68,7 +68,8 @@ h3 {
   gap: 1.5rem;
 }
 
-.suggested-by {
+.suggested-by,
+.route-slug {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -77,10 +78,18 @@ h3 {
   border-radius: 4px;
   color: #757575;
   font-size: 0.9rem;
+}
+
+.suggested-by {
   margin-top: 1rem;
 }
 
-.suggested-by mat-icon {
+.route-slug {
+  margin-top: 0.5rem;
+}
+
+.suggested-by mat-icon,
+.route-slug mat-icon {
   font-size: 18px;
   width: 18px;
   height: 18px;

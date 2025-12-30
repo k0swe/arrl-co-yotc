@@ -105,6 +105,7 @@
         aria-label="Club slug for URL"
       />
       <mat-icon matPrefix>link</mat-icon>
+      <span matTextPrefix>/clubs/</span>
       @if (isClubActive) {
         <mat-hint>Slug cannot be changed once club is active</mat-hint>
       } @else if (getErrorMessage('slug')) {
