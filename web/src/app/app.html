@@ -2,7 +2,14 @@
   <button mat-icon-button (click)="toggleSidenav()" aria-label="Toggle navigation">
     <mat-icon>menu</mat-icon>
   </button>
-  <img ngSrc="/Colorado_WAS250.svg" alt="App Logo" class="app-logo" width="48" height="48" priority />
+  <img
+    ngSrc="/Colorado_WAS250.svg"
+    alt="App Logo"
+    class="app-logo"
+    width="48"
+    height="48"
+    priority
+  />
   <span>{{ title() }}</span>
 
   <span class="spacer"></span>
@@ -86,13 +93,14 @@
       </a>
       @if (authService.isAdmin()) {
       <a mat-list-item routerLink="/admin" aria-label="Navigate to admin">
-        <mat-icon matListItemIcon>admin_panel_settings</mat-icon>
-        <span
-          matListItemTitle
+        <mat-icon
+          matListItemIcon
           [matBadge]="pendingClubsCount()"
           [matBadgeHidden]="pendingClubsCount() === 0"
           matBadgeColor="warn"
-        >Admin</span>
+          >admin_panel_settings</mat-icon
+        >
+        Admin
       </a>
       }
     </mat-nav-list>
