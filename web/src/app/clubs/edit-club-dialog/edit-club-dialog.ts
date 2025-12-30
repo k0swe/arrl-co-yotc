@@ -11,7 +11,6 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { NgOptimizedImage } from '@angular/common';
 import { Club } from '@arrl-co-yotc/shared/build/app/models/club.model';
 import { StorageService } from '../../services/storage.service';
 import { catchError, of } from 'rxjs';
@@ -32,7 +31,6 @@ export type ClubFormData = Pick<Club, 'name' | 'callsign' | 'description' | 'loc
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
-    NgOptimizedImage,
   ],
   templateUrl: './edit-club-dialog.html',
   styleUrl: './edit-club-dialog.css',

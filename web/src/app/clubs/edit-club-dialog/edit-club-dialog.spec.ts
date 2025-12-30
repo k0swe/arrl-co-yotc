@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { Storage } from '@angular/fire/storage';
 import { EditClubDialog, EditClubDialogData } from './edit-club-dialog';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { Club } from '@arrl-co-yotc/shared/build/app/models/club.model';
@@ -8,6 +9,7 @@ describe('EditClubDialog', () => {
   let component: EditClubDialog;
   let fixture: ComponentFixture<EditClubDialog>;
   let mockDialogRef: Partial<MatDialogRef<EditClubDialog>>;
+  let mockStorage: Partial<Storage>;
 
   describe('Create mode (no existing club)', () => {
     beforeEach(async () => {
@@ -15,11 +17,14 @@ describe('EditClubDialog', () => {
         close: vi.fn(),
       };
 
+      mockStorage = {};
+
       await TestBed.configureTestingModule({
         imports: [EditClubDialog],
         providers: [
           { provide: MatDialogRef, useValue: mockDialogRef },
           { provide: MAT_DIALOG_DATA, useValue: null },
+          { provide: Storage, useValue: mockStorage },
           provideAnimations(),
         ],
       }).compileComponents();
@@ -145,6 +150,8 @@ describe('EditClubDialog', () => {
         close: vi.fn(),
       };
 
+      mockStorage = {};
+
       const dialogData: EditClubDialogData = { club: existingClub };
 
       await TestBed.configureTestingModule({
@@ -152,6 +159,7 @@ describe('EditClubDialog', () => {
         providers: [
           { provide: MatDialogRef, useValue: mockDialogRef },
           { provide: MAT_DIALOG_DATA, useValue: dialogData },
+          { provide: Storage, useValue: mockStorage },
           provideAnimations(),
         ],
       }).compileComponents();
@@ -245,6 +253,8 @@ describe('EditClubDialog', () => {
         close: vi.fn(),
       };
 
+      mockStorage = {};
+
       const dialogData: EditClubDialogData = { club: inactiveClub };
 
       await TestBed.configureTestingModule({
@@ -252,6 +262,7 @@ describe('EditClubDialog', () => {
         providers: [
           { provide: MatDialogRef, useValue: mockDialogRef },
           { provide: MAT_DIALOG_DATA, useValue: dialogData },
+          { provide: Storage, useValue: mockStorage },
           provideAnimations(),
         ],
       }).compileComponents();
