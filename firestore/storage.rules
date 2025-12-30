@@ -1,0 +1,56 @@
+rules_version = '2';
+
+// Firebase Storage Security Rules for ARRL Colorado Year of the Club
+//
+// Storage structure:
+// - club-logos/{clubId}/{filename} - Club logo images
+//
+// Security model:
+// - Anyone can read club logos (public access)
+// - Club leaders and admins can upload/update logos for their clubs
+// - File size limit: 5MB
+// - Allowed file types: JPEG, PNG, WEBP, GIF
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Helper functions
+    
+    // Check if the user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Check if the user is an admin (using Custom Claims)
+    function isAdmin() {
+      return isAuthenticated() && request.auth.token.admin == true;
+    }
+    
+    // Check if the user is a leader of a specific club
+    function isClubLeader(clubId) {
+      return isAuthenticated() && 
+             firestore.get(/databases/(default)/documents/clubs/$(clubId)).data.leaderIds.hasAny([request.auth.uid]);
+    }
+    
+    // Validate image file type
+    function isValidImageType() {
+      return request.resource.contentType.matches('image/(jpeg|png|webp|gif)');
+    }
+    
+    // Validate file size (max 5MB)
+    function isValidSize() {
+      return request.resource.size < 5 * 1024 * 1024;
+    }
+    
+    // Club logos
+    match /club-logos/{clubId}/{filename} {
+      // Anyone can read club logos
+      allow read: if true;
+      
+      // Club leaders can upload/update/delete logos for their club
+      allow write: if (isClubLeader(clubId) || isAdmin()) && 
+                      isValidImageType() && 
+                      isValidSize();
+    }
+  }
+}

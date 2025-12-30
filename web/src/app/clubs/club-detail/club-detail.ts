@@ -114,7 +114,7 @@ export class ClubDetail {
     dialogRef
       .afterClosed()
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((result: ClubFormData | undefined) => {
+      .subscribe((result: ClubFormData & { logoUrl?: string } | undefined) => {
         if (result) {
           this.loading.set(true);
           this.clubService

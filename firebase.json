@@ -5,6 +5,9 @@
     "rules": "firestore/firestore.rules",
     "indexes": "firestore/firestore.indexes.json"
   },
+  "storage": {
+    "rules": "firestore/storage.rules"
+  },
   "hosting": {
     "site": "arrl-co-yotc",
     "source": "web/",
