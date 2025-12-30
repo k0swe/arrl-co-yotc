@@ -34,9 +34,6 @@
       <app-active-members [clubId]="clubData.id" [clubLeaderIds]="clubData.leaderIds" />
     }
 
-    <div class="placeholder-message">
-      <mat-icon>info</mat-icon>
-      <p>This is a placeholder page. More club details and features will be added in the future.</p>
-    </div>
+    <app-event-list [clubId]="clubData.id" [canEdit]="canEdit()" />
   }
 </div>
