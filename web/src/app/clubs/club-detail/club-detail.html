@@ -31,7 +31,7 @@
     }
 
     @if (canViewMembers()) {
-      <app-active-members [clubId]="clubData.id" />
+      <app-active-members [clubId]="clubData.id" [clubLeaderIds]="clubData.leaderIds" />
     }
 
     <div class="placeholder-message">

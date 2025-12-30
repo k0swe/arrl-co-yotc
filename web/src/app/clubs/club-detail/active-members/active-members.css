@@ -67,9 +67,20 @@ mat-card-title {
   height: 1rem;
 }
 
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
 @media (max-width: 600px) {
   .member-item {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .action-buttons {
+    margin-left: 0;
+    align-self: flex-end;
   }
 }

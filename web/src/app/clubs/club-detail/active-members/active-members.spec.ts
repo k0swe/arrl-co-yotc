@@ -7,12 +7,16 @@ import { ActiveMembers } from './active-members';
 import { firebaseTestConfig } from '../../../firebase-test.config';
 import { MembershipService } from '../../../services/membership.service';
 import { UserService } from '../../../services/user.service';
+import { ClubService } from '../../../services/club.service';
+import { AuthService } from '../../../auth/auth.service';
 
 describe('ActiveMembers', () => {
   let component: ActiveMembers;
   let fixture: ComponentFixture<ActiveMembers>;
   let membershipService: MembershipService;
   let userService: UserService;
+  let clubService: ClubService;
+  let authService: AuthService;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -37,9 +41,12 @@ describe('ActiveMembers', () => {
     component = fixture.componentInstance;
     membershipService = TestBed.inject(MembershipService);
     userService = TestBed.inject(UserService);
+    clubService = TestBed.inject(ClubService);
+    authService = TestBed.inject(AuthService);
 
-    // Set a default clubId
+    // Set default inputs
     fixture.componentRef.setInput('clubId', 'test-club-id');
+    fixture.componentRef.setInput('clubLeaderIds', []);
   });
 
   it('should create', () => {
@@ -50,6 +57,10 @@ describe('ActiveMembers', () => {
     expect(component.clubId()).toBe('test-club-id');
   });
 
+  it('should have clubLeaderIds input', () => {
+    expect(component.clubLeaderIds()).toEqual([]);
+  });
+
   it('should have loading signal', () => {
     expect(component['loading']).toBeDefined();
     expect(typeof component['loading']()).toBe('boolean');
@@ -58,5 +69,10 @@ describe('ActiveMembers', () => {
   it('should have activeMembersWithUsers signal', () => {
     expect(component['activeMembersWithUsers']).toBeDefined();
     expect(Array.isArray(component['activeMembersWithUsers']())).toBe(true);
+  });
+
+  it('should have canManageRoles computed signal', () => {
+    expect(component['canManageRoles']).toBeDefined();
+    expect(typeof component['canManageRoles']()).toBe('boolean');
   });
 });

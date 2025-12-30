@@ -171,4 +171,18 @@ export class ClubService {
       }).then(() => void 0),
     );
   }
+
+  /**
+   * Update the leaderIds array for a club
+   * Used when promoting or demoting members to/from leader role
+   */
+  updateClubLeaderIds(clubId: string, leaderIds: string[]): Observable<void> {
+    const clubDoc = doc(this.firestore, 'clubs', clubId);
+    return from(
+      updateDoc(clubDoc, {
+        leaderIds,
+        updatedAt: serverTimestamp(),
+      }).then(() => void 0),
+    );
+  }
 }
