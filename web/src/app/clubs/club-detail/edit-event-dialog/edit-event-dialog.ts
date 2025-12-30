@@ -44,6 +44,7 @@ export class EditEventDialog {
 
   protected readonly submitting = signal(false);
   protected readonly isEditMode = !!this.data?.event;
+  protected readonly timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   protected readonly eventForm = this.fb.nonNullable.group({
     name: [

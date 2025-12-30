@@ -27,6 +27,17 @@ app-club-card {
   margin-bottom: 24px;
 }
 
+app-membership-requests,
+app-active-members {
+  display: block;
+  margin-bottom: 24px;
+}
+
+app-event-list {
+  display: block;
+  margin-top: 24px;
+}
+
 .placeholder-message {
   display: flex;
   align-items: center;
