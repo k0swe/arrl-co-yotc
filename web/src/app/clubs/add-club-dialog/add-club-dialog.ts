@@ -7,8 +7,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { Club } from '@arrl-co-yotc/shared/build/app/models/club.model';
 
-export type ClubSuggestion = Pick<Club, 'name' | 'callsign' | 'description' | 'location'>;
-
 @Component({
   selector: 'app-add-club-dialog',
   imports: [
@@ -37,6 +35,10 @@ export class AddClubDialog {
     ],
     description: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(500)]],
     location: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
+    website: [
+      '',
+      [Validators.pattern(/^https?:\/\/[^\s\/$.?#].[^\s]*$/i), Validators.maxLength(200)],
+    ],
   });
 
   protected onCancel(): void {
@@ -50,7 +52,7 @@ export class AddClubDialog {
     }
 
     this.submitting.set(true);
-    const suggestion: ClubSuggestion = this.clubForm.getRawValue();
+    const suggestion: Partial<Club> = this.clubForm.getRawValue();
     this.dialogRef.close(suggestion);
   }
 
@@ -72,7 +74,13 @@ export class AddClubDialog {
       return `Maximum length is ${maxLength} characters`;
     }
     if (field.hasError('pattern')) {
-      return 'Only letters and numbers allowed';
+      if (fieldName === 'callsign') {
+        return 'Only letters and numbers allowed';
+      }
+      if (fieldName === 'website') {
+        return 'Must be a valid URL starting with http:// or https://';
+      }
+      return 'Invalid format';
     }
     return '';
   }

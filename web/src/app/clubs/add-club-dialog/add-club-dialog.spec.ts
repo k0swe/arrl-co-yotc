@@ -33,6 +33,7 @@ describe('AddClubDialog', () => {
     expect(component['clubForm'].get('callsign')).toBeTruthy();
     expect(component['clubForm'].get('description')).toBeTruthy();
     expect(component['clubForm'].get('location')).toBeTruthy();
+    expect(component['clubForm'].get('website')).toBeTruthy();
   });
 
   it('should mark form as invalid when empty', () => {
@@ -47,6 +48,7 @@ describe('AddClubDialog', () => {
       callsign: 'W0TEST',
       description: 'A test club for testing purposes',
       location: 'Denver, CO',
+      website: 'https://example.com',
     });
 
     expect(form.valid).toBeTruthy();
@@ -60,6 +62,7 @@ describe('AddClubDialog', () => {
       callsign: 'W0TEST',
       description: 'A test club for testing purposes',
       location: 'Denver, CO',
+      website: 'https://example.com',
     });
 
     component['onSubmit']();
@@ -69,6 +72,7 @@ describe('AddClubDialog', () => {
       callsign: 'W0TEST',
       description: 'A test club for testing purposes',
       location: 'Denver, CO',
+      website: 'https://example.com',
     };
     expect(mockDialogRef.close).toHaveBeenCalledWith(expectedData);
   });
@@ -96,5 +100,27 @@ describe('AddClubDialog', () => {
 
     descControl?.setValue('A longer description that meets the minimum length');
     expect(descControl?.hasError('minlength')).toBeFalsy();
+  });
+
+  it('should validate website URL format', () => {
+    const websiteControl = component['clubForm'].get('website');
+
+    // Valid URLs should pass
+    websiteControl?.setValue('https://example.com');
+    expect(websiteControl?.hasError('pattern')).toBeFalsy();
+
+    websiteControl?.setValue('http://example.com');
+    expect(websiteControl?.hasError('pattern')).toBeFalsy();
+
+    // Invalid URLs should fail
+    websiteControl?.setValue('not-a-url');
+    expect(websiteControl?.hasError('pattern')).toBeTruthy();
+
+    websiteControl?.setValue('ftp://example.com');
+    expect(websiteControl?.hasError('pattern')).toBeTruthy();
+
+    // Empty should be valid (optional field)
+    websiteControl?.setValue('');
+    expect(websiteControl?.hasError('pattern')).toBeFalsy();
   });
 });
