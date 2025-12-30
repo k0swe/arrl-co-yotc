@@ -54,6 +54,15 @@
           class="nested-nav-item"
           [attr.aria-label]="'Navigate to ' + club.name"
         >
+          @if (club.logoUrl) {
+          <img
+            matListItemAvatar
+            [ngSrc]="club.logoUrl"
+            [alt]="'Logo for ' + club.name"
+            width="40"
+            height="40"
+          />
+          }
           <span matListItemTitle>{{ club.name }}</span>
         </a>
         }
