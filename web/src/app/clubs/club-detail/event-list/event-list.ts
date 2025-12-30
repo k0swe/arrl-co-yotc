@@ -20,6 +20,7 @@ import { EventService } from '../../../services/event.service';
 import { AuthService } from '../../../auth/auth.service';
 import { Event } from '@arrl-co-yotc/shared/build/app/models/event.model';
 import { EditEventDialog, EventFormData } from '../edit-event-dialog/edit-event-dialog';
+import { ConfirmDialog } from '../confirm-dialog/confirm-dialog';
 import { catchError, of } from 'rxjs';
 
 @Component({
@@ -162,25 +163,40 @@ export class EventList {
   }
 
   protected deleteEvent(event: Event): void {
-    if (!confirm(`Are you sure you want to delete "${event.name}"?`)) {
-      return;
-    }
+    const dialogRef = this.dialog.open(ConfirmDialog, {
+      width: '400px',
+      data: {
+        title: 'Delete Event',
+        message: `Are you sure you want to delete "${event.name}"?`,
+        confirmText: 'Delete',
+        cancelText: 'Cancel',
+      },
+    });
 
-    const clubId = this.clubId();
-    this.eventService
-      .deleteEvent(clubId, event.id)
+    dialogRef
+      .afterClosed()
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          this.snackBar.open('Event deleted successfully!', 'Close', {
-            duration: 3000,
+      .subscribe((confirmed: boolean) => {
+        if (!confirmed) {
+          return;
+        }
+
+        const clubId = this.clubId();
+        this.eventService
+          .deleteEvent(clubId, event.id)
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe({
+            next: () => {
+              this.snackBar.open('Event deleted successfully!', 'Close', {
+                duration: 3000,
+              });
+              this.loadEvents();
+            },
+            error: (error) => {
+              console.error('Error deleting event:', error);
+              this.snackBar.open('Failed to delete event', 'Close', { duration: 3000 });
+            },
           });
-          this.loadEvents();
-        },
-        error: (error) => {
-          console.error('Error deleting event:', error);
-          this.snackBar.open('Failed to delete event', 'Close', { duration: 3000 });
-        },
       });
   }
 

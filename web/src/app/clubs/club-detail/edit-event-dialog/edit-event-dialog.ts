@@ -75,11 +75,27 @@ export class EditEventDialog {
     }
 
     const formData = this.eventForm.getRawValue();
+    
+    // Validate that end time is after start time
+    const startTime = formData.startTime;
+    const endTime = formData.endTime;
+    
+    if (!startTime || !endTime) {
+      return; // Should not happen due to required validators
+    }
+    
+    if (endTime <= startTime) {
+      // Show error on endTime field
+      this.eventForm.get('endTime')?.setErrors({ endBeforeStart: true });
+      this.eventForm.get('endTime')?.markAsTouched();
+      return;
+    }
+
     const result: EventFormData = {
       name: formData.name,
       description: formData.description,
-      startTime: formData.startTime || new Date(),
-      endTime: formData.endTime || new Date(),
+      startTime: startTime,
+      endTime: endTime,
     };
 
     this.dialogRef.close(result);
@@ -101,6 +117,9 @@ export class EditEventDialog {
     if (field.hasError('maxlength')) {
       const maxLength = field.getError('maxlength').requiredLength;
       return `Maximum length is ${maxLength} characters`;
+    }
+    if (field.hasError('endBeforeStart')) {
+      return 'End date must be after start date';
     }
     return '';
   }
