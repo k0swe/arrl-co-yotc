@@ -81,6 +81,7 @@
     {
       "collectionGroup": "events",
       "fieldPath": "startTime",
+      "ttl": false,
       "indexes": [
         {
           "order": "ASCENDING",
