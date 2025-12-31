@@ -5,11 +5,27 @@ In 2026, the [American Radio Relay League](https://www.arrl.org/) is celebrating
 organizing and advertising our clubs' events and activities throughout the year. This tool will help
 clubs in the Colorado Section plan and promote their events for the Year of the Club.
 
-## Administrative Scripts
+## Primary Use Cases
 
-For system administrators, see the [`scripts/`](scripts/) directory for administrative tools,
-including:
+This application serves three main audiences:
 
-- **set-admin-claim.js** - Grant application admin permissions to Firebase Auth users
+**For the Public:**
 
-See [scripts/README.md](scripts/README.md) for detailed usage instructions.
+- Browse all active clubs in the Colorado Section
+- View upcoming events and activities in a calendar
+- Discover opportunities to participate in amateur radio
+
+**For Club Members:**
+
+- Confirm existing club memberships in the app
+- RSVP to attend or operate at club events
+- Upload QSO logs after events to track participation
+
+**For Club Leaders:**
+
+- Manage club information and membership
+- Create and promote events throughout the year
+- Coordinate club activities and track participation
+
+The platform also includes administrative capabilities for managing clubs, assigning roles, and
+maintaining the overall system integrity.
