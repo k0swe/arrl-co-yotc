@@ -24,7 +24,7 @@ import { ClubService } from '../../../services/club.service';
 import { AuthService } from '../../../auth/auth.service';
 import { ClubMembership } from '@arrl-co-yotc/shared/build/app/models/user.model';
 import { User } from '@arrl-co-yotc/shared/build/app/models/user.model';
-import { catchError, of, forkJoin, switchMap } from 'rxjs';
+import { catchError, of, forkJoin, switchMap, map, Observable } from 'rxjs';
 
 interface MemberWithUser {
   membership: ClubMembership;
@@ -128,34 +128,34 @@ export class Members {
         }),
       ),
     })
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(({ active, pending }) => {
-        // Process active members
-        if (active.length > 0) {
-          this.loadUsersForMemberships(active, (membersWithUsers) => {
-            this.activeMembersWithUsers.set(membersWithUsers);
-          });
-        } else {
-          this.activeMembersWithUsers.set([]);
-        }
+      .pipe(
+        switchMap(({ active, pending }) => {
+          // Create observables for loading users
+          const activeUsers$ = active.length > 0
+            ? this.loadUsersForMembershipsObservable(active)
+            : of([]);
+          const pendingUsers$ = pending.length > 0
+            ? this.loadUsersForMembershipsObservable(pending)
+            : of([]);
 
-        // Process pending memberships
-        if (pending.length > 0) {
-          this.loadUsersForMemberships(pending, (membersWithUsers) => {
-            this.pendingMembershipsWithUsers.set(membersWithUsers);
+          // Load users for both active and pending members in parallel
+          return forkJoin({
+            activeMembers: activeUsers$,
+            pendingMembers: pendingUsers$,
           });
-        } else {
-          this.pendingMembershipsWithUsers.set([]);
-        }
-
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(({ activeMembers, pendingMembers }) => {
+        this.activeMembersWithUsers.set(activeMembers);
+        this.pendingMembershipsWithUsers.set(pendingMembers);
         this.loading.set(false);
       });
   }
 
-  private loadUsersForMemberships(
+  private loadUsersForMembershipsObservable(
     memberships: ClubMembership[],
-    callback: (membersWithUsers: MemberWithUser[]) => void,
-  ): void {
+  ): Observable<MemberWithUser[]> {
     const userFetches = memberships.map((membership) =>
       this.userService.getUser(membership.userId).pipe(
         catchError((error) => {
@@ -165,21 +165,18 @@ export class Members {
       ),
     );
 
-    forkJoin(userFetches)
-      .pipe(
-        catchError((error) => {
-          console.error('Error fetching users:', error);
-          return of(memberships.map(() => null));
-        }),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe((users) => {
-        const membersWithUsers = memberships.map((membership, index) => ({
+    return forkJoin(userFetches).pipe(
+      catchError((error) => {
+        console.error('Error fetching users:', error);
+        return of(memberships.map(() => null));
+      }),
+      map((users) =>
+        memberships.map((membership, index) => ({
           membership,
           user: users[index],
-        }));
-        callback(membersWithUsers);
-      });
+        })),
+      ),
+    );
   }
 
   protected approveMembership(membershipWithUser: MemberWithUser): void {
