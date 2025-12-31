@@ -160,23 +160,36 @@ export class Admin {
       });
   }
 
-  protected approveClub(club: Club): void {
-    this.setProcessing(club.id, true);
-    this.clubService
-      .approveClub(club.id)
+  protected acceptClub(club: Club): void {
+    const dialogRef = this.dialog.open(EditClubDialog, {
+      width: '600px',
+      data: { club, isApprovalMode: true },
+    });
+
+    dialogRef
+      .afterClosed()
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          this.showSnackBar(`${club.name} has been approved!`);
-          this.setProcessing(club.id, false);
-          // Remove from pending review queue. The club is now active and visible to the public.
-          this.pendingClubs.set(this.pendingClubs().filter((c) => c.id !== club.id));
-        },
-        error: (error) => {
-          console.error('Error approving club:', error);
-          this.showSnackBar('Failed to approve club');
-          this.setProcessing(club.id, false);
-        },
+      .subscribe((result: ClubFormData | undefined) => {
+        if (result) {
+          this.setProcessing(club.id, true);
+          // Update club with validated form data AND set it to active
+          this.clubService
+            .updateClub(club.id, { ...result, isActive: true })
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({
+              next: () => {
+                this.showSnackBar(`${result.name} has been approved!`);
+                this.setProcessing(club.id, false);
+                // Remove from pending review queue. The club is now active and visible to the public.
+                this.pendingClubs.set(this.pendingClubs().filter((c) => c.id !== club.id));
+              },
+              error: (error) => {
+                console.error('Error approving club:', error);
+                this.showSnackBar('Failed to approve club');
+                this.setProcessing(club.id, false);
+              },
+            });
+        }
       });
   }
 

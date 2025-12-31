@@ -51,9 +51,9 @@
               <button
                 mat-raised-button
                 color="primary"
-                (click)="approveClub(club)"
+                (click)="acceptClub(club)"
                 [disabled]="isProcessing(club.id)"
-                aria-label="Approve {{ club.name }}"
+                aria-label="Accept {{ club.name }}"
                 class="action-button"
               >
                 @if (isProcessing(club.id)) {
@@ -62,7 +62,7 @@
                 @if (!isProcessing(club.id)) {
                   <mat-icon>check_circle</mat-icon>
                 }
-                <span>{{ isProcessing(club.id) ? 'Approving...' : 'Approve' }}</span>
+                <span>{{ isProcessing(club.id) ? 'Processing...' : 'Accept' }}</span>
               </button>
               <button
                 mat-raised-button

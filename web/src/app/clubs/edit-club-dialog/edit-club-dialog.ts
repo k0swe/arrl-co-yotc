@@ -17,6 +17,7 @@ import { catchError, of } from 'rxjs';
 
 export interface EditClubDialogData {
   club?: Club;
+  isApprovalMode?: boolean;
 }
 
 export type ClubFormData = Pick<Club, 'name' | 'callsign' | 'description' | 'location' | 'website' | 'slug'>;
@@ -45,6 +46,7 @@ export class EditClubDialog {
   protected readonly submitting = signal(false);
   protected readonly uploadingLogo = signal(false);
   protected readonly isEditMode = !!this.data?.club;
+  protected readonly isApprovalMode = this.data?.isApprovalMode ?? false;
   protected readonly isClubActive = this.data?.club?.isActive ?? false;
   protected readonly logoUrl = signal<string | undefined>(this.data?.club?.logoUrl);
   protected readonly logoFile = signal<File | null>(null);
