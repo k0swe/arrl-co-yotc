@@ -232,5 +232,13 @@ service cloud.firestore {
         }
       }
     }
+    
+    // Collection group query support for events
+    // This matches events at any nesting level for collection group queries
+    match /{path=**}/events/{eventId} {
+      // Allow public read access for collection group queries
+      // The application filters by active clubs
+      allow read: if true;
+    }
   }
 }

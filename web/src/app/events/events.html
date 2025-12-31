@@ -1,0 +1,57 @@
+<div class="events-container">
+  <header class="events-header">
+    <div class="header-content">
+      <div class="header-text">
+        <h1>Events</h1>
+        <p class="subtitle">
+          Browse upcoming events from Colorado amateur radio clubs
+        </p>
+      </div>
+    </div>
+  </header>
+
+  @if (loading()) {
+  <div class="loading-container" role="status" aria-live="polite">
+    <mat-spinner></mat-spinner>
+    <p>Loading events...</p>
+  </div>
+  } @else if (events().length === 0) {
+  <div class="empty-state" role="status">
+    <mat-icon class="empty-icon">event_busy</mat-icon>
+    <h2>No Events Scheduled</h2>
+    <p>There are currently no events scheduled in the system.</p>
+  </div>
+  } @else {
+  <mat-card class="events-card">
+    <mat-card-content>
+      <mat-list>
+        @for (event of events(); track event.id; let last = $last) {
+        <mat-list-item class="event-item">
+          <div class="event-content">
+            <div class="event-icon" matListItemIcon>
+              <mat-icon>event</mat-icon>
+            </div>
+            <div class="event-details">
+              <h3 class="event-name">{{ event.name }}</h3>
+              <div class="event-metadata">
+                <span class="club-name">
+                  <mat-icon class="inline-icon">groups</mat-icon>
+                  {{ event.club?.name || 'Unknown Club' }}
+                </span>
+                <span class="event-time">
+                  <mat-icon class="inline-icon">schedule</mat-icon>
+                  {{ toDate(event.startTime) | date: 'short' }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </mat-list-item>
+        @if (!last) {
+        <mat-divider></mat-divider>
+        }
+        }
+      </mat-list>
+    </mat-card-content>
+  </mat-card>
+  }
+</div>

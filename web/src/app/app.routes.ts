@@ -5,6 +5,7 @@ import { Register } from './auth/register/register';
 import { ForgotPassword } from './auth/forgot-password/forgot-password';
 import { Clubs } from './clubs/clubs';
 import { ClubDetail } from './clubs/club-detail/club-detail';
+import { Events } from './events/events';
 import { Admin } from './admin/admin';
 import { Profile } from './profile/profile';
 import { authGuard } from './auth/auth.guard';
@@ -14,6 +15,7 @@ export const routes: Routes = [
   { path: '', component: Home },
   { path: 'clubs', component: Clubs },
   { path: 'clubs/:slug', component: ClubDetail },
+  { path: 'events', component: Events },
   { path: 'admin', component: Admin, canActivate: [adminGuard] },
   { path: 'profile', component: Profile, canActivate: [authGuard] },
   { path: 'login', component: Login },
