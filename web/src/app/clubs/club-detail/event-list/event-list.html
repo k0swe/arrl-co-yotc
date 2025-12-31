@@ -1,21 +1,6 @@
 <mat-card>
   <mat-card-header>
-    <mat-card-title>
-      <div class="header-content">
-        <span>Events</span>
-        @if (canEdit()) {
-          <button
-            mat-raised-button
-            color="primary"
-            (click)="openAddDialog()"
-            aria-label="Add new event"
-          >
-            <mat-icon>add</mat-icon>
-            Add Event
-          </button>
-        }
-      </div>
-    </mat-card-title>
+    <mat-card-title>Events</mat-card-title>
   </mat-card-header>
 
   <mat-card-content>
@@ -87,4 +72,18 @@
       </table>
     }
   </mat-card-content>
+
+  <mat-card-actions>
+    @if (canEdit()) {
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="openAddDialog()"
+        aria-label="Add new event"
+      >
+        <mat-icon>add</mat-icon>
+        Add Event
+      </button>
+    }
+  </mat-card-actions>
 </mat-card>
