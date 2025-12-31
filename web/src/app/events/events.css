@@ -1,0 +1,158 @@
+.events-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.events-header {
+  margin-bottom: 2rem;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.header-text h1 {
+  margin: 0 0 0.5rem 0;
+  font-size: 2rem;
+  font-weight: 500;
+}
+
+.subtitle {
+  margin: 0;
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 1rem;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  text-align: center;
+}
+
+.loading-container mat-spinner {
+  margin-bottom: 1rem;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  text-align: center;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  width: 4rem;
+  height: 4rem;
+  color: rgba(0, 0, 0, 0.3);
+  margin-bottom: 1rem;
+}
+
+.empty-state h2 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.5rem;
+  font-weight: 500;
+}
+
+.empty-state p {
+  margin: 0;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.events-card {
+  margin-bottom: 1rem;
+}
+
+.events-card mat-card-content {
+  padding: 0;
+}
+
+.event-item {
+  height: auto;
+  min-height: 72px;
+  padding: 1rem 1rem;
+}
+
+.event-content {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  gap: 1rem;
+}
+
+.event-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: rgba(63, 81, 181, 0.1);
+  color: #3f51b5;
+}
+
+.event-icon mat-icon {
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+}
+
+.event-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.event-name {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.125rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.event-metadata {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 0.875rem;
+}
+
+.club-name,
+.event-time {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.inline-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  vertical-align: middle;
+}
+
+@media (max-width: 600px) {
+  .events-container {
+    padding: 1rem 0.5rem;
+  }
+
+  .header-text h1 {
+    font-size: 1.5rem;
+  }
+
+  .event-metadata {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}

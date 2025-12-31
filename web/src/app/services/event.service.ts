@@ -3,6 +3,7 @@ import {
   addDoc,
   collection,
   collectionData,
+  collectionGroup,
   deleteDoc,
   doc,
   Firestore,
@@ -23,6 +24,15 @@ import { Event } from '@arrl-co-yotc/shared/build/app/models/event.model';
 })
 export class EventService {
   private firestore = inject(Firestore);
+
+  /**
+   * Get all events across all clubs ordered by start time
+   */
+  getAllEvents(): Observable<Event[]> {
+    const eventsGroup = collectionGroup(this.firestore, 'events');
+    const q = query(eventsGroup, orderBy('startTime', 'asc'));
+    return collectionData(q, { idField: 'id' }) as Observable<Event[]>;
+  }
 
   /**
    * Get all events for a specific club ordered by start time
