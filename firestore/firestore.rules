@@ -153,9 +153,11 @@ service cloud.firestore {
       
       // Events sub-collection
       match /events/{eventId} {
-        // Anyone can read events (filtering for active clubs is done at application level)
-        // This is necessary for collection group queries to work efficiently
-        allow read: if true;
+        // Anyone can read events for active clubs
+        allow read: if isClubActive(clubId);
+        
+        // Authenticated users can read all events
+        allow read: if isAuthenticated();
         
         // Club leaders can create events for their club
         allow create: if isClubLeader(clubId) &&
@@ -229,6 +231,14 @@ service cloud.firestore {
           allow write: if isAdmin();
         }
       }
+    }
+    
+    // Collection group query support for events
+    // This matches events at any nesting level for collection group queries
+    match /{path=**}/events/{eventId} {
+      // Allow public read access for collection group queries
+      // The application filters by active clubs
+      allow read: if true;
     }
   }
 }
