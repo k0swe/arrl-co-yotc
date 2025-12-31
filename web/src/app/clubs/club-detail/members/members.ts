@@ -24,7 +24,7 @@ import { ClubService } from '../../../services/club.service';
 import { AuthService } from '../../../auth/auth.service';
 import { ClubMembership } from '@arrl-co-yotc/shared/build/app/models/user.model';
 import { User } from '@arrl-co-yotc/shared/build/app/models/user.model';
-import { catchError, of, forkJoin, switchMap, map, Observable } from 'rxjs';
+import { catchError, of, combineLatest, switchMap, map, Observable, forkJoin } from 'rxjs';
 
 interface MemberWithUser {
   membership: ClubMembership;
@@ -114,29 +114,30 @@ export class Members {
     const clubId = this.clubId();
 
     // Load both active and pending members in parallel
-    forkJoin({
-      active: this.membershipService.getActiveMembers(clubId).pipe(
-        catchError((error) => {
-          console.error('Error loading active members:', error);
-          return of([]);
-        }),
-      ),
-      pending: this.membershipService.getPendingMemberships(clubId).pipe(
-        catchError((error) => {
-          console.error('Error loading pending memberships:', error);
-          return of([]);
-        }),
-      ),
+    const activeQuery = this.membershipService.getActiveMembers(clubId).pipe(
+      catchError((error) => {
+        console.error('[Members] Error loading active members:', error);
+        return of([]);
+      })
+    );
+    const pendingQuery = this.membershipService.getPendingMemberships(clubId).pipe(
+      catchError((error) => {
+        console.error('[Members] Error loading pending memberships:', error);
+        return of([]);
+      })
+    );
+
+    combineLatest({
+      active: activeQuery,
+      pending: pendingQuery,
     })
       .pipe(
         switchMap(({ active, pending }) => {
           // Create observables for loading users
-          const activeUsers$ = active.length > 0
-            ? this.loadUsersForMembershipsObservable(active)
-            : of([]);
-          const pendingUsers$ = pending.length > 0
-            ? this.loadUsersForMembershipsObservable(pending)
-            : of([]);
+          const activeUsers$ =
+            active.length > 0 ? this.loadUsersForMembershipsObservable(active) : of([]);
+          const pendingUsers$ =
+            pending.length > 0 ? this.loadUsersForMembershipsObservable(pending) : of([]);
 
           // Load users for both active and pending members in parallel
           return forkJoin({
@@ -144,25 +145,31 @@ export class Members {
             pendingMembers: pendingUsers$,
           });
         }),
-        takeUntilDestroyed(this.destroyRef),
+        takeUntilDestroyed(this.destroyRef)
       )
-      .subscribe(({ activeMembers, pendingMembers }) => {
-        this.activeMembersWithUsers.set(activeMembers);
-        this.pendingMembershipsWithUsers.set(pendingMembers);
-        this.loading.set(false);
+      .subscribe({
+        next: ({ activeMembers, pendingMembers }) => {
+          this.activeMembersWithUsers.set(activeMembers);
+          this.pendingMembershipsWithUsers.set(pendingMembers);
+          this.loading.set(false);
+        },
+        error: (error) => {
+          console.error('[Members] Error in main subscription:', error);
+          this.loading.set(false);
+        },
       });
   }
 
   private loadUsersForMembershipsObservable(
-    memberships: ClubMembership[],
+    memberships: ClubMembership[]
   ): Observable<MemberWithUser[]> {
     const userFetches = memberships.map((membership) =>
       this.userService.getUser(membership.userId).pipe(
         catchError((error) => {
           console.error(`Error fetching user ${membership.userId}:`, error);
           return of(null);
-        }),
-      ),
+        })
+      )
     );
 
     return forkJoin(userFetches).pipe(
@@ -174,8 +181,8 @@ export class Members {
         memberships.map((membership, index) => ({
           membership,
           user: users[index],
-        })),
-      ),
+        }))
+      )
     );
   }
 
@@ -261,7 +268,7 @@ export class Members {
           this.snackBar.open('Failed to promote member', 'Close', { duration: 3000 });
           return of(undefined);
         }),
-        takeUntilDestroyed(this.destroyRef),
+        takeUntilDestroyed(this.destroyRef)
       )
       .subscribe((result) => {
         if (result !== undefined) {
@@ -300,7 +307,7 @@ export class Members {
           this.snackBar.open('Failed to demote member', 'Close', { duration: 3000 });
           return of(undefined);
         }),
-        takeUntilDestroyed(this.destroyRef),
+        takeUntilDestroyed(this.destroyRef)
       )
       .subscribe((result) => {
         if (result !== undefined) {
@@ -326,7 +333,11 @@ export class Members {
       return timestamp;
     }
     // Check if it's a Firestore Timestamp with toDate method
-    if (typeof timestamp === 'object' && 'toDate' in timestamp && typeof timestamp.toDate === 'function') {
+    if (
+      typeof timestamp === 'object' &&
+      'toDate' in timestamp &&
+      typeof timestamp.toDate === 'function'
+    ) {
       return timestamp.toDate();
     }
     // Try to parse as date string
