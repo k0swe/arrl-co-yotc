@@ -5,7 +5,7 @@ import { EditClubDialog, EditClubDialogData } from './edit-club-dialog';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { Club } from '@arrl-co-yotc/shared/build/app/models/club.model';
 import { ClubService } from '../../services/club.service';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 
 describe('EditClubDialog', () => {
   let component: EditClubDialog;
@@ -61,7 +61,7 @@ describe('EditClubDialog', () => {
       expect(component['clubForm'].valid).toBeFalsy();
     });
 
-    it('should validate required fields', () => {
+    it('should validate required fields', async () => {
       const form = component['clubForm'];
 
       form.patchValue({
@@ -71,11 +71,15 @@ describe('EditClubDialog', () => {
         description: 'A test club for testing purposes',
         location: 'Denver, CO',
       });
+
+      // Wait for async validation to complete (300ms debounce + processing)
+      await new Promise(resolve => setTimeout(resolve, 400));
+      await fixture.whenStable();
 
       expect(form.valid).toBeTruthy();
     });
 
-    it('should close dialog with form data on submit', () => {
+    it('should close dialog with form data on submit', async () => {
       const form = component['clubForm'];
 
       form.patchValue({
@@ -85,6 +89,10 @@ describe('EditClubDialog', () => {
         description: 'A test club for testing purposes',
         location: 'Denver, CO',
       });
+
+      // Wait for async validation to complete
+      await new Promise(resolve => setTimeout(resolve, 400));
+      await fixture.whenStable();
 
       component['onSubmit']();
 
@@ -380,7 +388,7 @@ describe('EditClubDialog', () => {
       expect(mockDialogRef.close).not.toHaveBeenCalled();
     });
 
-    it('should close dialog with validated data on submit', () => {
+    it('should close dialog with validated data on submit', async () => {
       const form = component['clubForm'];
 
       // Update some fields
@@ -388,6 +396,10 @@ describe('EditClubDialog', () => {
         name: 'Validated Club Name',
         description: 'This club has been reviewed and validated by an admin',
       });
+
+      // Wait for async validation to complete
+      await new Promise(resolve => setTimeout(resolve, 400));
+      await fixture.whenStable();
 
       component['onSubmit']();
 
@@ -454,7 +466,8 @@ describe('EditClubDialog', () => {
       slugControl?.setValue('denver-club');
       slugControl?.markAsTouched();
       
-      // Wait for async validation
+      // Wait for async validation (300ms debounce + processing)
+      await new Promise(resolve => setTimeout(resolve, 400));
       await fixture.whenStable();
 
       expect(slugControl?.hasError('slugNotUnique')).toBeTruthy();
@@ -569,7 +582,8 @@ describe('EditClubDialog', () => {
       slugControl?.setValue('denver-club');
       slugControl?.markAsTouched();
       
-      // Wait for async validation
+      // Wait for async validation (300ms debounce + processing)
+      await new Promise(resolve => setTimeout(resolve, 400));
       await fixture.whenStable();
 
       expect(slugControl?.hasError('slugNotUnique')).toBeTruthy();
@@ -631,7 +645,7 @@ describe('EditClubDialog', () => {
 
     it('should handle network errors during validation gracefully', async () => {
       mockClubService.getClubBySlug.mockReturnValue(
-        new Promise((_, reject) => reject(new Error('Network error')))
+        throwError(() => new Error('Network error'))
       );
 
       fixture = TestBed.createComponent(EditClubDialog);
@@ -641,7 +655,8 @@ describe('EditClubDialog', () => {
       const slugControl = component['clubForm'].get('slug');
       slugControl?.setValue('network-error-slug');
       
-      // Wait for async validation to complete
+      // Wait for async validation to complete (300ms debounce + processing)
+      await new Promise(resolve => setTimeout(resolve, 400));
       await fixture.whenStable();
 
       // Should not have validation error (validation should return null on error)
@@ -700,7 +715,8 @@ describe('EditClubDialog', () => {
 
       nameControl?.setValue('Denver Amateur Radio Club');
 
-      expect(slugControl?.value).toBe('denver-amateur-radio-club');
+      // Expect acronym-style slug (first letter of each word)
+      expect(slugControl?.value).toBe('darc');
       expect(slugControl?.touched).toBeTruthy();
     });
 
@@ -769,7 +785,8 @@ describe('EditClubDialog', () => {
       // Changing name should generate slug since current slug is empty
       nameControl?.setValue('Boulder Amateur Radio Club');
       
-      expect(slugControl?.value).toBe('boulder-amateur-radio-club');
+      // Expect acronym-style slug (first letter of each word)
+      expect(slugControl?.value).toBe('barc');
     });
   });
 });
