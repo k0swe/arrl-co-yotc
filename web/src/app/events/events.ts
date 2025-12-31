@@ -77,11 +77,13 @@ export class Events {
                 clubMap.set(id, clubs[index]);
               });
 
-              // Combine events with their club information
-              return events.map((event) => ({
-                ...event,
-                club: clubMap.get(event.clubId) ?? undefined,
-              }));
+              // Combine events with their club information and filter for active clubs only
+              return events
+                .map((event) => ({
+                  ...event,
+                  club: clubMap.get(event.clubId) ?? undefined,
+                }))
+                .filter((event) => event.club?.isActive === true);
             })
           );
         }),

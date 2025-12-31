@@ -153,11 +153,9 @@ service cloud.firestore {
       
       // Events sub-collection
       match /events/{eventId} {
-        // Anyone can read events for active clubs
-        allow read: if isClubActive(clubId);
-        
-        // Authenticated users can read all events
-        allow read: if isAuthenticated();
+        // Anyone can read events (filtering for active clubs is done at application level)
+        // This is necessary for collection group queries to work efficiently
+        allow read: if true;
         
         // Club leaders can create events for their club
         allow create: if isClubLeader(clubId) &&
