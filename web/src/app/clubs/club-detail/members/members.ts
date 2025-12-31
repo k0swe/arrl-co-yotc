@@ -222,10 +222,8 @@ export class Members {
       .subscribe({
         next: () => {
           this.snackBar.open('Membership denied', 'Close', { duration: 3000 });
-          // Remove the denied membership from the list
-          this.pendingMembershipsWithUsers.update((membershipsWithUsers) =>
-            membershipsWithUsers.filter((m) => m.membership.userId !== membership.userId),
-          );
+          // Reload members to reflect the changes
+          this.loadMembers();
           this.processingMembership.set(null);
         },
         error: (error) => {
