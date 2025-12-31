@@ -574,5 +574,202 @@ describe('EditClubDialog', () => {
 
       expect(slugControl?.hasError('slugNotUnique')).toBeTruthy();
     });
+
+    it('should show error message for pending async validation', () => {
+      mockClubService.getClubBySlug.mockReturnValue(new Promise(() => {})); // Never resolves
+
+      fixture = TestBed.createComponent(EditClubDialog);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+
+      const slugControl = component['clubForm'].get('slug');
+      slugControl?.setValue('checking-slug');
+      
+      // While async validation is pending
+      expect(slugControl?.pending).toBeTruthy();
+      expect(component['getErrorMessage']('slug')).toBe('Checking if slug is available...');
+    });
+
+    it('should use custom ErrorStateMatcher for immediate error display', () => {
+      const existingClub: Club = {
+        id: 'existing-id',
+        name: 'Existing Club',
+        callsign: 'W0EXIST',
+        description: 'An existing club',
+        location: 'Denver, CO',
+        slug: 'denver-club',
+        isActive: true,
+        leaderIds: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      mockClubService.getClubBySlug.mockReturnValue(of(existingClub));
+      
+      const dialogData: EditClubDialogData = { club: existingClub };
+
+      TestBed.overrideProvider(MAT_DIALOG_DATA, { useValue: dialogData });
+
+      fixture = TestBed.createComponent(EditClubDialog);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+
+      const slugErrorStateMatcher = component['slugErrorStateMatcher'];
+      expect(slugErrorStateMatcher).toBeTruthy();
+      expect(slugErrorStateMatcher.constructor.name).toBe('ImmediateErrorStateMatcher');
+
+      // Test that the matcher returns true for invalid control even without touched/dirty
+      const mockControl = {
+        invalid: true,
+        valid: false,
+        touched: false,
+        dirty: false
+      } as any;
+
+      expect(slugErrorStateMatcher.isErrorState(mockControl, null)).toBeTruthy();
+    });
+
+    it('should handle network errors during validation gracefully', async () => {
+      mockClubService.getClubBySlug.mockReturnValue(
+        new Promise((_, reject) => reject(new Error('Network error')))
+      );
+
+      fixture = TestBed.createComponent(EditClubDialog);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+
+      const slugControl = component['clubForm'].get('slug');
+      slugControl?.setValue('network-error-slug');
+      
+      // Wait for async validation to complete
+      await fixture.whenStable();
+
+      // Should not have validation error (validation should return null on error)
+      expect(slugControl?.hasError('slugNotUnique')).toBeFalsy();
+    });
+
+    it('should not validate empty or disabled slug fields', () => {
+      fixture = TestBed.createComponent(EditClubDialog);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+
+      const slugControl = component['clubForm'].get('slug');
+      
+      // Test empty value
+      slugControl?.setValue('');
+      expect(mockClubService.getClubBySlug).not.toHaveBeenCalled();
+
+      // Test disabled control
+      slugControl?.disable();
+      slugControl?.setValue('test-slug');
+      expect(mockClubService.getClubBySlug).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Automatic slug generation', () => {
+    beforeEach(async () => {
+      mockDialogRef = {
+        close: vi.fn(),
+      };
+
+      mockStorage = {};
+
+      mockClubService = {
+        getClubBySlug: vi.fn().mockReturnValue(of(null)), // Default: slug is unique
+      };
+
+      await TestBed.configureTestingModule({
+        imports: [EditClubDialog],
+        providers: [
+          { provide: MatDialogRef, useValue: mockDialogRef },
+          { provide: MAT_DIALOG_DATA, useValue: null },
+          { provide: Storage, useValue: mockStorage },
+          { provide: ClubService, useValue: mockClubService },
+          provideAnimations(),
+        ],
+      }).compileComponents();
+    });
+
+    it('should auto-generate slug when name changes in create mode', () => {
+      fixture = TestBed.createComponent(EditClubDialog);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+
+      const nameControl = component['clubForm'].get('name');
+      const slugControl = component['clubForm'].get('slug');
+
+      nameControl?.setValue('Denver Amateur Radio Club');
+
+      expect(slugControl?.value).toBe('denver-amateur-radio-club');
+      expect(slugControl?.touched).toBeTruthy();
+    });
+
+    it('should not auto-generate slug if slug field already has a value in edit mode', () => {
+      const existingClub: Club = {
+        id: 'existing-id',
+        name: 'Existing Club',
+        callsign: 'W0EXIST',
+        description: 'An existing club',
+        location: 'Denver, CO',
+        slug: 'existing-slug',
+        isActive: false,
+        leaderIds: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      const dialogData: EditClubDialogData = { club: existingClub };
+
+      TestBed.overrideProvider(MAT_DIALOG_DATA, { useValue: dialogData });
+
+      fixture = TestBed.createComponent(EditClubDialog);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+
+      const nameControl = component['clubForm'].get('name');
+      const slugControl = component['clubForm'].get('slug');
+
+      // Slug should be pre-populated from existing club
+      expect(slugControl?.value).toBe('existing-slug');
+
+      // Changing name should not update slug since it already has a value
+      nameControl?.setValue('Updated Club Name');
+      
+      expect(slugControl?.value).toBe('existing-slug');
+    });
+
+    it('should auto-generate slug if slug field is empty even in edit mode', () => {
+      const existingClub: Club = {
+        id: 'existing-id',
+        name: 'Existing Club',
+        callsign: 'W0EXIST',
+        description: 'An existing club',
+        location: 'Denver, CO',
+        slug: '', // Empty slug
+        isActive: false,
+        leaderIds: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      const dialogData: EditClubDialogData = { club: existingClub };
+
+      TestBed.overrideProvider(MAT_DIALOG_DATA, { useValue: dialogData });
+
+      fixture = TestBed.createComponent(EditClubDialog);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+
+      const nameControl = component['clubForm'].get('name');
+      const slugControl = component['clubForm'].get('slug');
+
+      // Should start empty
+      expect(slugControl?.value).toBe('');
+
+      // Changing name should generate slug since current slug is empty
+      nameControl?.setValue('Boulder Amateur Radio Club');
+      
+      expect(slugControl?.value).toBe('boulder-amateur-radio-club');
+    });
   });
 });

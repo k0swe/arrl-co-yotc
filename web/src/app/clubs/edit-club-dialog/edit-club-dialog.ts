@@ -120,54 +120,35 @@ export class EditClubDialog {
     return (control: AbstractControl): Observable<ValidationErrors | null> => {
       const value = control.value?.trim();
 
-      console.log('🔍 uniqueSlugValidator called:', {
-        value,
-        disabled: control.disabled,
-        touched: control.touched,
-        dirty: control.dirty,
-      });
-
       // Skip validation if control is disabled or empty
       if (control.disabled || !value) {
-        console.log('⏭️ Skipping validation: disabled or empty');
         return of(null);
       }
-
-      console.log('▶️ Starting async validation for slug:', value);
 
       // Create a simple observable with debouncing to prevent race conditions
       return new Observable<ValidationErrors | null>((observer) => {
         // Debounce the API call
         const timeout = setTimeout(() => {
-          console.log('🔄 Executing debounced validation for:', value);
-
           this.clubService.getClubBySlug(value).subscribe({
             next: (existingClub) => {
-              console.log('📡 API response:', existingClub);
-
               let result: ValidationErrors | null = null;
 
               if (existingClub) {
                 // If in edit mode and the club with this slug is the current club, it's valid
                 if (this.data?.club?.id && existingClub.id === this.data.club.id) {
-                  console.log('✅ Slug belongs to current club');
                   result = null;
                 } else {
-                  console.log('❌ Slug is not unique, returning error');
                   result = { slugNotUnique: true };
                 }
               } else {
-                console.log('✅ Slug is unique');
                 result = null;
               }
 
-              console.log('📋 Final validation result:', result);
               observer.next(result);
               observer.complete();
 
               // Trigger change detection after a short delay
               setTimeout(() => {
-                console.log('🔄 Triggering change detection');
                 this.cdr.detectChanges();
               }, 50);
             },
@@ -188,32 +169,15 @@ export class EditClubDialog {
   }
 
   constructor() {
-    console.log('🏗️ EditClubDialog constructor:', {
-      isEditMode: this.isEditMode,
-      isClubActive: this.isClubActive,
-      clubData: this.data?.club,
-    });
-
     // Disable slug field when club is active to prevent changing deep links
     if (this.isClubActive) {
-      console.log('🔒 Disabling slug field for active club');
       this.clubForm.get('slug')?.disable();
     }
 
     // Auto-generate slug from name when creating a new club or when editing inactive clubs
     if (!this.isEditMode || !this.isClubActive) {
-      console.log('⚙️ Setting up slug auto-generation');
       this.setupSlugAutoGeneration();
     }
-
-    // Log initial form state
-    const slugControl = this.clubForm.get('slug');
-    console.log('📋 Initial slug control state:', {
-      value: slugControl?.value,
-      disabled: slugControl?.disabled,
-      validators: slugControl?.validator ? 'has sync validators' : 'no sync validators',
-      asyncValidators: slugControl?.asyncValidator ? 'has async validators' : 'no async validators',
-    });
   }
 
   /**
@@ -228,32 +192,17 @@ export class EditClubDialog {
       return;
     }
 
-    console.log('🔗 Setting up slug auto-generation subscription');
-
     // Only auto-generate if slug is empty or in create mode
     nameControl.valueChanges.subscribe((nameValue) => {
-      console.log('📝 Name changed:', nameValue);
-
       // Only auto-generate slug if it's currently empty or we're creating a new club
       if (!this.isEditMode || !slugControl.value) {
         const generatedSlug = generateSlugFromName(nameValue || '');
-        console.log('🔄 Generated slug:', generatedSlug);
 
         if (generatedSlug && generatedSlug !== slugControl.value) {
-          console.log('✏️ Setting new slug value and triggering validation');
           slugControl.setValue(generatedSlug);
           slugControl.markAsTouched();
           // Force validation to run after setting the value
           slugControl.updateValueAndValidity();
-
-          console.log('📋 After setValue - slug control state:', {
-            value: slugControl.value,
-            touched: slugControl.touched,
-            dirty: slugControl.dirty,
-            valid: slugControl.valid,
-            pending: slugControl.pending,
-            errors: slugControl.errors,
-          });
         }
       }
     });
@@ -301,35 +250,15 @@ export class EditClubDialog {
   }
 
   protected onSubmit(): void {
-    console.log('🚀 Form submission attempted');
-    console.log('📋 Form state:', {
-      valid: this.clubForm.valid,
-      invalid: this.clubForm.invalid,
-      pending: this.clubForm.pending,
-      status: this.clubForm.status,
-      errors: this.clubForm.errors,
-    });
-
     const slugControl = this.clubForm.get('slug');
-    console.log('🔗 Slug control state on submit:', {
-      value: slugControl?.value,
-      valid: slugControl?.valid,
-      invalid: slugControl?.invalid,
-      pending: slugControl?.pending,
-      errors: slugControl?.errors,
-      status: slugControl?.status,
-    });
 
     // Check if form is invalid OR has pending async validators
     if (this.clubForm.invalid || this.clubForm.pending) {
-      console.log('❌ Form validation failed - marking all as touched');
       this.clubForm.markAllAsTouched();
       // Trigger change detection to show errors
       this.cdr.markForCheck();
       return;
     }
-
-    console.log('✅ Form is valid, proceeding with submission');
 
     const formData: ClubFormData = this.clubForm.getRawValue();
     const logoFile = this.logoFile();
@@ -381,27 +310,6 @@ export class EditClubDialog {
 
     // Debug logging for slug field
     if (fieldName === 'slug') {
-      console.log('🔍 getErrorMessage for slug:', {
-        value: field.value,
-        valid: field.valid,
-        invalid: field.invalid,
-        touched: field.touched,
-        dirty: field.dirty,
-        pending: field.pending,
-        errors: field.errors,
-        status: field.status,
-      });
-      // Add delayed state check for debugging
-      setTimeout(() => {
-        console.log('🕐 Delayed slug control state check:', {
-          value: field.value,
-          valid: field.valid,
-          invalid: field.invalid,
-          pending: field.pending,
-          errors: field.errors,
-          status: field.status,
-        });
-      }, 100);
     }
 
     // For async validators, we need to check if the field is invalid and touched/dirty
@@ -410,14 +318,6 @@ export class EditClubDialog {
     const hasAsyncError = field.invalid && field.errors && 'slugNotUnique' in field.errors;
     const shouldShowError = field.invalid && (field.touched || field.dirty || hasAsyncError);
     const isPending = field.pending;
-
-    if (fieldName === 'slug') {
-      console.log('🎯 Slug error display logic:', {
-        shouldShowError,
-        isPending,
-        willReturn: shouldShowError || isPending,
-      });
-    }
 
     if (!shouldShowError && !isPending) {
       return '';
@@ -452,7 +352,6 @@ export class EditClubDialog {
       return 'Invalid format';
     }
     if (field.hasError('slugNotUnique')) {
-      console.log('🚨 Found slugNotUnique error, returning message');
       return 'This slug is already taken by another club';
     }
     return '';
