@@ -15,7 +15,7 @@ This application serves three main audiences:
 * Discover opportunities to participate in amateur radio
 
 **For Club Members:**
-* Find and join clubs by requesting membership
+* Confirm existing club memberships in the app
 * RSVP to attend or operate at club events
 * Upload QSO logs after events to track participation
 
