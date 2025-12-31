@@ -7,12 +7,21 @@ clubs in the Colorado Section plan and promote their events for the Year of the 
 
 ## Primary Use Cases
 
-This app exists to serve these use cases:
+This application serves three main audiences:
 
-* Let amateur radio clubs publish events.
-* Let club operators express interest in operating for the events.
-* Let the public know when these club events are happening.
-* Let event operators upload their QSO logs after the event.
-* Track contest standings.
+**For the Public:**
+* Browse all active clubs in the Colorado Section
+* View upcoming events and activities in a calendar
+* Discover opportunities to participate in amateur radio
 
-To enable these use cases, there are a number of ancilliary flows related to registering users, creating clubs, associating users to clubs, and other administrative tasks.
+**For Club Members:**
+* Find and join clubs by requesting membership
+* RSVP to attend or operate at club events
+* Upload QSO logs after events to track participation
+
+**For Club Leaders:**
+* Manage club information and membership
+* Create and promote events throughout the year
+* Coordinate club activities and track participation
+
+The platform also includes administrative capabilities for managing clubs, assigning roles, and maintaining the overall system integrity.
