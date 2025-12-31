@@ -4,7 +4,7 @@ import {
   signal,
   inject,
 } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators, AsyncValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -13,7 +13,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Club } from '@arrl-co-yotc/shared/build/app/models/club.model';
 import { StorageService } from '../../services/storage.service';
-import { catchError, of } from 'rxjs';
+import { ClubService } from '../../services/club.service';
+import { catchError, of, map, Observable } from 'rxjs';
 
 export interface EditClubDialogData {
   club?: Club;
@@ -41,6 +42,7 @@ export class EditClubDialog {
   private fb = inject(FormBuilder);
   private dialogRef = inject(MatDialogRef<EditClubDialog>);
   private storageService = inject(StorageService);
+  private clubService = inject(ClubService);
   protected data = inject<EditClubDialogData>(MAT_DIALOG_DATA, { optional: true });
 
   protected readonly submitting = signal(false);
@@ -64,6 +66,7 @@ export class EditClubDialog {
     slug: [
       this.data?.club?.slug || '',
       [Validators.required, Validators.pattern(/^[a-z0-9-]*$/), Validators.maxLength(100)],
+      [this.uniqueSlugValidator()],
     ],
     description: [
       this.data?.club?.description || '',
@@ -78,6 +81,37 @@ export class EditClubDialog {
       [Validators.pattern(/^https?:\/\/[^\s\/$.?#].[^\s]*$/i), Validators.maxLength(200)],
     ],
   });
+
+  /**
+   * Async validator to check if slug is unique
+   * Returns null if slug is unique or if it's the current club's slug
+   * Returns { slugNotUnique: true } if slug is already taken by another club
+   */
+  private uniqueSlugValidator(): AsyncValidatorFn {
+    return (control: AbstractControl): Observable<ValidationErrors | null> => {
+      if (!control.value) {
+        return of(null);
+      }
+
+      return this.clubService.getClubBySlug(control.value).pipe(
+        map((existingClub) => {
+          // If no club found with this slug, it's unique
+          if (!existingClub) {
+            return null;
+          }
+
+          // If in edit mode and the club with this slug is the current club, it's valid
+          if (this.data?.club?.id && existingClub.id === this.data.club.id) {
+            return null;
+          }
+
+          // Otherwise, slug is not unique
+          return { slugNotUnique: true };
+        }),
+        catchError(() => of(null)) // On error, allow the slug (fail open)
+      );
+    };
+  }
 
   constructor() {
     // Disable slug field when club is active to prevent changing deep links
@@ -201,6 +235,9 @@ export class EditClubDialog {
         return 'Only lowercase letters, numbers, and hyphens allowed';
       }
       return 'Invalid format';
+    }
+    if (field.hasError('slugNotUnique')) {
+      return 'This slug is already taken by another club';
     }
     return '';
   }
