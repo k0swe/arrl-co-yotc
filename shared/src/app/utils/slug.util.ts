@@ -13,7 +13,7 @@ export function generateSlugFromName(clubName: string): string {
   }
 
   // Split by spaces, hyphens, and other word separators, then filter out empty strings
-  const words = clubName.trim().split(/[\s-]+/);
+  const words = clubName.trim().split(/[\s-]+/).filter(word => word.length > 0);
 
   // Take the first letter of each word, convert to lowercase
   const slug = words

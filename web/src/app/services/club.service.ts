@@ -109,14 +109,13 @@ export class ClubService {
    * The slug will be generated from the club name (first letter of each word)
    */
   suggestClub(suggestion: Partial<Club>, userId: string): Observable<void> {
-    const slug = generateSlugFromName(suggestion.name || '');
     const clubData = {
       name: suggestion.name,
       callsign: suggestion.callsign,
       description: suggestion.description,
       location: suggestion.location,
       website: suggestion.website,
-      slug: slug || '', // Use generated slug or empty string if name is empty
+      slug: generateSlugFromName(suggestion.name || ''),
       isActive: false,
       suggestedBy: userId,
       leaderIds: [],
