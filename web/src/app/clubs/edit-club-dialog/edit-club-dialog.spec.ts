@@ -277,4 +277,103 @@ describe('EditClubDialog', () => {
       expect(slugControl?.disabled).toBeFalsy();
     });
   });
+
+  describe('Approval mode (with pending club)', () => {
+    const pendingClub: Club = {
+      id: 'pending-id',
+      name: 'Pending Club',
+      callsign: 'W0PEND',
+      description: 'A pending club for testing',
+      location: 'Fort Collins, CO',
+      slug: 'pending-club',
+      isActive: false,
+      leaderIds: [],
+      suggestedBy: 'user123',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    beforeEach(async () => {
+      mockDialogRef = {
+        close: vi.fn(),
+      };
+
+      mockStorage = {};
+
+      const dialogData: EditClubDialogData = { club: pendingClub, isApprovalMode: true };
+
+      await TestBed.configureTestingModule({
+        imports: [EditClubDialog],
+        providers: [
+          { provide: MatDialogRef, useValue: mockDialogRef },
+          { provide: MAT_DIALOG_DATA, useValue: dialogData },
+          { provide: Storage, useValue: mockStorage },
+          provideAnimations(),
+        ],
+      }).compileComponents();
+
+      fixture = TestBed.createComponent(EditClubDialog);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+    });
+
+    it('should create', () => {
+      expect(component).toBeTruthy();
+    });
+
+    it('should be in approval mode', () => {
+      expect(component['isApprovalMode']).toBeTruthy();
+    });
+
+    it('should be in edit mode when in approval mode', () => {
+      expect(component['isEditMode']).toBeTruthy();
+    });
+
+    it('should pre-fill form with pending club data', () => {
+      const form = component['clubForm'];
+
+      expect(form.get('name')?.value).toBe(pendingClub.name);
+      expect(form.get('callsign')?.value).toBe(pendingClub.callsign);
+      expect(form.get('slug')?.value).toBe(pendingClub.slug);
+      expect(form.get('description')?.value).toBe(pendingClub.description);
+      expect(form.get('location')?.value).toBe(pendingClub.location);
+    });
+
+    it('should allow editing slug field when club is pending', () => {
+      const slugControl = component['clubForm'].get('slug');
+      expect(slugControl?.disabled).toBeFalsy();
+    });
+
+    it('should require all fields to be valid before submission', () => {
+      const form = component['clubForm'];
+      
+      // Clear description to make form invalid
+      form.patchValue({ description: '' });
+      expect(form.valid).toBeFalsy();
+
+      component['onSubmit']();
+      expect(mockDialogRef.close).not.toHaveBeenCalled();
+    });
+
+    it('should close dialog with validated data on submit', () => {
+      const form = component['clubForm'];
+
+      // Update some fields
+      form.patchValue({
+        name: 'Validated Club Name',
+        description: 'This club has been reviewed and validated by an admin',
+      });
+
+      component['onSubmit']();
+
+      expect(mockDialogRef.close).toHaveBeenCalledWith({
+        name: 'Validated Club Name',
+        callsign: pendingClub.callsign,
+        slug: pendingClub.slug,
+        description: 'This club has been reviewed and validated by an admin',
+        location: pendingClub.location,
+        website: '',
+      });
+    });
+  });
 });
