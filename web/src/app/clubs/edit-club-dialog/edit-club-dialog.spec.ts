@@ -5,7 +5,7 @@ import { EditClubDialog, EditClubDialogData } from './edit-club-dialog';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { Club } from '@arrl-co-yotc/shared/build/app/models/club.model';
 import { ClubService } from '../../services/club.service';
-import { of, throwError } from 'rxjs';
+import { of, throwError, NEVER } from 'rxjs';
 
 describe('EditClubDialog', () => {
   let component: EditClubDialog;
@@ -427,7 +427,7 @@ describe('EditClubDialog', () => {
       mockStorage = {};
 
       mockClubService = {
-        getClubBySlug: vi.fn(),
+        getClubBySlug: vi.fn().mockReturnValue(of(null)), // Default: slug is unique
       };
 
       await TestBed.configureTestingModule({
@@ -589,8 +589,8 @@ describe('EditClubDialog', () => {
       expect(slugControl?.hasError('slugNotUnique')).toBeTruthy();
     });
 
-    it('should show error message for pending async validation', () => {
-      mockClubService.getClubBySlug.mockReturnValue(new Promise(() => {})); // Never resolves
+    it('should show error message for pending async validation', async () => {
+      mockClubService.getClubBySlug.mockReturnValue(NEVER); // Observable that never completes
 
       fixture = TestBed.createComponent(EditClubDialog);
       component = fixture.componentInstance;
@@ -598,6 +598,9 @@ describe('EditClubDialog', () => {
 
       const slugControl = component['clubForm'].get('slug');
       slugControl?.setValue('checking-slug');
+      
+      // Wait for debounce but not for completion
+      await new Promise(resolve => setTimeout(resolve, 350));
       
       // While async validation is pending
       expect(slugControl?.pending).toBeTruthy();
