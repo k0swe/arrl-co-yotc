@@ -23,7 +23,7 @@ export interface Club {
   /** Club logo image URL stored in Firebase Storage */
   logoUrl?: string;
 
-  /** URL-friendly slug for the club (used in routes, defaults to document ID) */
+  /** URL-friendly slug for the club (used in routes, generated from first letter of each word in club name) */
   slug: string;
 
   /** Whether the club is currently active */
