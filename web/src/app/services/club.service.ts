@@ -15,6 +15,7 @@ import {
 import { from, Observable, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { Club } from '@arrl-co-yotc/shared/build/app/models/club.model';
+import { generateSlugFromName } from '@arrl-co-yotc/shared/build/app/utils/slug.util';
 
 /**
  * Service for managing club data from Firestore.
@@ -105,16 +106,17 @@ export class ClubService {
   /**
    * Submit a suggestion for a new club
    * Creates an inactive club that requires admin approval
-   * The slug will be set to the Firestore-generated document ID
+   * The slug will be generated from the club name (first letter of each word)
    */
   suggestClub(suggestion: Partial<Club>, userId: string): Observable<void> {
+    const slug = generateSlugFromName(suggestion.name || '');
     const clubData = {
       name: suggestion.name,
       callsign: suggestion.callsign,
       description: suggestion.description,
       location: suggestion.location,
       website: suggestion.website,
-      slug: '', // Will be updated to document ID after creation
+      slug: slug || '', // Use generated slug or empty string if name is empty
       isActive: false,
       suggestedBy: userId,
       leaderIds: [],
@@ -122,10 +124,7 @@ export class ClubService {
       updatedAt: serverTimestamp(),
     };
     return from(
-      addDoc(this.clubsCollection, clubData).then((docRef) => {
-        // Update the slug to match the document ID
-        return updateDoc(docRef, { slug: docRef.id }).then(() => void 0);
-      }),
+      addDoc(this.clubsCollection, clubData).then(() => void 0),
     );
   }
 
