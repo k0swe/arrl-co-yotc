@@ -149,4 +149,18 @@ describe('App', () => {
     expect(spy).toHaveBeenCalledWith('club1');
     expect(spy).toHaveBeenCalledWith('club2');
   });
+
+  it('should have bug reports and feature requests link in sidenav', async () => {
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const compiled = fixture.nativeElement as HTMLElement;
+    const bugReportLink = compiled.querySelector(
+      'a[href="https://github.com/k0swe/arrl-co-yotc/issues"]'
+    );
+    expect(bugReportLink).toBeTruthy();
+    expect(bugReportLink?.getAttribute('target')).toBe('_blank');
+    expect(bugReportLink?.getAttribute('rel')).toBe('noopener noreferrer');
+    expect(bugReportLink?.textContent).toContain('Bug reports and feature requests');
+  });
 });
