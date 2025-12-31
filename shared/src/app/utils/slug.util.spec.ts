@@ -47,6 +47,6 @@ describe('generateSlugFromName', () => {
   });
 
   it('should handle special characters at word boundaries', () => {
-    expect(generateSlugFromName('Mile-High Radio Club')).toBe('mrc');
+    expect(generateSlugFromName('Mile-High Radio Club')).toBe('mhrc');
   });
 });
