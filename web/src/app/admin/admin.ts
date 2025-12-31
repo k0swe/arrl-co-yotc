@@ -160,7 +160,7 @@ export class Admin {
       });
   }
 
-  protected acceptClub(club: Club): void {
+  protected approveClub(club: Club): void {
     const dialogRef = this.dialog.open(EditClubDialog, {
       width: '600px',
       data: { club, isApprovalMode: true },
