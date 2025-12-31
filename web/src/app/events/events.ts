@@ -61,7 +61,10 @@ export class Events {
           // Fetch all club details
           const clubRequests = clubIds.map((clubId) =>
             this.clubService.getClubById(clubId).pipe(
-              catchError(() => of(null))
+              catchError((error) => {
+                console.error(`Error loading club ${clubId}:`, error);
+                return of(null);
+              })
             )
           );
 
@@ -77,7 +80,7 @@ export class Events {
               // Combine events with their club information
               return events.map((event) => ({
                 ...event,
-                club: clubMap.get(event.clubId) || undefined,
+                club: clubMap.get(event.clubId) ?? undefined,
               }));
             })
           );
