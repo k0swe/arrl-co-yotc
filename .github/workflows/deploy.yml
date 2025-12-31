@@ -21,7 +21,7 @@ jobs:
       id-token: write
 
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v6
 
       - name: Setup node
@@ -33,13 +33,11 @@ jobs:
             shared/package-lock.json
             web/package-lock.json
 
-      - name: Install shared dependencies
+      - name: Install and build shared module
         working-directory: shared
-        run: npm ci
-
-      - name: Build shared package
-        working-directory: shared
-        run: npm run build
+        run: |
+          npm ci
+          npm run build
 
       - name: Install dependencies
         working-directory: web
@@ -58,4 +56,4 @@ jobs:
       - name: Deploy to Firebase
         env:
           FIREBASE_CLI_EXPERIMENTS: webframeworks
-        run: firebase deploy --project arrl-co-yotc
+        run: firebase deploy --only hosting,firestore:rules,firestore:indexes --project arrl-co-yotc
