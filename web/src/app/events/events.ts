@@ -11,7 +11,7 @@ import { ClubService } from '../services/club.service';
 import { Event } from '@arrl-co-yotc/shared/build/app/models/event.model';
 import { Club } from '@arrl-co-yotc/shared/build/app/models/club.model';
 import { catchError, forkJoin, of } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, switchMap } from 'rxjs/operators';
 
 interface EventWithClub extends Event {
   club?: Club;
@@ -49,7 +49,12 @@ export class Events {
     this.eventService
       .getAllEvents()
       .pipe(
-        map((events) => {
+        switchMap((events) => {
+          // If no events, return empty array
+          if (events.length === 0) {
+            return of([]);
+          }
+
           // Get unique club IDs
           const clubIds = [...new Set(events.map((event) => event.clubId))];
           
@@ -60,7 +65,7 @@ export class Events {
             )
           );
 
-          // Wait for all club details to load
+          // Wait for all club details to load, then combine with events
           return forkJoin(clubRequests).pipe(
             map((clubs) => {
               // Create a map of club ID to club object
@@ -79,16 +84,13 @@ export class Events {
         }),
         catchError((error) => {
           console.error('Error loading events:', error);
-          this.loading.set(false);
-          return of(of([]));
+          return of([]);
         }),
         takeUntilDestroyed(this.destroyRef)
       )
-      .subscribe((eventsObservable) => {
-        eventsObservable.subscribe((eventsWithClubs) => {
-          this.events.set(eventsWithClubs);
-          this.loading.set(false);
-        });
+      .subscribe((eventsWithClubs) => {
+        this.events.set(eventsWithClubs);
+        this.loading.set(false);
       });
   }
 
