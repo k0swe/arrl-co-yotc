@@ -95,9 +95,9 @@ System administrators maintain platform integrity:
 
 ### Club Membership
 
-1. Users search for and select clubs they want to join
-2. Users request membership confirmation
-3. Club leaders review and approve membership requests
+1. Users join clubs through the club's own membership application and fee process (outside this app)
+2. Users search for their clubs in the app and request membership confirmation
+3. Club leaders review and confirm existing memberships
 4. Confirmed members can participate in club events
 
 ### Club Suggestions
