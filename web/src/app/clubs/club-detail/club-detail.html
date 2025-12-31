@@ -26,12 +26,8 @@
       }
     </app-club-card>
 
-    @if (canEdit()) {
-      <app-membership-requests [clubId]="clubData.id" />
-    }
-
     @if (canViewMembers()) {
-      <app-active-members [clubId]="clubData.id" [clubLeaderIds]="clubData.leaderIds" />
+      <app-members [clubId]="clubData.id" [clubLeaderIds]="clubData.leaderIds" />
     }
 
     <app-event-list [clubId]="clubData.id" [canEdit]="canEdit()" />

@@ -1,4 +1,4 @@
-.membership-requests-card {
+.members-card {
   margin-top: 1.5rem;
 }
 
@@ -30,6 +30,28 @@ mat-card-title {
   color: var(--mdc-theme-primary, #1976d2);
 }
 
+.section {
+  margin-bottom: 1rem;
+}
+
+.section:last-child {
+  margin-bottom: 0;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  margin: 1rem 0 0.5rem 0;
+  color: var(--mdc-theme-text-secondary-on-background, rgba(0, 0, 0, 0.6));
+}
+
+.section-divider {
+  margin: 1rem 0;
+}
+
 .membership-item {
   display: flex;
   justify-content: space-between;
@@ -46,6 +68,14 @@ mat-card-title {
   flex: 1;
 }
 
+.member-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 0.75rem 0;
+  gap: 1rem;
+}
+
 .user-icon {
   color: var(--mdc-theme-text-secondary-on-background, rgba(0, 0, 0, 0.6));
 }
@@ -54,6 +84,7 @@ mat-card-title {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  flex: 1;
 }
 
 .user-name {
@@ -65,6 +96,20 @@ mat-card-title {
   color: var(--mdc-theme-text-secondary-on-background, rgba(0, 0, 0, 0.6));
 }
 
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+  color: var(--mdc-theme-primary, #1976d2);
+}
+
+.role-icon {
+  font-size: 1rem;
+  width: 1rem;
+  height: 1rem;
+}
+
 .membership-actions {
   display: flex;
   gap: 0.5rem;
@@ -73,6 +118,12 @@ mat-card-title {
 
 .membership-actions button {
   min-width: 100px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  margin-left: auto;
 }
 
 @media (max-width: 600px) {
@@ -88,5 +139,15 @@ mat-card-title {
 
   .membership-actions button {
     flex: 1;
+  }
+
+  .member-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .action-buttons {
+    margin-left: 0;
+    align-self: flex-end;
   }
 }

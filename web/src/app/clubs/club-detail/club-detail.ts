@@ -12,8 +12,7 @@ import { MembershipService } from '../../services/membership.service';
 import { AuthService } from '../../auth/auth.service';
 import { ClubCard } from '../club-card/club-card';
 import { EditClubDialog, ClubFormData } from '../edit-club-dialog/edit-club-dialog';
-import { MembershipRequests } from './membership-requests/membership-requests';
-import { ActiveMembers } from './active-members/active-members';
+import { Members } from './members/members';
 import { EventList } from './event-list/event-list';
 import { Club } from '@arrl-co-yotc/shared/build/app/models/club.model';
 import { MembershipStatus } from '@arrl-co-yotc/shared/build/app/models/user.model';
@@ -29,8 +28,7 @@ import { catchError, of, switchMap } from 'rxjs';
     MatDialogModule,
     MatSnackBarModule,
     ClubCard,
-    MembershipRequests,
-    ActiveMembers,
+    Members,
     EventList,
   ],
   templateUrl: './club-detail.html',

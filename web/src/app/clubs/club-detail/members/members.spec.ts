@@ -3,16 +3,16 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
 import { provideAuth, getAuth, connectAuthEmulator } from '@angular/fire/auth';
 import { provideFirestore, getFirestore, connectFirestoreEmulator } from '@angular/fire/firestore';
-import { ActiveMembers } from './active-members';
+import { Members } from './members';
 import { firebaseTestConfig } from '../../../firebase-test.config';
 import { MembershipService } from '../../../services/membership.service';
 import { UserService } from '../../../services/user.service';
 import { ClubService } from '../../../services/club.service';
 import { AuthService } from '../../../auth/auth.service';
 
-describe('ActiveMembers', () => {
-  let component: ActiveMembers;
-  let fixture: ComponentFixture<ActiveMembers>;
+describe('Members', () => {
+  let component: Members;
+  let fixture: ComponentFixture<Members>;
   let membershipService: MembershipService;
   let userService: UserService;
   let clubService: ClubService;
@@ -20,7 +20,7 @@ describe('ActiveMembers', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ActiveMembers],
+      imports: [Members],
       providers: [
         provideAnimationsAsync(),
         provideFirebaseApp(() => initializeApp(firebaseTestConfig)),
@@ -37,7 +37,7 @@ describe('ActiveMembers', () => {
       ],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(ActiveMembers);
+    fixture = TestBed.createComponent(Members);
     component = fixture.componentInstance;
     membershipService = TestBed.inject(MembershipService);
     userService = TestBed.inject(UserService);
@@ -71,8 +71,54 @@ describe('ActiveMembers', () => {
     expect(Array.isArray(component['activeMembersWithUsers']())).toBe(true);
   });
 
+  it('should have pendingMembershipsWithUsers signal', () => {
+    expect(component['pendingMembershipsWithUsers']).toBeDefined();
+    expect(Array.isArray(component['pendingMembershipsWithUsers']())).toBe(true);
+  });
+
   it('should have canManageRoles computed signal', () => {
     expect(component['canManageRoles']).toBeDefined();
     expect(typeof component['canManageRoles']()).toBe('boolean');
+  });
+
+  it('should have canApproveMemberships computed signal', () => {
+    expect(component['canApproveMemberships']).toBeDefined();
+    expect(typeof component['canApproveMemberships']()).toBe('boolean');
+  });
+
+  it('should allow admins to manage roles', () => {
+    authService.isAdmin.set(true);
+    expect(component['canManageRoles']()).toBe(true);
+  });
+
+  it('should not allow non-admins to manage roles', () => {
+    authService.isAdmin.set(false);
+    expect(component['canManageRoles']()).toBe(false);
+  });
+
+  it('should allow admins to approve memberships', () => {
+    authService.isAdmin.set(true);
+    authService.currentUser.set({ uid: 'test-user-id' } as any);
+    expect(component['canApproveMemberships']()).toBe(true);
+  });
+
+  it('should allow club leaders to approve memberships', () => {
+    authService.isAdmin.set(false);
+    authService.currentUser.set({ uid: 'test-user-id' } as any);
+    fixture.componentRef.setInput('clubLeaderIds', ['test-user-id']);
+    expect(component['canApproveMemberships']()).toBe(true);
+  });
+
+  it('should not allow non-leaders/non-admins to approve memberships', () => {
+    authService.isAdmin.set(false);
+    authService.currentUser.set({ uid: 'test-user-id' } as any);
+    fixture.componentRef.setInput('clubLeaderIds', ['other-user-id']);
+    expect(component['canApproveMemberships']()).toBe(false);
+  });
+
+  it('should not allow unauthenticated users to approve memberships', () => {
+    authService.isAdmin.set(false);
+    authService.currentUser.set(null);
+    expect(component['canApproveMemberships']()).toBe(false);
   });
 });
