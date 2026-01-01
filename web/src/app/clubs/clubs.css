@@ -43,10 +43,6 @@ mat-chip {
     padding: 1rem;
   }
 
-  .page-header h1 {
-    font-size: 2rem;
-  }
-
   .clubs-grid {
     grid-template-columns: 1fr;
   }
