@@ -129,16 +129,20 @@ export class EditClubDialog {
       return new Observable<ValidationErrors | null>((observer) => {
         // Debounce the API call
         const timeout = setTimeout(() => {
-          this.clubService.getClubBySlug(value).subscribe({
-            next: (existingClub) => {
+          this.clubService.getAllClubsBySlug(value).subscribe({
+            next: (existingClubs) => {
               let result: ValidationErrors | null = null;
 
-              if (existingClub) {
-                // If in edit mode and the club with this slug is the current club, it's valid
-                if (this.data?.club?.id && existingClub.id === this.data.club.id) {
-                  result = null;
-                } else {
+              if (existingClubs.length > 0) {
+                // Check if any of the clubs with this slug are NOT the current club
+                const otherClubs = existingClubs.filter(
+                  (club) => !this.data?.club?.id || club.id !== this.data.club.id
+                );
+
+                if (otherClubs.length > 0) {
                   result = { slugNotUnique: true };
+                } else {
+                  result = null;
                 }
               } else {
                 result = null;
@@ -153,7 +157,7 @@ export class EditClubDialog {
               }, 50);
             },
             error: (error) => {
-              console.error('💥 Async validator error:', error);
+              console.error('💥 [Slug Validator] Firestore query error:', error);
               observer.next(null); // Fail open
               observer.complete();
             },
@@ -193,19 +197,42 @@ export class EditClubDialog {
     }
 
     // Only auto-generate if slug is empty or in create mode
-    nameControl.valueChanges.subscribe((nameValue) => {
-      // Only auto-generate slug if it's currently empty or we're creating a new club
-      if (!this.isEditMode || !slugControl.value) {
-        const generatedSlug = generateSlugFromName(nameValue || '');
-
-        if (generatedSlug && generatedSlug !== slugControl.value) {
-          slugControl.setValue(generatedSlug);
-          slugControl.markAsTouched();
-          // Force validation to run after setting the value
-          slugControl.updateValueAndValidity();
+    nameControl.valueChanges
+      .pipe(
+        debounceTime(300), // Debounce name changes
+        distinctUntilChanged() // Only emit when name actually changes
+      )
+      .subscribe((nameValue) => {
+        // Only auto-generate slug if it's currently empty or we're creating a new club
+        if (!this.isEditMode || !slugControl.value) {
+          if (nameValue && nameValue.trim()) {
+            // Generate unique slug from the name
+            this.clubService.generateUniqueSlug(nameValue, this.data?.club?.id).subscribe({
+              next: (uniqueSlug) => {
+                if (uniqueSlug && uniqueSlug !== slugControl.value) {
+                  slugControl.setValue(uniqueSlug);
+                  slugControl.markAsTouched();
+                  // Force validation to run after setting the value
+                  slugControl.updateValueAndValidity();
+                }
+              },
+              error: (error) => {
+                console.error('Error generating unique slug:', error);
+                // Fallback to basic generation if service fails
+                const fallbackSlug = generateSlugFromName(nameValue);
+                if (fallbackSlug && fallbackSlug !== slugControl.value) {
+                  slugControl.setValue(fallbackSlug);
+                  slugControl.markAsTouched();
+                  slugControl.updateValueAndValidity();
+                }
+              },
+            });
+          } else {
+            // Clear slug if name is empty
+            slugControl.setValue('');
+          }
         }
-      }
-    });
+      });
   }
 
   protected onCancel(): void {
@@ -306,10 +333,6 @@ export class EditClubDialog {
     const field = this.clubForm.get(fieldName);
     if (!field) {
       return '';
-    }
-
-    // Debug logging for slug field
-    if (fieldName === 'slug') {
     }
 
     // For async validators, we need to check if the field is invalid and touched/dirty

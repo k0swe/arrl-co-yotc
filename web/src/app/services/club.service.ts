@@ -66,6 +66,81 @@ export class ClubService {
   }
 
   /**
+   * Get all clubs with a specific slug (for uniqueness validation)
+   */
+  getAllClubsBySlug(slug: string): Observable<Club[]> {
+    const q = query(this.clubsCollection, where('slug', '==', slug));
+    return collectionData(q, { idField: 'id' }) as Observable<Club[]>;
+  }
+
+  /**
+   * Generate a unique slug from a club name, handling collisions by appending numbers
+   * @param clubName The club name to generate a slug from
+   * @param excludeClubId Optional club ID to exclude from collision detection (for editing existing clubs)
+   * @returns Observable that emits a unique slug
+   */
+  generateUniqueSlug(clubName: string, excludeClubId?: string): Observable<string> {
+    const baseSlug = generateSlugFromName(clubName);
+    
+    if (!baseSlug) {
+      // If we can't generate a base slug, return a random one
+      return of(`club-${Math.random().toString(36).substr(2, 6)}`);
+    }
+
+    // Check if the base slug is available
+    return this.getAllClubsBySlug(baseSlug).pipe(
+      switchMap((existingClubs) => {
+        // Filter out the current club if editing
+        const conflictingClubs = existingClubs.filter(club => 
+          !excludeClubId || club.id !== excludeClubId
+        );
+        
+        if (conflictingClubs.length === 0) {
+          // Base slug is available
+          return of(baseSlug);
+        }
+        
+        // Base slug is taken, try numbered variants
+        return this.findAvailableNumberedSlug(baseSlug, excludeClubId);
+      })
+    );
+  }
+
+  /**
+   * Find an available slug by appending numbers (slug2, slug3, etc.)
+   */
+  private findAvailableNumberedSlug(baseSlug: string, excludeClubId?: string): Observable<string> {
+    const maxAttempts = 100; // Prevent infinite loops
+    
+    const checkSlug = (attempt: number): Observable<string> => {
+      if (attempt > maxAttempts) {
+        // Fallback to random suffix if we can't find a numbered one
+        const randomSuffix = Math.random().toString(36).substr(2, 4);
+        return of(`${baseSlug}-${randomSuffix}`);
+      }
+      
+      const candidateSlug = `${baseSlug}${attempt}`;
+      
+      return this.getAllClubsBySlug(candidateSlug).pipe(
+        switchMap((existingClubs) => {
+          const conflictingClubs = existingClubs.filter(club => 
+            !excludeClubId || club.id !== excludeClubId
+          );
+          
+          if (conflictingClubs.length === 0) {
+            return of(candidateSlug);
+          }
+          
+          // Try next number
+          return checkSlug(attempt + 1);
+        })
+      );
+    };
+    
+    return checkSlug(2); // Start with slug2
+  }
+
+  /**
    * Get a specific club by slug or ID
    * Tries to fetch by slug first, falls back to ID if slug lookup fails
    */
@@ -106,24 +181,29 @@ export class ClubService {
   /**
    * Submit a suggestion for a new club
    * Creates an inactive club that requires admin approval
-   * The slug will be generated from the club name (first letter of each word)
+   * The slug will be generated from the club name and guaranteed to be unique
    */
   suggestClub(suggestion: Partial<Club>, userId: string): Observable<void> {
-    const clubData = {
-      name: suggestion.name,
-      callsign: suggestion.callsign,
-      description: suggestion.description,
-      location: suggestion.location,
-      website: suggestion.website,
-      slug: generateSlugFromName(suggestion.name || ''),
-      isActive: false,
-      suggestedBy: userId,
-      leaderIds: [],
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-    };
-    return from(
-      addDoc(this.clubsCollection, clubData).then(() => void 0),
+    // Generate a unique slug first
+    return this.generateUniqueSlug(suggestion.name || '').pipe(
+      switchMap((uniqueSlug) => {
+        const clubData = {
+          name: suggestion.name,
+          callsign: suggestion.callsign,
+          description: suggestion.description,
+          location: suggestion.location,
+          website: suggestion.website,
+          slug: uniqueSlug,
+          isActive: false,
+          suggestedBy: userId,
+          leaderIds: [],
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        };
+        return from(
+          addDoc(this.clubsCollection, clubData).then(() => void 0),
+        );
+      })
     );
   }
 
