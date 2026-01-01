@@ -96,10 +96,10 @@ describe('EditClubDialog', () => {
 
       component['onSubmit']();
 
+      // In create mode, slug is not included - it defaults to document ID
       const expectedData: Partial<Club> = {
         name: 'Test Club',
         callsign: 'W0TEST',
-        slug: 'test-club',
         description: 'A test club for testing purposes',
         location: 'Denver, CO',
         website: '',
@@ -684,112 +684,4 @@ describe('EditClubDialog', () => {
     });
   });
 
-  describe('Automatic slug generation', () => {
-    beforeEach(async () => {
-      mockDialogRef = {
-        close: vi.fn(),
-      };
-
-      mockStorage = {};
-
-      mockClubService = {
-        getClubBySlug: vi.fn().mockReturnValue(of(null)), // Default: slug is unique
-      };
-
-      await TestBed.configureTestingModule({
-        imports: [EditClubDialog],
-        providers: [
-          { provide: MatDialogRef, useValue: mockDialogRef },
-          { provide: MAT_DIALOG_DATA, useValue: null },
-          { provide: Storage, useValue: mockStorage },
-          { provide: ClubService, useValue: mockClubService },
-          provideAnimations(),
-        ],
-      }).compileComponents();
-    });
-
-    it('should auto-generate slug when name changes in create mode', () => {
-      fixture = TestBed.createComponent(EditClubDialog);
-      component = fixture.componentInstance;
-      fixture.detectChanges();
-
-      const nameControl = component['clubForm'].get('name');
-      const slugControl = component['clubForm'].get('slug');
-
-      nameControl?.setValue('Denver Amateur Radio Club');
-
-      // Expect acronym-style slug (first letter of each word)
-      expect(slugControl?.value).toBe('darc');
-      expect(slugControl?.touched).toBeTruthy();
-    });
-
-    it('should not auto-generate slug if slug field already has a value in edit mode', () => {
-      const existingClub: Club = {
-        id: 'existing-id',
-        name: 'Existing Club',
-        callsign: 'W0EXIST',
-        description: 'An existing club',
-        location: 'Denver, CO',
-        slug: 'existing-slug',
-        isActive: false,
-        leaderIds: [],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
-      const dialogData: EditClubDialogData = { club: existingClub };
-
-      TestBed.overrideProvider(MAT_DIALOG_DATA, { useValue: dialogData });
-
-      fixture = TestBed.createComponent(EditClubDialog);
-      component = fixture.componentInstance;
-      fixture.detectChanges();
-
-      const nameControl = component['clubForm'].get('name');
-      const slugControl = component['clubForm'].get('slug');
-
-      // Slug should be pre-populated from existing club
-      expect(slugControl?.value).toBe('existing-slug');
-
-      // Changing name should not update slug since it already has a value
-      nameControl?.setValue('Updated Club Name');
-      
-      expect(slugControl?.value).toBe('existing-slug');
-    });
-
-    it('should auto-generate slug if slug field is empty even in edit mode', () => {
-      const existingClub: Club = {
-        id: 'existing-id',
-        name: 'Existing Club',
-        callsign: 'W0EXIST',
-        description: 'An existing club',
-        location: 'Denver, CO',
-        slug: '', // Empty slug
-        isActive: false,
-        leaderIds: [],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
-      const dialogData: EditClubDialogData = { club: existingClub };
-
-      TestBed.overrideProvider(MAT_DIALOG_DATA, { useValue: dialogData });
-
-      fixture = TestBed.createComponent(EditClubDialog);
-      component = fixture.componentInstance;
-      fixture.detectChanges();
-
-      const nameControl = component['clubForm'].get('name');
-      const slugControl = component['clubForm'].get('slug');
-
-      // Should start empty
-      expect(slugControl?.value).toBe('');
-
-      // Changing name should generate slug since current slug is empty
-      nameControl?.setValue('Boulder Amateur Radio Club');
-      
-      // Expect acronym-style slug (first letter of each word)
-      expect(slugControl?.value).toBe('barc');
-    });
-  });
 });

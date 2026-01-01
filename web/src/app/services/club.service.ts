@@ -15,7 +15,6 @@ import {
 import { from, Observable, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { Club } from '@arrl-co-yotc/shared/build/app/models/club.model';
-import { generateSlugFromName } from '@arrl-co-yotc/shared/build/app/utils/slug.util';
 
 /**
  * Service for managing club data from Firestore.
@@ -46,7 +45,7 @@ export class ClubService {
           return { id: docSnapshot.id, ...docSnapshot.data() } as Club;
         }
         return null;
-      }),
+      })
     );
   }
 
@@ -61,7 +60,7 @@ export class ClubService {
           return clubs[0];
         }
         return null;
-      }),
+      })
     );
   }
 
@@ -72,14 +71,14 @@ export class ClubService {
   getClubBySlugOrId(slugOrId: string): Observable<Club | null> {
     // First try to get by slug
     return this.getClubBySlug(slugOrId).pipe(
-      switchMap((club) => {
+      switchMap((club: Club | null) => {
         // If found by slug, return it
         if (club) {
           return of(club);
         }
         // Otherwise try by ID
         return this.getClubById(slugOrId);
-      }),
+      })
     );
   }
 
@@ -98,7 +97,7 @@ export class ClubService {
     const q = query(
       this.clubsCollection,
       where('isActive', '==', false),
-      orderBy('createdAt', 'desc'),
+      orderBy('createdAt', 'desc')
     );
     return collectionData(q, { idField: 'id' }) as Observable<Club[]>;
   }
@@ -106,7 +105,7 @@ export class ClubService {
   /**
    * Submit a suggestion for a new club
    * Creates an inactive club that requires admin approval
-   * The slug will be generated from the club name (first letter of each word)
+   * The slug will be set to the document ID to guarantee uniqueness
    */
   suggestClub(suggestion: Partial<Club>, userId: string): Observable<void> {
     const clubData = {
@@ -115,15 +114,21 @@ export class ClubService {
       description: suggestion.description,
       location: suggestion.location,
       website: suggestion.website,
-      slug: generateSlugFromName(suggestion.name || ''),
+      slug: '', // Will be updated to document ID after creation
       isActive: false,
       suggestedBy: userId,
       leaderIds: [],
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     };
+
     return from(
-      addDoc(this.clubsCollection, clubData).then(() => void 0),
+      addDoc(this.clubsCollection, clubData)
+        .then((docRef) => {
+          // Update the document with its ID as the slug
+          return updateDoc(docRef, { slug: docRef.id });
+        })
+        .then(() => void 0)
     );
   }
 
@@ -136,7 +141,7 @@ export class ClubService {
       updateDoc(clubDoc, {
         isActive: true,
         updatedAt: serverTimestamp(),
-      }).then(() => void 0),
+      }).then(() => void 0)
     );
   }
 
@@ -152,7 +157,7 @@ export class ClubService {
       updateDoc(clubDoc, {
         isActive: false,
         updatedAt: serverTimestamp(),
-      }).then(() => void 0),
+      }).then(() => void 0)
     );
   }
 
@@ -166,7 +171,7 @@ export class ClubService {
       updateDoc(clubDoc, {
         ...updates,
         updatedAt: serverTimestamp(),
-      }).then(() => void 0),
+      }).then(() => void 0)
     );
   }
 
@@ -180,7 +185,7 @@ export class ClubService {
       updateDoc(clubDoc, {
         leaderIds,
         updatedAt: serverTimestamp(),
-      }).then(() => void 0),
+      }).then(() => void 0)
     );
   }
 }

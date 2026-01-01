@@ -28,7 +28,7 @@ import { Club } from '@arrl-co-yotc/shared/build/app/models/club.model';
 import { StorageService } from '../../services/storage.service';
 import { ClubService } from '../../services/club.service';
 import { generateSlugFromName } from '@arrl-co-yotc/shared/build/app/utils/slug.util';
-import { catchError, of, map, Observable, tap, debounceTime, distinctUntilChanged } from 'rxjs';
+import { catchError, of, map, Observable, tap } from 'rxjs';
 
 export interface EditClubDialogData {
   club?: Club;
@@ -133,13 +133,8 @@ export class EditClubDialog {
             next: (existingClub) => {
               let result: ValidationErrors | null = null;
 
-              if (existingClub) {
-                // If in edit mode and the club with this slug is the current club, it's valid
-                if (this.data?.club?.id && existingClub.id === this.data.club.id) {
-                  result = null;
-                } else {
-                  result = { slugNotUnique: true };
-                }
+              if (!!existingClub && existingClub.id !== this.data?.club?.id) {
+                result = { slugNotUnique: true };
               } else {
                 result = null;
               }
@@ -153,7 +148,7 @@ export class EditClubDialog {
               }, 50);
             },
             error: (error) => {
-              console.error('💥 Async validator error:', error);
+              console.error('💥 [Slug Validator] Firestore query error:', error);
               observer.next(null); // Fail open
               observer.complete();
             },
@@ -174,38 +169,8 @@ export class EditClubDialog {
       this.clubForm.get('slug')?.disable();
     }
 
-    // Auto-generate slug from name when creating a new club or when editing inactive clubs
-    if (!this.isEditMode || !this.isClubActive) {
-      this.setupSlugAutoGeneration();
-    }
-  }
-
-  /**
-   * Sets up automatic slug generation based on club name changes
-   */
-  private setupSlugAutoGeneration(): void {
-    const nameControl = this.clubForm.get('name');
-    const slugControl = this.clubForm.get('slug');
-
-    if (!nameControl || !slugControl) {
-      console.warn('⚠️ Could not set up slug auto-generation: missing controls');
-      return;
-    }
-
-    // Only auto-generate if slug is empty or in create mode
-    nameControl.valueChanges.subscribe((nameValue) => {
-      // Only auto-generate slug if it's currently empty or we're creating a new club
-      if (!this.isEditMode || !slugControl.value) {
-        const generatedSlug = generateSlugFromName(nameValue || '');
-
-        if (generatedSlug && generatedSlug !== slugControl.value) {
-          slugControl.setValue(generatedSlug);
-          slugControl.markAsTouched();
-          // Force validation to run after setting the value
-          slugControl.updateValueAndValidity();
-        }
-      }
-    });
+    // For new clubs, we'll generate unique slugs server-side during submission
+    // For existing clubs, users can manually edit slugs and validation will catch conflicts
   }
 
   protected onCancel(): void {
@@ -260,9 +225,26 @@ export class EditClubDialog {
       return;
     }
 
-    const formData: ClubFormData = this.clubForm.getRawValue();
     const logoFile = this.logoFile();
     const clubId = this.data?.club?.id;
+
+    // Handle club suggestions vs edits differently
+    if (!this.isEditMode) {
+      // For new suggestions, exclude slug from form data (will be set to document ID)
+      const suggestionData: Partial<Club> = {
+        name: this.clubForm.get('name')?.value,
+        callsign: this.clubForm.get('callsign')?.value,
+        description: this.clubForm.get('description')?.value,
+        location: this.clubForm.get('location')?.value,
+        website: this.clubForm.get('website')?.value,
+      };
+
+      this.dialogRef.close(suggestionData);
+      return;
+    }
+
+    // For edits, include full form data
+    const formData: ClubFormData = this.clubForm.getRawValue();
 
     // If there's a new logo file to upload and we have a club ID, handle it
     if (logoFile && clubId) {
@@ -306,10 +288,6 @@ export class EditClubDialog {
     const field = this.clubForm.get(fieldName);
     if (!field) {
       return '';
-    }
-
-    // Debug logging for slug field
-    if (fieldName === 'slug') {
     }
 
     // For async validators, we need to check if the field is invalid and touched/dirty
