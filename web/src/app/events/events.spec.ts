@@ -54,7 +54,7 @@ describe('Events', () => {
     fixture.detectChanges();
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
-    const header = compiled.querySelector('.events-header h1');
+    const header = compiled.querySelector('.page-header h1');
     expect(header).toBeTruthy();
     expect(header?.textContent).toContain('Events');
   });
