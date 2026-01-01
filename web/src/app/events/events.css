@@ -5,7 +5,7 @@
 }
 
 .events-header {
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
 }
 
 .header-content {
@@ -18,14 +18,14 @@
 
 .header-text h1 {
   margin: 0 0 0.5rem 0;
-  font-size: 2rem;
+  font-size: 2.5rem;
   font-weight: 500;
 }
 
 .subtitle {
   margin: 0;
+  font-size: 1.125rem;
   color: rgba(0, 0, 0, 0.6);
-  font-size: 1rem;
 }
 
 .loading-container {

@@ -4,9 +4,33 @@
   padding: 2rem;
 }
 
-h1 {
-  color: #3f51b5;
-  margin-bottom: 2rem;
+.home-header {
+  margin-bottom: 3rem;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.header-text {
+  flex: 1;
+  text-align: left;
+}
+
+.home-header h1 {
+  margin: 0 0 0.5rem 0;
+  font-size: 2.5rem;
+  font-weight: 500;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 1.125rem;
+  color: rgba(0, 0, 0, 0.6);
 }
 
 h2 {
