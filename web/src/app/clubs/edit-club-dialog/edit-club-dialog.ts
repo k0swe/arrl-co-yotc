@@ -40,12 +40,6 @@ export type ClubFormData = Pick<
   'name' | 'callsign' | 'description' | 'location' | 'website' | 'slug'
 >;
 
-/** Form data for club suggestions (excludes slug which is auto-generated) */
-export type ClubSuggestionData = Pick<
-  Club,
-  'name' | 'callsign' | 'description' | 'location' | 'website'
->;
-
 /** Custom error state matcher that shows errors immediately for async validation */
 class ImmediateErrorStateMatcher implements ErrorStateMatcher {
   isErrorState(control: FormControl | null, form: FormGroupDirective | NgForm | null): boolean {
