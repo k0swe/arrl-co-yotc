@@ -28,7 +28,7 @@ import { Club } from '@arrl-co-yotc/shared/build/app/models/club.model';
 import { StorageService } from '../../services/storage.service';
 import { ClubService } from '../../services/club.service';
 import { generateSlugFromName } from '@arrl-co-yotc/shared/build/app/utils/slug.util';
-import { catchError, of, map, Observable, tap, debounceTime, distinctUntilChanged } from 'rxjs';
+import { catchError, of, map, Observable, tap } from 'rxjs';
 
 export interface EditClubDialogData {
   club?: Club;
@@ -38,6 +38,12 @@ export interface EditClubDialogData {
 export type ClubFormData = Pick<
   Club,
   'name' | 'callsign' | 'description' | 'location' | 'website' | 'slug'
+>;
+
+/** Form data for club suggestions (excludes slug which is auto-generated) */
+export type ClubSuggestionData = Pick<
+  Club,
+  'name' | 'callsign' | 'description' | 'location' | 'website'
 >;
 
 /** Custom error state matcher that shows errors immediately for async validation */
@@ -129,21 +135,12 @@ export class EditClubDialog {
       return new Observable<ValidationErrors | null>((observer) => {
         // Debounce the API call
         const timeout = setTimeout(() => {
-          this.clubService.getAllClubsBySlug(value).subscribe({
-            next: (existingClubs) => {
+          this.clubService.getClubBySlug(value).subscribe({
+            next: (existingClub) => {
               let result: ValidationErrors | null = null;
 
-              if (existingClubs.length > 0) {
-                // Check if any of the clubs with this slug are NOT the current club
-                const otherClubs = existingClubs.filter(
-                  (club) => !this.data?.club?.id || club.id !== this.data.club.id
-                );
-
-                if (otherClubs.length > 0) {
-                  result = { slugNotUnique: true };
-                } else {
-                  result = null;
-                }
+              if (!!existingClub && existingClub.id !== this.data?.club?.id) {
+                result = { slugNotUnique: true };
               } else {
                 result = null;
               }
@@ -178,61 +175,8 @@ export class EditClubDialog {
       this.clubForm.get('slug')?.disable();
     }
 
-    // Auto-generate slug from name when creating a new club or when editing inactive clubs
-    if (!this.isEditMode || !this.isClubActive) {
-      this.setupSlugAutoGeneration();
-    }
-  }
-
-  /**
-   * Sets up automatic slug generation based on club name changes
-   */
-  private setupSlugAutoGeneration(): void {
-    const nameControl = this.clubForm.get('name');
-    const slugControl = this.clubForm.get('slug');
-
-    if (!nameControl || !slugControl) {
-      console.warn('⚠️ Could not set up slug auto-generation: missing controls');
-      return;
-    }
-
-    // Only auto-generate if slug is empty or in create mode
-    nameControl.valueChanges
-      .pipe(
-        debounceTime(300), // Debounce name changes
-        distinctUntilChanged() // Only emit when name actually changes
-      )
-      .subscribe((nameValue) => {
-        // Only auto-generate slug if it's currently empty or we're creating a new club
-        if (!this.isEditMode || !slugControl.value) {
-          if (nameValue && nameValue.trim()) {
-            // Generate unique slug from the name
-            this.clubService.generateUniqueSlug(nameValue, this.data?.club?.id).subscribe({
-              next: (uniqueSlug) => {
-                if (uniqueSlug && uniqueSlug !== slugControl.value) {
-                  slugControl.setValue(uniqueSlug);
-                  slugControl.markAsTouched();
-                  // Force validation to run after setting the value
-                  slugControl.updateValueAndValidity();
-                }
-              },
-              error: (error) => {
-                console.error('Error generating unique slug:', error);
-                // Fallback to basic generation if service fails
-                const fallbackSlug = generateSlugFromName(nameValue);
-                if (fallbackSlug && fallbackSlug !== slugControl.value) {
-                  slugControl.setValue(fallbackSlug);
-                  slugControl.markAsTouched();
-                  slugControl.updateValueAndValidity();
-                }
-              },
-            });
-          } else {
-            // Clear slug if name is empty
-            slugControl.setValue('');
-          }
-        }
-      });
+    // For new clubs, we'll generate unique slugs server-side during submission
+    // For existing clubs, users can manually edit slugs and validation will catch conflicts
   }
 
   protected onCancel(): void {
@@ -287,9 +231,26 @@ export class EditClubDialog {
       return;
     }
 
-    const formData: ClubFormData = this.clubForm.getRawValue();
     const logoFile = this.logoFile();
     const clubId = this.data?.club?.id;
+
+    // Handle club suggestions vs edits differently
+    if (!this.isEditMode) {
+      // For new suggestions, exclude slug from form data (will be set to document ID)
+      const suggestionData: Partial<Club> = {
+        name: this.clubForm.get('name')?.value,
+        callsign: this.clubForm.get('callsign')?.value,
+        description: this.clubForm.get('description')?.value,
+        location: this.clubForm.get('location')?.value,
+        website: this.clubForm.get('website')?.value,
+      };
+
+      this.dialogRef.close(suggestionData);
+      return;
+    }
+
+    // For edits, include full form data
+    const formData: ClubFormData = this.clubForm.getRawValue();
 
     // If there's a new logo file to upload and we have a club ID, handle it
     if (logoFile && clubId) {
