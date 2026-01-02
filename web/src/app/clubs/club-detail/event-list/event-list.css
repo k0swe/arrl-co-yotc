@@ -41,3 +41,19 @@
 .events-table th {
   padding: 0.75rem;
 }
+
+.no-attendees {
+  color: rgba(0, 0, 0, 0.54);
+  font-style: italic;
+  font-size: 0.875rem;
+}
+
+mat-chip-set {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+mat-chip {
+  font-size: 0.75rem;
+}
