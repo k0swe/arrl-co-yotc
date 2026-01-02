@@ -202,8 +202,8 @@ service cloud.firestore {
                            request.resource.data.updatedAt == request.time &&
                            isActiveMember(clubId);
           
-          // Users can delete their own RSVPs if they are active members
-          allow delete: if isAuthenticated() && rsvpId == request.auth.uid && isActiveMember(clubId);
+          // Users can delete their own RSVPs
+          allow delete: if isAuthenticated() && rsvpId == request.auth.uid;
           
           // Club leaders can create or delete RSVPs for their club's events
           // This allows leaders to add/remove attendees for administrative purposes
