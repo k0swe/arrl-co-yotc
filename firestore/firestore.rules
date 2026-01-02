@@ -183,23 +183,27 @@ service cloud.firestore {
           // Authenticated users can read their own RSVP
           allow read: if isAuthenticated() && rsvpId == request.auth.uid;
           
+          // Active club members can read all RSVPs for their club's events
+          allow read: if isActiveMember(clubId);
+          
           // Club leaders can read all RSVPs for their club's events
           allow read: if isClubLeader(clubId);
           
           // Admins can read all RSVPs
           allow read: if isAdmin();
           
-          // Authenticated users can create RSVPs for themselves
+          // Active club members can create RSVPs for themselves
           allow create: if isAuthenticated() && 
                            rsvpId == request.auth.uid &&
                            request.resource.data.userId == request.auth.uid &&
                            request.resource.data.eventId == eventId &&
                            request.resource.data.clubId == clubId &&
                            request.resource.data.createdAt == request.time &&
-                           request.resource.data.updatedAt == request.time;
+                           request.resource.data.updatedAt == request.time &&
+                           isActiveMember(clubId);
           
-          // Users can delete their own RSVPs
-          allow delete: if isAuthenticated() && rsvpId == request.auth.uid;
+          // Users can delete their own RSVPs if they are active members
+          allow delete: if isAuthenticated() && rsvpId == request.auth.uid && isActiveMember(clubId);
           
           // Club leaders can create or delete RSVPs for their club's events
           // This allows leaders to add/remove attendees for administrative purposes
