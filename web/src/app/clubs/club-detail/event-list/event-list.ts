@@ -252,11 +252,16 @@ export class EventList {
   protected getAttendeeNames(eventId: string): string[] {
     const rsvps = this.eventRsvps().get(eventId) || [];
     const names = this.userNames();
-    return rsvps.map((rsvp) => names.get(rsvp.userId) || 'Loading...').filter((name) => name !== 'Loading...');
+    return rsvps.map((rsvp) => names.get(rsvp.userId) || 'Loading...');
   }
 
   protected getAttendeeCount(eventId: string): number {
     return (this.eventRsvps().get(eventId) || []).length;
+  }
+
+  protected areAttendeesLoaded(eventId: string): boolean {
+    const names = this.getAttendeeNames(eventId);
+    return names.length === 0 || !names.some((name) => name === 'Loading...');
   }
 
   protected openAddDialog(): void {

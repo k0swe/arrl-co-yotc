@@ -48,6 +48,12 @@
   font-size: 0.875rem;
 }
 
+.loading-text {
+  color: rgba(0, 0, 0, 0.54);
+  font-style: italic;
+  font-size: 0.875rem;
+}
+
 mat-chip-set {
   display: flex;
   flex-wrap: wrap;
