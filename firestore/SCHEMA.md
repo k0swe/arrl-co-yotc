@@ -172,8 +172,8 @@ Stores user RSVPs for a specific event. The full path is
 **Access**:
 
 - Public: None
-- Authenticated: Read own RSVP, create RSVP for themselves (if they're active club members)
-- Club Leaders: Read all RSVPs for their club's events, create/delete RSVPs for their events
+- Active Club Members: Read all RSVPs for their club's events, create RSVP for themselves, delete own RSVP
+- Club Leaders: Read all RSVPs for their club's events, create/delete RSVPs for their events (including for other members)
 - Admin: Full access to all RSVPs
 
 **Queries**:

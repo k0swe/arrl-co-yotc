@@ -41,6 +41,44 @@
           </td>
         </ng-container>
 
+        <!-- RSVP Column -->
+        <ng-container matColumnDef="rsvp">
+          <th mat-header-cell *matHeaderCellDef>RSVP</th>
+          <td mat-cell *matCellDef="let event">
+            @if (canRsvp()) {
+              <button
+                mat-icon-button
+                [color]="userRsvps().get(event.id) ? 'primary' : ''"
+                (click)="toggleRsvp(event)"
+                [attr.aria-label]="userRsvps().get(event.id) ? 'Remove RSVP' : 'Add RSVP'"
+                [matTooltip]="userRsvps().get(event.id) ? 'Remove RSVP' : 'RSVP to attend'"
+              >
+                <mat-icon>{{ userRsvps().get(event.id) ? 'check_circle' : 'check_circle_outline' }}</mat-icon>
+              </button>
+            }
+          </td>
+        </ng-container>
+
+        <!-- Attendees Column -->
+        <ng-container matColumnDef="attendees">
+          <th mat-header-cell *matHeaderCellDef>Attendees</th>
+          <td mat-cell *matCellDef="let event">
+            @if (getAttendeeCount(event.id) > 0) {
+              @if (areAttendeesLoaded(event.id)) {
+                <mat-chip-set>
+                  @for (name of getAttendeeNames(event.id); track name) {
+                    <mat-chip>{{ name }}</mat-chip>
+                  }
+                </mat-chip-set>
+              } @else {
+                <span class="loading-text">Loading attendees...</span>
+              }
+            } @else {
+              <span class="no-attendees">No RSVPs yet</span>
+            }
+          </td>
+        </ng-container>
+
         <!-- Actions Column -->
         <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef>Actions</th>
