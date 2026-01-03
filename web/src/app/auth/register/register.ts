@@ -15,6 +15,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '../auth.service';
 
 @Component({
@@ -37,6 +38,7 @@ import { AuthService } from '../auth.service';
 export class Register {
   private authService = inject(AuthService);
   private router = inject(Router);
+  private snackBar = inject(MatSnackBar);
 
   protected readonly loading = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
@@ -62,7 +64,9 @@ export class Register {
       },
       error: (error) => {
         this.loading.set(false);
-        this.errorMessage.set(this.getErrorMessage(error));
+        const errorMsg = this.getErrorMessage(error);
+        this.errorMessage.set(errorMsg);
+        this.snackBar.open(errorMsg, 'Close', { duration: 5000 });
       },
     });
   }
@@ -78,7 +82,9 @@ export class Register {
       },
       error: (error) => {
         this.loading.set(false);
-        this.errorMessage.set(this.getErrorMessage(error));
+        const errorMsg = this.getErrorMessage(error);
+        this.errorMessage.set(errorMsg);
+        this.snackBar.open(errorMsg, 'Close', { duration: 5000 });
       },
     });
   }
@@ -100,7 +106,9 @@ export class Register {
       },
       error: (error) => {
         this.loading.set(false);
-        this.errorMessage.set(this.getErrorMessage(error));
+        const errorMsg = this.getErrorMessage(error);
+        this.errorMessage.set(errorMsg);
+        this.snackBar.open(errorMsg, 'Close', { duration: 5000 });
       },
     });
   }

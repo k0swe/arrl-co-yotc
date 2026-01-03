@@ -6,6 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '../auth.service';
 
 @Component({
@@ -25,6 +26,7 @@ import { AuthService } from '../auth.service';
 })
 export class ForgotPassword {
   private authService = inject(AuthService);
+  private snackBar = inject(MatSnackBar);
 
   protected readonly loading = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
@@ -48,14 +50,16 @@ export class ForgotPassword {
     this.authService.sendPasswordResetEmail(email!).subscribe({
       next: () => {
         this.loading.set(false);
-        this.successMessage.set(
-          'Password reset email sent! Please check your inbox for instructions.',
-        );
+        const successMsg = 'Password reset email sent! Please check your inbox for instructions.';
+        this.successMessage.set(successMsg);
+        this.snackBar.open(successMsg, 'Close', { duration: 5000 });
         this.resetForm.reset();
       },
       error: (error) => {
         this.loading.set(false);
-        this.errorMessage.set(this.getErrorMessage(error));
+        const errorMsg = this.getErrorMessage(error);
+        this.errorMessage.set(errorMsg);
+        this.snackBar.open(errorMsg, 'Close', { duration: 5000 });
       },
     });
   }

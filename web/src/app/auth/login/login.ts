@@ -9,6 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '../auth.service';
 import { ArrlInfoDialog } from '../arrl-info-dialog/arrl-info-dialog';
 
@@ -33,6 +34,7 @@ export class Login {
   private authService = inject(AuthService);
   private router = inject(Router);
   private dialog = inject(MatDialog);
+  private snackBar = inject(MatSnackBar);
 
   protected readonly loading = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
@@ -54,7 +56,9 @@ export class Login {
       },
       error: (error) => {
         this.loading.set(false);
-        this.errorMessage.set(this.getErrorMessage(error));
+        const errorMsg = this.getErrorMessage(error);
+        this.errorMessage.set(errorMsg);
+        this.snackBar.open(errorMsg, 'Close', { duration: 5000 });
       },
     });
   }
@@ -71,7 +75,9 @@ export class Login {
       error: (error) => {
         this.loading.set(false);
         console.error('Facebook sign-in error:', error);
-        this.errorMessage.set(this.getErrorMessage(error));
+        const errorMsg = this.getErrorMessage(error);
+        this.errorMessage.set(errorMsg);
+        this.snackBar.open(errorMsg, 'Close', { duration: 5000 });
       },
     });
   }
@@ -93,7 +99,9 @@ export class Login {
       },
       error: (error) => {
         this.loading.set(false);
-        this.errorMessage.set(this.getErrorMessage(error));
+        const errorMsg = this.getErrorMessage(error);
+        this.errorMessage.set(errorMsg);
+        this.snackBar.open(errorMsg, 'Close', { duration: 5000 });
       },
     });
   }
