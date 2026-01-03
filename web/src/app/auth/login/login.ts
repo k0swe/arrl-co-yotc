@@ -9,7 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { AuthService } from '../auth.service';
 import { ArrlInfoDialog } from '../arrl-info-dialog/arrl-info-dialog';
 
@@ -25,6 +25,7 @@ import { ArrlInfoDialog } from '../arrl-info-dialog/arrl-info-dialog';
     MatIconModule,
     MatDividerModule,
     MatProgressSpinnerModule,
+    MatSnackBarModule,
   ],
   templateUrl: './login.html',
   styleUrl: './login.css',
@@ -58,7 +59,7 @@ export class Login {
         this.loading.set(false);
         const errorMsg = this.getErrorMessage(error);
         this.errorMessage.set(errorMsg);
-        this.snackBar.open(errorMsg, 'Close', { duration: 5000 });
+        this.showErrorSnackbar(errorMsg);
       },
     });
   }
@@ -77,7 +78,7 @@ export class Login {
         console.error('Facebook sign-in error:', error);
         const errorMsg = this.getErrorMessage(error);
         this.errorMessage.set(errorMsg);
-        this.snackBar.open(errorMsg, 'Close', { duration: 5000 });
+        this.showErrorSnackbar(errorMsg);
       },
     });
   }
@@ -101,7 +102,7 @@ export class Login {
         this.loading.set(false);
         const errorMsg = this.getErrorMessage(error);
         this.errorMessage.set(errorMsg);
-        this.snackBar.open(errorMsg, 'Close', { duration: 5000 });
+        this.showErrorSnackbar(errorMsg);
       },
     });
   }
@@ -116,6 +117,10 @@ export class Login {
       width: '500px',
       maxWidth: '90vw',
     });
+  }
+
+  private showErrorSnackbar(message: string): void {
+    this.snackBar.open(message, 'Close', { duration: 5000 });
   }
 
   private getErrorMessage(error: any): string {

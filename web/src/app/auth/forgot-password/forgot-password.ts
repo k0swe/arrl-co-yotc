@@ -6,7 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { AuthService } from '../auth.service';
 
 @Component({
@@ -19,6 +19,7 @@ import { AuthService } from '../auth.service';
     MatInputModule,
     MatFormFieldModule,
     MatIconModule,
+    MatSnackBarModule,
   ],
   templateUrl: './forgot-password.html',
   styleUrl: './forgot-password.css',
@@ -52,16 +53,24 @@ export class ForgotPassword {
         this.loading.set(false);
         const successMsg = 'Password reset email sent! Please check your inbox for instructions.';
         this.successMessage.set(successMsg);
-        this.snackBar.open(successMsg, 'Close', { duration: 5000 });
+        this.showSuccessSnackbar(successMsg);
         this.resetForm.reset();
       },
       error: (error) => {
         this.loading.set(false);
         const errorMsg = this.getErrorMessage(error);
         this.errorMessage.set(errorMsg);
-        this.snackBar.open(errorMsg, 'Close', { duration: 5000 });
+        this.showErrorSnackbar(errorMsg);
       },
     });
+  }
+
+  private showSuccessSnackbar(message: string): void {
+    this.snackBar.open(message, 'Close', { duration: 5000 });
+  }
+
+  private showErrorSnackbar(message: string): void {
+    this.snackBar.open(message, 'Close', { duration: 5000 });
   }
 
   private getErrorMessage(error: any): string {

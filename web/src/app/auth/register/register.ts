@@ -15,7 +15,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { AuthService } from '../auth.service';
 
 @Component({
@@ -30,6 +30,7 @@ import { AuthService } from '../auth.service';
     MatIconModule,
     MatDividerModule,
     MatProgressSpinnerModule,
+    MatSnackBarModule,
   ],
   templateUrl: './register.html',
   styleUrl: './register.css',
@@ -66,7 +67,7 @@ export class Register {
         this.loading.set(false);
         const errorMsg = this.getErrorMessage(error);
         this.errorMessage.set(errorMsg);
-        this.snackBar.open(errorMsg, 'Close', { duration: 5000 });
+        this.showErrorSnackbar(errorMsg);
       },
     });
   }
@@ -84,7 +85,7 @@ export class Register {
         this.loading.set(false);
         const errorMsg = this.getErrorMessage(error);
         this.errorMessage.set(errorMsg);
-        this.snackBar.open(errorMsg, 'Close', { duration: 5000 });
+        this.showErrorSnackbar(errorMsg);
       },
     });
   }
@@ -108,7 +109,7 @@ export class Register {
         this.loading.set(false);
         const errorMsg = this.getErrorMessage(error);
         this.errorMessage.set(errorMsg);
-        this.snackBar.open(errorMsg, 'Close', { duration: 5000 });
+        this.showErrorSnackbar(errorMsg);
       },
     });
   }
@@ -128,6 +129,10 @@ export class Register {
     }
 
     return password.value === confirmPassword.value ? null : { passwordMismatch: true };
+  }
+
+  private showErrorSnackbar(message: string): void {
+    this.snackBar.open(message, 'Close', { duration: 5000 });
   }
 
   private getErrorMessage(error: any): string {
