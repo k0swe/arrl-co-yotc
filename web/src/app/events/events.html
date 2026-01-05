@@ -26,7 +26,15 @@
     <mat-card-content>
       <mat-list>
         @for (event of events(); track event.id; let last = $last) {
-        <mat-list-item class="event-item">
+        <mat-list-item
+          class="event-item clickable"
+          (click)="openEventDetail(event)"
+          (keydown.enter)="openEventDetail(event)"
+          (keydown.space)="openEventDetail(event); $event.preventDefault()"
+          tabindex="0"
+          role="button"
+          [attr.aria-label]="'View details for ' + event.name"
+        >
           <div class="event-content">
             <div class="event-icon" matListItemIcon>
               <mat-icon>event</mat-icon>

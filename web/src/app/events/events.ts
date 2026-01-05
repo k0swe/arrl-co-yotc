@@ -6,12 +6,15 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { EventService } from '../services/event.service';
 import { ClubService } from '../services/club.service';
 import { Event } from '@arrl-co-yotc/shared/build/app/models/event.model';
 import { Club } from '@arrl-co-yotc/shared/build/app/models/club.model';
 import { catchError, forkJoin, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
+import { EventDetailDialog } from './event-detail-dialog/event-detail-dialog';
+import { toDate } from '../utils/timestamp.util';
 
 interface EventWithClub extends Event {
   club?: Club;
@@ -26,6 +29,7 @@ interface EventWithClub extends Event {
     MatIconModule,
     MatListModule,
     MatDividerModule,
+    MatDialogModule,
   ],
   templateUrl: './events.html',
   styleUrl: './events.css',
@@ -35,6 +39,7 @@ export class Events {
   private eventService = inject(EventService);
   private clubService = inject(ClubService);
   private destroyRef = inject(DestroyRef);
+  private dialog = inject(MatDialog);
 
   protected readonly loading = signal(true);
   protected readonly events = signal<EventWithClub[]>([]);
@@ -99,23 +104,19 @@ export class Events {
       });
   }
 
-  /**
-   * Convert Firestore Timestamp to Date for display
-   */
-  protected toDate(timestamp: Date | { toDate(): Date } | string | null | undefined): Date | null {
-    if (!timestamp) {
-      return null;
+  protected openEventDetail(event: EventWithClub): void {
+    if (!event.club) {
+      return;
     }
-    if (timestamp instanceof Date) {
-      return timestamp;
-    }
-    if (typeof timestamp === 'object' && 'toDate' in timestamp && typeof timestamp.toDate === 'function') {
-      return timestamp.toDate();
-    }
-    if (typeof timestamp === 'string') {
-      const date = new Date(timestamp);
-      return isNaN(date.getTime()) ? null : date;
-    }
-    return null;
+
+    this.dialog.open(EventDetailDialog, {
+      width: '600px',
+      data: {
+        event,
+        club: event.club,
+      },
+    });
   }
+
+  protected readonly toDate = toDate;
 }
