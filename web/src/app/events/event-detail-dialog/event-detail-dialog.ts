@@ -4,7 +4,7 @@ import {
   inject,
   signal,
   DestroyRef,
-  effect,
+  OnInit,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DatePipe } from '@angular/common';
@@ -22,6 +22,7 @@ import { MembershipService } from '../../services/membership.service';
 import { UserService } from '../../services/user.service';
 import { AuthService } from '../../auth/auth.service';
 import { catchError, forkJoin, of } from 'rxjs';
+import { toDate } from '../../utils/timestamp.util';
 
 export interface EventDetailDialogData {
   event: Event;
@@ -43,7 +44,7 @@ export interface EventDetailDialogData {
   styleUrl: './event-detail-dialog.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class EventDetailDialog {
+export class EventDetailDialog implements OnInit {
   private dialogRef = inject(MatDialogRef<EventDetailDialog>);
   private rsvpService = inject(RsvpService);
   private membershipService = inject(MembershipService);
@@ -58,10 +59,8 @@ export class EventDetailDialog {
   protected readonly userNames = signal<Map<string, string>>(new Map());
   protected readonly canViewRsvps = signal(false);
 
-  constructor() {
-    effect(() => {
-      this.checkPermissionsAndLoadRsvps();
-    });
+  ngOnInit(): void {
+    this.checkPermissionsAndLoadRsvps();
   }
 
   private checkPermissionsAndLoadRsvps(): void {
@@ -147,27 +146,5 @@ export class EventDetailDialog {
     this.dialogRef.close();
   }
 
-  /**
-   * Convert Firestore Timestamp to Date for display
-   */
-  protected toDate(timestamp: Date | { toDate(): Date } | string | null | undefined): Date | null {
-    if (!timestamp) {
-      return null;
-    }
-    if (timestamp instanceof Date) {
-      return timestamp;
-    }
-    if (
-      typeof timestamp === 'object' &&
-      'toDate' in timestamp &&
-      typeof timestamp.toDate === 'function'
-    ) {
-      return timestamp.toDate();
-    }
-    if (typeof timestamp === 'string') {
-      const date = new Date(timestamp);
-      return isNaN(date.getTime()) ? null : date;
-    }
-    return null;
-  }
+  protected readonly toDate = toDate;
 }

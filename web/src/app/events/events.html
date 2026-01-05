@@ -30,7 +30,7 @@
           class="event-item clickable"
           (click)="openEventDetail(event)"
           (keydown.enter)="openEventDetail(event)"
-          (keydown.space)="openEventDetail(event)"
+          (keydown.space)="openEventDetail(event); $event.preventDefault()"
           tabindex="0"
           role="button"
           [attr.aria-label]="'View details for ' + event.name"

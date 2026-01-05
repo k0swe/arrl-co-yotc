@@ -14,6 +14,7 @@ import { Club } from '@arrl-co-yotc/shared/build/app/models/club.model';
 import { catchError, forkJoin, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { EventDetailDialog } from './event-detail-dialog/event-detail-dialog';
+import { toDate } from '../utils/timestamp.util';
 
 interface EventWithClub extends Event {
   club?: Club;
@@ -117,23 +118,5 @@ export class Events {
     });
   }
 
-  /**
-   * Convert Firestore Timestamp to Date for display
-   */
-  protected toDate(timestamp: Date | { toDate(): Date } | string | null | undefined): Date | null {
-    if (!timestamp) {
-      return null;
-    }
-    if (timestamp instanceof Date) {
-      return timestamp;
-    }
-    if (typeof timestamp === 'object' && 'toDate' in timestamp && typeof timestamp.toDate === 'function') {
-      return timestamp.toDate();
-    }
-    if (typeof timestamp === 'string') {
-      const date = new Date(timestamp);
-      return isNaN(date.getTime()) ? null : date;
-    }
-    return null;
-  }
+  protected readonly toDate = toDate;
 }
