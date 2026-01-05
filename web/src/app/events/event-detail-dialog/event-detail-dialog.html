@@ -1,0 +1,76 @@
+<h2 mat-dialog-title>{{ data.event.name }}</h2>
+
+<mat-dialog-content>
+  <div class="event-info">
+    <div class="info-section">
+      <div class="info-row">
+        <mat-icon class="info-icon">groups</mat-icon>
+        <div class="info-content">
+          <span class="info-label">Club</span>
+          <span class="info-value">{{ data.club.name }}</span>
+        </div>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <div class="info-row">
+        <mat-icon class="info-icon">schedule</mat-icon>
+        <div class="info-content">
+          <span class="info-label">Start Time</span>
+          <span class="info-value">{{ toDate(data.event.startTime) | date: 'medium' }}</span>
+        </div>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <div class="info-row">
+        <mat-icon class="info-icon">schedule</mat-icon>
+        <div class="info-content">
+          <span class="info-label">End Time</span>
+          <span class="info-value">{{ toDate(data.event.endTime) | date: 'medium' }}</span>
+        </div>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <div class="description-section">
+        <h3>Description</h3>
+        <p class="description-text">{{ data.event.description }}</p>
+      </div>
+    </div>
+
+    @if (canViewRsvps()) {
+    <mat-divider></mat-divider>
+
+    <div class="rsvp-section">
+      <h3>Attendees</h3>
+
+      @if (loadingRsvps()) {
+      <div class="loading-container" role="status" aria-live="polite">
+        <mat-spinner [diameter]="32"></mat-spinner>
+        <p>Loading attendees...</p>
+      </div>
+      } @else if (rsvps().length === 0) {
+      <p class="no-attendees">No RSVPs yet</p>
+      } @else {
+      <mat-list>
+        @for (rsvp of rsvps(); track rsvp.id; let last = $last) {
+        <mat-list-item>
+          <mat-icon matListItemIcon>person</mat-icon>
+          <div matListItemTitle>
+            {{ userNames().get(rsvp.userId) || 'Loading...' }}
+          </div>
+        </mat-list-item>
+        @if (!last) {
+        <mat-divider></mat-divider>
+        } }
+      </mat-list>
+      }
+    </div>
+    }
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions [class.align-end]="true">
+  <button mat-raised-button color="primary" (click)="onClose()">Close</button>
+</mat-dialog-actions>
