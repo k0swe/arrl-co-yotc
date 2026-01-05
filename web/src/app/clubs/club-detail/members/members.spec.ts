@@ -121,4 +121,33 @@ describe('Members', () => {
     authService.currentUser.set(null);
     expect(component['canApproveMemberships']()).toBe(false);
   });
+
+  it('should handle undefined clubLeaderIds when checking if user can approve memberships', () => {
+    authService.isAdmin.set(false);
+    authService.currentUser.set({ uid: 'test-user-id' } as any);
+    fixture.componentRef.setInput('clubLeaderIds', undefined);
+    expect(component['canApproveMemberships']()).toBe(false);
+  });
+
+  it('should handle undefined clubLeaderIds when promoting to leader', () => {
+    authService.isAdmin.set(true);
+    fixture.componentRef.setInput('clubId', 'test-club-id');
+    fixture.componentRef.setInput('clubLeaderIds', undefined);
+    
+    // This should not throw an error
+    expect(() => {
+      component['promoteToLeader']('user-123', 'Test User');
+    }).not.toThrow();
+  });
+
+  it('should handle undefined clubLeaderIds when demoting to member', () => {
+    authService.isAdmin.set(true);
+    fixture.componentRef.setInput('clubId', 'test-club-id');
+    fixture.componentRef.setInput('clubLeaderIds', undefined);
+    
+    // This should not throw an error
+    expect(() => {
+      component['demoteToMember']('user-123', 'Test User');
+    }).not.toThrow();
+  });
 });

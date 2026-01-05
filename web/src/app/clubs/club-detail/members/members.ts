@@ -95,7 +95,7 @@ export class Members {
     }
 
     // Club leaders can approve memberships
-    const currentLeaderIds = this.clubLeaderIds();
+    const currentLeaderIds = this.clubLeaderIds() || [];
     return currentLeaderIds.includes(currentUser.uid);
   });
 
@@ -247,7 +247,7 @@ export class Members {
    */
   protected promoteToLeader(userId: string, userName: string): void {
     const clubId = this.clubId();
-    const currentLeaderIds = this.clubLeaderIds();
+    const currentLeaderIds = this.clubLeaderIds() || [];
 
     // Check if user is already a leader
     if (currentLeaderIds.includes(userId)) {
@@ -286,7 +286,7 @@ export class Members {
    */
   protected demoteToMember(userId: string, userName: string): void {
     const clubId = this.clubId();
-    const currentLeaderIds = this.clubLeaderIds();
+    const currentLeaderIds = this.clubLeaderIds() || [];
 
     // Check if user is actually a leader
     if (!currentLeaderIds.includes(userId)) {
