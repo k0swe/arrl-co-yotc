@@ -58,7 +58,7 @@ export class Register {
     this.authService.signInWithGoogle().subscribe({
       next: () => {
         this.loading.set(false);
-        this.router.navigate(['/']);
+        this.router.navigate(['/clubs']);
       },
       error: (error) => {
         this.loading.set(false);
@@ -74,7 +74,7 @@ export class Register {
     this.authService.signInWithFacebook().subscribe({
       next: () => {
         this.loading.set(false);
-        this.router.navigate(['/']);
+        this.router.navigate(['/clubs']);
       },
       error: (error) => {
         this.loading.set(false);
@@ -96,7 +96,7 @@ export class Register {
     this.authService.createUserWithEmailAndPassword(email!, password!).subscribe({
       next: () => {
         this.loading.set(false);
-        this.router.navigate(['/']);
+        this.router.navigate(['/clubs']);
       },
       error: (error) => {
         this.loading.set(false);

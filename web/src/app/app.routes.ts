@@ -11,14 +11,15 @@ import { Admin } from './admin/admin';
 import { Profile } from './profile/profile';
 import { authGuard } from './auth/auth.guard';
 import { adminGuard } from './auth/admin.guard';
+import { profileCompleteGuard } from './auth/profile-complete.guard';
 
 export const routes: Routes = [
-  { path: '', component: Home },
-  { path: 'clubs', component: Clubs },
-  { path: 'clubs/:slug', component: ClubDetail },
-  { path: 'events', component: Events },
-  { path: 'standings', component: Standings },
-  { path: 'admin', component: Admin, canActivate: [adminGuard] },
+  { path: '', component: Home, canActivate: [profileCompleteGuard] },
+  { path: 'clubs', component: Clubs, canActivate: [profileCompleteGuard] },
+  { path: 'clubs/:slug', component: ClubDetail, canActivate: [profileCompleteGuard] },
+  { path: 'events', component: Events, canActivate: [profileCompleteGuard] },
+  { path: 'standings', component: Standings, canActivate: [profileCompleteGuard] },
+  { path: 'admin', component: Admin, canActivate: [authGuard, adminGuard, profileCompleteGuard] },
   { path: 'profile', component: Profile, canActivate: [authGuard] },
   { path: 'login', component: Login },
   { path: 'register', component: Register },
