@@ -162,5 +162,67 @@ describe('profileCompleteGuard', () => {
       }
     });
   });
+
+  it('should redirect to profile when user has whitespace-only name', async () => {
+    const mockUser = { uid: 'test-user-id', email: 'test@example.com' } as any;
+    authService.currentUser.set(mockUser);
+
+    const incompleteUserData = {
+      id: 'test-user-id',
+      name: '   ',
+      callsign: 'K0TEST',
+      email: 'test@example.com',
+      isAdmin: false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    vi.spyOn(userService, 'getUser').mockReturnValue(of(incompleteUserData));
+
+    const result = TestBed.runInInjectionContext(() =>
+      profileCompleteGuard(null as any, null as any),
+    );
+
+    await new Promise<void>((resolve) => {
+      if (typeof result === 'object' && 'subscribe' in result) {
+        result.subscribe((res: any) => {
+          expect(res).not.toBe(true);
+          expect(res.toString()).toBe('/profile');
+          resolve();
+        });
+      }
+    });
+  });
+
+  it('should redirect to profile when user has whitespace-only callsign', async () => {
+    const mockUser = { uid: 'test-user-id', email: 'test@example.com' } as any;
+    authService.currentUser.set(mockUser);
+
+    const incompleteUserData = {
+      id: 'test-user-id',
+      name: 'Test User',
+      callsign: '   ',
+      email: 'test@example.com',
+      isAdmin: false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    vi.spyOn(userService, 'getUser').mockReturnValue(of(incompleteUserData));
+
+    const result = TestBed.runInInjectionContext(() =>
+      profileCompleteGuard(null as any, null as any),
+    );
+
+    await new Promise<void>((resolve) => {
+      if (typeof result === 'object' && 'subscribe' in result) {
+        result.subscribe((res: any) => {
+          expect(res).not.toBe(true);
+          expect(res.toString()).toBe('/profile');
+          resolve();
+        });
+      }
+    });
+  });
 });
 

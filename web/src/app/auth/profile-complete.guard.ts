@@ -19,7 +19,7 @@ export const profileCompleteGuard: CanActivateFn = () => {
   // Check if user has completed their profile
   return userService.getUser(currentUser.uid).pipe(
     map((user) => {
-      if (!user || !user.name || !user.callsign) {
+      if (!user || !user.name?.trim() || !user.callsign?.trim()) {
         // Profile incomplete, redirect to profile page
         return router.createUrlTree(['/profile']);
       }
