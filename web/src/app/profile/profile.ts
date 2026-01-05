@@ -127,7 +127,7 @@ export class Profile {
           horizontalPosition: 'center',
           verticalPosition: 'top',
         });
-        this.router.navigate(['/']);
+        this.router.navigate(['/clubs']);
       });
   }
 
