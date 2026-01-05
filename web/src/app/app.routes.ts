@@ -19,7 +19,7 @@ export const routes: Routes = [
   { path: 'clubs/:slug', component: ClubDetail, canActivate: [profileCompleteGuard] },
   { path: 'events', component: Events, canActivate: [profileCompleteGuard] },
   { path: 'standings', component: Standings, canActivate: [profileCompleteGuard] },
-  { path: 'admin', component: Admin, canActivate: [authGuard, adminGuard, profileCompleteGuard] },
+  { path: 'admin', component: Admin, canActivate: [authGuard, profileCompleteGuard, adminGuard] },
   { path: 'profile', component: Profile, canActivate: [authGuard] },
   { path: 'login', component: Login },
   { path: 'register', component: Register },
