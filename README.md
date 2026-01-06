@@ -1,4 +1,4 @@
-# <img src="https://raw.githubusercontent.com/k0swe/w1aw-schedule/refs/heads/main/web/src/assets/Colorado_WAS250.svg" width="100px" alt="Colorado 150-250 logo"> ARRL Colorado Section's Year of the Club
+# <img src="https://raw.githubusercontent.com/k0swe/arrl-co-yotc/refs/heads/main/web/public/Colorado_WAS250.svg" width="100px" alt="Colorado 150-250 logo"> ARRL Colorado Section's Year of the Club
 
 In 2026, the [American Radio Relay League](https://www.arrl.org/) is celebrating the
 [Year of the Club](https://www.arrl.org/year-of-the-club)! The Colorado Section is also celebrating
