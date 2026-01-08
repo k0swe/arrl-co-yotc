@@ -296,4 +296,9 @@ export class Clubs {
         }
       });
   }
+
+  protected onFilterChange(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    this.filterText.set(target.value);
+  }
 }

@@ -26,7 +26,7 @@
       <input
         matInput
         [value]="filterText()"
-        (input)="filterText.set($any($event.target).value)"
+        (input)="onFilterChange($event)"
         placeholder="Search by name, callsign, or location"
         aria-label="Filter clubs by name, callsign, or location"
       />
