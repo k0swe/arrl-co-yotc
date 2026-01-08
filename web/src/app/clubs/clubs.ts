@@ -17,7 +17,6 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { FormsModule } from '@angular/forms';
 import { ClubService } from '../services/club.service';
 import { MembershipService } from '../services/membership.service';
 import { AuthService } from '../auth/auth.service';
@@ -44,7 +43,6 @@ interface ClubWithMembership extends Club {
     MatSnackBarModule,
     MatInputModule,
     MatFormFieldModule,
-    FormsModule,
     ClubCard,
   ],
   templateUrl: './clubs.html',
@@ -68,9 +66,9 @@ export class Clubs {
       return this.clubs();
     }
     return this.clubs().filter((club) => {
-      const nameMatch = club.name.toLowerCase().includes(filter);
-      const callsignMatch = club.callsign.toLowerCase().includes(filter);
-      const locationMatch = club.location.toLowerCase().includes(filter);
+      const nameMatch = club.name?.toLowerCase().includes(filter) ?? false;
+      const callsignMatch = club.callsign?.toLowerCase().includes(filter) ?? false;
+      const locationMatch = club.location?.toLowerCase().includes(filter) ?? false;
       return nameMatch || callsignMatch || locationMatch;
     });
   });

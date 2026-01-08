@@ -25,7 +25,8 @@
       <mat-label>Filter clubs</mat-label>
       <input
         matInput
-        [(ngModel)]="filterText"
+        [value]="filterText()"
+        (input)="filterText.set($any($event.target).value)"
         placeholder="Search by name, callsign, or location"
         aria-label="Filter clubs by name, callsign, or location"
       />
