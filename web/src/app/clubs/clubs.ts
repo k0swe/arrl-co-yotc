@@ -5,6 +5,7 @@ import {
   inject,
   signal,
   effect,
+  computed,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatCardModule } from '@angular/material/card';
@@ -14,6 +15,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { ClubService } from '../services/club.service';
 import { MembershipService } from '../services/membership.service';
 import { AuthService } from '../auth/auth.service';
@@ -38,6 +41,8 @@ interface ClubWithMembership extends Club {
     MatProgressSpinnerModule,
     MatChipsModule,
     MatSnackBarModule,
+    MatInputModule,
+    MatFormFieldModule,
     ClubCard,
   ],
   templateUrl: './clubs.html',
@@ -54,6 +59,19 @@ export class Clubs {
 
   protected readonly loading = signal(true);
   protected readonly clubs = signal<ClubWithMembership[]>([]);
+  protected readonly filterText = signal('');
+  protected readonly filteredClubs = computed(() => {
+    const filter = this.filterText().toLowerCase().trim();
+    if (!filter) {
+      return this.clubs();
+    }
+    return this.clubs().filter((club) => {
+      const nameMatch = club.name?.toLowerCase().includes(filter) ?? false;
+      const callsignMatch = club.callsign?.toLowerCase().includes(filter) ?? false;
+      const locationMatch = club.location?.toLowerCase().includes(filter) ?? false;
+      return nameMatch || callsignMatch || locationMatch;
+    });
+  });
   protected readonly isAuthenticated = this.authService.isAuthenticated;
   protected readonly MembershipStatus = MembershipStatus;
 
@@ -277,5 +295,10 @@ export class Clubs {
             });
         }
       });
+  }
+
+  protected onFilterChange(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    this.filterText.set(target.value);
   }
 }

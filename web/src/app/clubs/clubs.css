@@ -4,6 +4,12 @@
   padding: 2rem;
 }
 
+.filter-field {
+  width: 100%;
+  max-width: 500px;
+  margin-top: 1.5rem;
+}
+
 .add-club-button {
   white-space: nowrap;
 }
