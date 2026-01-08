@@ -105,7 +105,7 @@ export class ClubService {
   /**
    * Submit a suggestion for a new club
    * Creates an inactive club that requires admin approval
-   * The slug will be set to the document ID to guarantee uniqueness
+   * The slug will be set by admins when they approve the club
    */
   suggestClub(suggestion: Partial<Club>, userId: string): Observable<void> {
     const clubData = {
@@ -114,7 +114,7 @@ export class ClubService {
       description: suggestion.description,
       location: suggestion.location,
       website: suggestion.website,
-      slug: '', // Will be updated to document ID after creation
+      slug: '', // Will be set by admin when approving the club
       isActive: false,
       suggestedBy: userId,
       leaderIds: [],
@@ -123,12 +123,7 @@ export class ClubService {
     };
 
     return from(
-      addDoc(this.clubsCollection, clubData)
-        .then((docRef) => {
-          // Update the document with its ID as the slug
-          return updateDoc(docRef, { slug: docRef.id });
-        })
-        .then(() => void 0)
+      addDoc(this.clubsCollection, clubData).then(() => void 0)
     );
   }
 
