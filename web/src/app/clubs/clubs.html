@@ -20,6 +20,27 @@
       </button>
       }
     </div>
+
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>Filter clubs</mat-label>
+      <input
+        matInput
+        [(ngModel)]="filterText"
+        placeholder="Search by name, callsign, or location"
+        aria-label="Filter clubs by name, callsign, or location"
+      />
+      <mat-icon matPrefix>search</mat-icon>
+      @if (filterText()) {
+      <button
+        mat-icon-button
+        matSuffix
+        (click)="filterText.set('')"
+        aria-label="Clear filter"
+      >
+        <mat-icon>clear</mat-icon>
+      </button>
+      }
+    </mat-form-field>
   </header>
 
   @if (loading()) {
@@ -27,15 +48,21 @@
     <mat-spinner></mat-spinner>
     <p>Loading clubs...</p>
   </div>
-  } @else if (clubs().length === 0) {
+  } @else if (filteredClubs().length === 0 && !filterText()) {
   <div class="empty-state" role="status">
     <mat-icon class="empty-icon">groups_off</mat-icon>
     <h2>No Clubs Available</h2>
     <p>There are currently no active clubs registered in the system.</p>
   </div>
+  } @else if (filteredClubs().length === 0 && filterText()) {
+  <div class="empty-state" role="status">
+    <mat-icon class="empty-icon">search_off</mat-icon>
+    <h2>No Matching Clubs</h2>
+    <p>No clubs match your search. Try a different search term.</p>
+  </div>
   } @else {
   <div class="clubs-grid">
-    @for (club of clubs(); track club.id) {
+    @for (club of filteredClubs(); track club.id) {
     <app-club-card [club]="club">
       <div card-content>
         @if (club.membershipStatus) {
