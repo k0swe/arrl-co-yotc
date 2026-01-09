@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import { Router, RouterOutlet, RouterLink } from '@angular/router';
 import { NgOptimizedImage } from '@angular/common';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatIconModule } from '@angular/material/icon';
@@ -47,6 +48,7 @@ import { map, catchError } from 'rxjs/operators';
 })
 export class App {
   private router = inject(Router);
+  private breakpointObserver = inject(BreakpointObserver);
   protected authService = inject(AuthService);
   private membershipService = inject(MembershipService);
   private clubService = inject(ClubService);
@@ -54,12 +56,25 @@ export class App {
 
   protected readonly title = signal('ARRL Colorado Section - Year of the Club');
   protected readonly sidenavOpened = signal(true);
+  protected readonly sidenavMode = signal<'side' | 'over'>('side');
+  protected readonly isMobile = signal(false);
   protected readonly userClubs = signal<Club[]>([]);
   protected readonly hasConfirmedMemberships = computed(() => this.userClubs().length > 0);
   protected readonly pendingClubsCount = signal(0);
   protected readonly pendingMembershipCounts = signal<Map<string, number>>(new Map());
 
   constructor() {
+    // Set up responsive behavior for sidenav
+    this.breakpointObserver
+      .observe([Breakpoints.XSmall, Breakpoints.Small, Breakpoints.Medium])
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((result) => {
+        const isMobile = result.matches;
+        this.isMobile.set(isMobile);
+        this.sidenavMode.set(isMobile ? 'over' : 'side');
+        this.sidenavOpened.set(!isMobile);
+      });
+
     // Load user's clubs when authentication state changes
     effect(() => {
       const user = this.authService.currentUser();
@@ -133,6 +148,12 @@ export class App {
 
   protected toggleSidenav(): void {
     this.sidenavOpened.update((value) => !value);
+  }
+
+  protected closeSidenavIfMobile(): void {
+    if (this.isMobile()) {
+      this.sidenavOpened.set(false);
+    }
   }
 
   private loadPendingClubsCount(): void {

@@ -10,7 +10,8 @@
     height="48"
     priority
   />
-  <span>{{ title() }}</span>
+  <span class="toolbar-title">{{ title() }}</span>
+  <span class="toolbar-title-short">CO Year of the Club</span>
 
   <span class="spacer"></span>
 
@@ -42,9 +43,14 @@
 </mat-toolbar>
 
 <mat-sidenav-container class="sidenav-container" autosize>
-  <mat-sidenav [opened]="sidenavOpened()" mode="side" class="sidenav">
+  <mat-sidenav
+    [opened]="sidenavOpened()"
+    [mode]="sidenavMode()"
+    class="sidenav"
+    (closed)="sidenavOpened.set(false)"
+  >
     <mat-nav-list>
-      <a mat-list-item routerLink="/" aria-label="Navigate to home">
+      <a mat-list-item routerLink="/" aria-label="Navigate to home" (click)="closeSidenavIfMobile()">
         <mat-icon matListItemIcon>home</mat-icon>
         <span matListItemTitle>Home</span>
       </a>
@@ -52,7 +58,12 @@
       <mat-expansion-panel class="nav-expansion-panel">
         <mat-expansion-panel-header class="nav-expansion-header">
           <mat-panel-title>
-            <a mat-list-item routerLink="/clubs" aria-label="Navigate to clubs">
+            <a
+              mat-list-item
+              routerLink="/clubs"
+              aria-label="Navigate to clubs"
+              (click)="closeSidenavIfMobile()"
+            >
               <mat-icon matListItemIcon>groups</mat-icon>
               <span matListItemTitle>Clubs</span>
             </a>
@@ -64,6 +75,7 @@
           [routerLink]="['/clubs', club.slug || club.id]"
           class="nested-nav-item"
           [attr.aria-label]="'Navigate to ' + club.name"
+          (click)="closeSidenavIfMobile()"
         >
           <span
             matListItemIcon
@@ -90,21 +102,41 @@
         }
       </mat-expansion-panel>
       } @else {
-      <a mat-list-item routerLink="/clubs" aria-label="Navigate to clubs">
+      <a
+        mat-list-item
+        routerLink="/clubs"
+        aria-label="Navigate to clubs"
+        (click)="closeSidenavIfMobile()"
+      >
         <mat-icon matListItemIcon>groups</mat-icon>
         <span matListItemTitle>Clubs</span>
       </a>
       }
-      <a mat-list-item routerLink="/events" aria-label="Navigate to events">
+      <a
+        mat-list-item
+        routerLink="/events"
+        aria-label="Navigate to events"
+        (click)="closeSidenavIfMobile()"
+      >
         <mat-icon matListItemIcon>event</mat-icon>
         <span matListItemTitle>Events</span>
       </a>
-      <a mat-list-item routerLink="/standings" aria-label="Navigate to standings">
+      <a
+        mat-list-item
+        routerLink="/standings"
+        aria-label="Navigate to standings"
+        (click)="closeSidenavIfMobile()"
+      >
         <mat-icon matListItemIcon>leaderboard</mat-icon>
         <span matListItemTitle>Standings</span>
       </a>
       @if (authService.isAdmin()) {
-      <a mat-list-item routerLink="/admin" aria-label="Navigate to admin">
+      <a
+        mat-list-item
+        routerLink="/admin"
+        aria-label="Navigate to admin"
+        (click)="closeSidenavIfMobile()"
+      >
         <mat-icon
           matListItemIcon
           [matBadge]="pendingClubsCount()"
