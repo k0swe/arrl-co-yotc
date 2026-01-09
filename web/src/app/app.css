@@ -100,10 +100,6 @@ nav-expansion-panel-body {
 
 /* Mobile-specific styles */
 @media (max-width: 959px) {
-  .sidenav {
-    width: 280px;
-  }
-
   mat-toolbar img {
     margin: 0 8px;
   }

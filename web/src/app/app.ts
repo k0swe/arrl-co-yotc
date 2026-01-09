@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import { Router, RouterOutlet, RouterLink } from '@angular/router';
 import { NgOptimizedImage } from '@angular/common';
-import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { BreakpointObserver } from '@angular/cdk/layout';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatIconModule } from '@angular/material/icon';
@@ -65,8 +65,9 @@ export class App {
 
   constructor() {
     // Set up responsive behavior for sidenav
+    // Use custom breakpoint to match CSS media queries (< 960px)
     this.breakpointObserver
-      .observe([Breakpoints.XSmall, Breakpoints.Small, Breakpoints.Medium])
+      .observe(['(max-width: 959px)'])
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((result) => {
         const isMobile = result.matches;
