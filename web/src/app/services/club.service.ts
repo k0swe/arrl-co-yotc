@@ -143,7 +143,9 @@ export class ClubService {
 
   /**
    * Reject a club suggestion by deleting it from the database
-   * This removes the rejected club suggestion completely.
+   * This removes the rejected club suggestion completely. Note: This operation
+   * is permanent and does not preserve an audit trail. Use this when the
+   * suggestion should not be retained in the system.
    */
   rejectClub(clubId: string): Observable<void> {
     const clubDoc = doc(this.firestore, 'clubs', clubId);
