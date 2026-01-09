@@ -202,8 +202,7 @@ export class Admin {
         next: () => {
           this.showSnackBar(`${club.name} has been rejected`);
           this.setProcessing(club.id, false);
-          // Remove from pending review queue. The club remains in the database as inactive
-          // for auditing purposes, but it no longer needs admin review.
+          // Remove from pending review queue. The club has been deleted from the database.
           this.pendingClubs.set(this.pendingClubs().filter((c) => c.id !== club.id));
         },
         error: (error) => {
