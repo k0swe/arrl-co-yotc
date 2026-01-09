@@ -3,6 +3,7 @@ import {
   addDoc,
   collection,
   collectionData,
+  deleteDoc,
   doc,
   Firestore,
   getDoc,
@@ -141,19 +142,12 @@ export class ClubService {
   }
 
   /**
-   * Reject a club suggestion by keeping it as inactive
-   * This preserves the record for auditing purposes in the database.
-   * Note: Rejected clubs remain in the database but are removed from the
-   * pending review queue since they have been reviewed and rejected.
+   * Reject a club suggestion by deleting it from the database
+   * This removes the rejected club suggestion completely.
    */
   rejectClub(clubId: string): Observable<void> {
     const clubDoc = doc(this.firestore, 'clubs', clubId);
-    return from(
-      updateDoc(clubDoc, {
-        isActive: false,
-        updatedAt: serverTimestamp(),
-      }).then(() => void 0)
-    );
+    return from(deleteDoc(clubDoc).then(() => void 0));
   }
 
   /**
