@@ -66,6 +66,5 @@ jobs:
           projectId: arrl-co-yotc
           channelId: pr-${{ github.event.pull_request.number }}
           expires: 7d
-          entryPoint: web
         env:
           FIREBASE_CLI_EXPERIMENTS: webframeworks
