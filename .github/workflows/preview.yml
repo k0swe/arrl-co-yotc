@@ -30,7 +30,16 @@ jobs:
         with:
           node-version-file: '.nvmrc'
           cache: npm
-          cache-dependency-path: web/package-lock.json
+          cache-dependency-path: |
+            shared/package-lock.json
+            web/package-lock.json
+
+      - name: Install and build shared module
+        working-directory: shared
+        run: |
+          npm ci
+          npm run build
+
       - name: Install npm deps
         working-directory: web
         run: npm ci
