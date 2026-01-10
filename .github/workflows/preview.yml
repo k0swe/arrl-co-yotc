@@ -50,19 +50,11 @@ jobs:
         with:
           workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
           service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
-          create_credentials_file: true
-
-      - name: Format service account credentials for action
-        run: |
-          SERVICE_ACCOUNT_KEY=$(cat "${{ steps.auth.outputs.credentials_file_path }}" | tr -d '\n')
-          echo "::add-mask::$SERVICE_ACCOUNT_KEY"
-          echo "SERVICE_ACCOUNT_KEY=$SERVICE_ACCOUNT_KEY" >> $GITHUB_ENV
 
       - name: Deploy to Firebase Hosting Preview Channel
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ env.SERVICE_ACCOUNT_KEY }}
           projectId: arrl-co-yotc
           channelId: pr-${{ github.event.pull_request.number }}
           expires: 7d
