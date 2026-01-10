@@ -93,10 +93,10 @@
           color="primary"
           (click)="applyForMembership(club)"
           [disabled]="club.isApplying"
-          aria-label="Confirm membership in {{ club.name }}"
+          aria-label="I am a member of {{ club.name }}"
         >
           <mat-icon>verified_user</mat-icon>
-          <span>Confirm Membership</span>
+          <span>I am a Member</span>
         </button>
         } @else if (!isAuthenticated()) {
         <button mat-button disabled aria-label="Sign in required to confirm">
