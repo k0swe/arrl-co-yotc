@@ -52,9 +52,11 @@ jobs:
           service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
           create_credentials_file: true
 
-      - name: Convert credentials file to service account key
+      - name: Format service account credentials for action
         run: |
-          echo "SERVICE_ACCOUNT_KEY=$(cat "${{ steps.auth.outputs.credentials_file_path }}" | tr -d '\n')" >> $GITHUB_ENV
+          SERVICE_ACCOUNT_KEY=$(cat "${{ steps.auth.outputs.credentials_file_path }}" | tr -d '\n')
+          echo "::add-mask::$SERVICE_ACCOUNT_KEY"
+          echo "SERVICE_ACCOUNT_KEY=$SERVICE_ACCOUNT_KEY" >> $GITHUB_ENV
 
       - name: Deploy to Firebase Hosting Preview Channel
         uses: FirebaseExtended/action-hosting-deploy@v0
