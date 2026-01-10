@@ -43,5 +43,5 @@ jobs:
           # Note: The entire *.web.app domain is manually authorized in Firebase Auth,
           # so no cleanup of Auth domains is needed for individual preview channels.
           firebase hosting:channel:delete $CHANNEL_ID \
-            --project w1aw-schedule-76a82 \
+            --project arrl-co-yotc \
             --force || echo "Channel may have already expired or been deleted"
