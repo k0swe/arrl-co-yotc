@@ -58,3 +58,20 @@ form {
   align-items: center;
   gap: 8px;
 }
+
+/* Mobile responsive styles */
+@media (max-width: 599px) {
+  .profile-container {
+    padding: 16px;
+    min-height: calc(100vh - 150px);
+  }
+
+  .button-container {
+    flex-direction: column;
+  }
+
+  .button-container button {
+    width: 100%;
+    justify-content: center;
+  }
+}

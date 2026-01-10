@@ -11,6 +11,7 @@
 
 .sidenav {
   max-width: 400px;
+  width: 280px;
 }
 
 .main-content {
@@ -87,5 +88,34 @@ nav-expansion-panel-body {
   align-items: center;
   justify-content: center;
   position: relative;
+}
+
+.toolbar-title {
+  display: inline;
+}
+
+.toolbar-title-short {
+  display: none;
+}
+
+/* Mobile-specific styles */
+@media (max-width: 959px) {
+  mat-toolbar img {
+    margin: 0 8px;
+  }
+}
+
+@media (max-width: 599px) {
+  .toolbar-title {
+    display: none;
+  }
+
+  .toolbar-title-short {
+    display: inline;
+  }
+
+  mat-toolbar img {
+    margin: 0 4px;
+  }
 }
 

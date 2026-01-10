@@ -87,3 +87,23 @@ h3 {
 .action-button mat-spinner {
   margin: 0;
 }
+
+/* Mobile responsive styles */
+@media (max-width: 599px) {
+  .admin-container {
+    padding: 1rem;
+  }
+
+  .clubs-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+  }
+
+  .action-button {
+    width: 100%;
+    justify-content: center !important;
+  }
+}
