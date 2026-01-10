@@ -52,6 +52,15 @@ mat-card-title {
   margin: 1rem 0;
 }
 
+mat-list-item {
+  height: auto !important;
+  min-height: 48px;
+}
+
+mat-list-item::part(content) {
+  padding: 0;
+}
+
 .membership-item {
   display: flex;
   justify-content: space-between;
@@ -97,11 +106,12 @@ mat-card-title {
 }
 
 .role-badge {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 0.25rem;
   font-size: 0.875rem;
   color: var(--mdc-theme-primary, #1976d2);
+  margin-top: 0.25rem;
 }
 
 .role-icon {
@@ -132,6 +142,10 @@ mat-card-title {
     align-items: flex-start;
   }
 
+  .membership-info {
+    width: 100%;
+  }
+
   .membership-actions {
     width: 100%;
     justify-content: stretch;
@@ -139,11 +153,18 @@ mat-card-title {
 
   .membership-actions button {
     flex: 1;
+    /* Ensure button text wraps on smaller screens */
+    white-space: normal;
+    min-height: 36px;
   }
 
   .member-item {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .user-details {
+    width: 100%;
   }
 
   .action-buttons {
