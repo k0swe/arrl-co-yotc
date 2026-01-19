@@ -6,7 +6,6 @@ import {
   collectionGroup,
   setDoc,
   doc,
-  docData,
   getDoc,
   query,
   where,
@@ -34,9 +33,20 @@ export class MembershipService {
    * Get all memberships for a specific user using collection group query
    */
   getUserMemberships(userId: string): Observable<ClubMembership[]> {
+    console.log('[MembershipService] getUserMemberships called for userId:', userId);
     const membershipsGroup = collectionGroup(this.firestore, 'memberships');
     const q = query(membershipsGroup, where('userId', '==', userId));
-    return collectionData(q, { idField: 'id' }) as Observable<ClubMembership[]>;
+    return collectionData(q, { idField: 'id' }).pipe(
+      map((data) => {
+        const memberships = data as ClubMembership[];
+        console.log('[MembershipService] getUserMemberships result:', memberships);
+        return memberships;
+      }),
+      catchError((error) => {
+        console.error('[MembershipService] getUserMemberships error:', error);
+        throw error;
+      }),
+    );
   }
 
   /**

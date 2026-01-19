@@ -250,8 +250,10 @@ service cloud.firestore {
     // Allows users to query all their memberships across clubs
     match /{path=**}/memberships/{membershipId} {
       // Authenticated users can query their own memberships across all clubs
-      allow read: if isAuthenticated() && membershipId == request.auth.uid;
-      
+      // When using collectionGroup queries with where('userId', '==', userId),
+      // we check if the document's userId field matches the authenticated user
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+
       // Admins can query all memberships
       allow read: if isAdmin();
     }

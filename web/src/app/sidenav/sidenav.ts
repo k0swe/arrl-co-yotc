@@ -91,34 +91,56 @@ export class SidenavComponent {
   }
 
   private loadUserClubs(userId: string, isAdmin: boolean): void {
+    console.log('[SidenavComponent] loadUserClubs called', { userId, isAdmin });
+
     if (isAdmin) {
       // Admins see all active clubs
+      console.log('[SidenavComponent] Loading clubs for admin user');
       this.clubService
         .getActiveClubs()
         .pipe(
-          catchError(() => of([])),
+          catchError((error) => {
+            console.error('[SidenavComponent] Error loading active clubs for admin:', error);
+            return of([]);
+          }),
           takeUntilDestroyed(this.destroyRef),
         )
         .subscribe((clubs) => {
+          console.log('[SidenavComponent] Admin clubs loaded:', clubs.length);
           this.userClubs.set(clubs);
         });
     } else {
       // Regular users see only clubs where they have confirmed membership
+      console.log('[SidenavComponent] Loading clubs for non-admin user');
       combineLatest([
         this.membershipService.getUserMemberships(userId),
         this.clubService.getActiveClubs(),
       ])
         .pipe(
           map(([memberships, clubs]) => {
+            console.log('[SidenavComponent] Memberships received:', memberships.length);
+            console.log('[SidenavComponent] Active clubs received:', clubs.length);
+            console.log('[SidenavComponent] All memberships:', memberships);
+
             const confirmedClubIds = memberships
               .filter((m) => m.status === MembershipStatus.Active)
               .map((m) => m.clubId);
-            return clubs.filter((c) => confirmedClubIds.includes(c.id));
+
+            console.log('[SidenavComponent] Confirmed club IDs:', confirmedClubIds);
+
+            const userClubs = clubs.filter((c) => confirmedClubIds.includes(c.id));
+            console.log('[SidenavComponent] Filtered user clubs:', userClubs.length, userClubs);
+
+            return userClubs;
           }),
-          catchError(() => of([])),
+          catchError((error) => {
+            console.error('[SidenavComponent] Error loading clubs for non-admin:', error);
+            return of([]);
+          }),
           takeUntilDestroyed(this.destroyRef),
         )
         .subscribe((clubs) => {
+          console.log('[SidenavComponent] Setting user clubs:', clubs.length);
           this.userClubs.set(clubs);
         });
     }
