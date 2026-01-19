@@ -53,6 +53,7 @@ export class SidenavComponent {
   protected readonly hasConfirmedMemberships = computed(() => this.userClubs().length > 0);
   protected readonly pendingClubsCount = signal(0);
   protected readonly pendingMembershipCounts = signal<Map<string, number>>(new Map());
+  protected readonly clubsExpanded = signal(false);
 
   constructor() {
     // Load user's clubs when authentication state changes
@@ -103,6 +104,7 @@ export class SidenavComponent {
         )
         .subscribe((clubs) => {
           this.userClubs.set(clubs);
+          this.clubsExpanded.set(true);
           this.cdr.markForCheck();
         });
     } else {
@@ -123,6 +125,7 @@ export class SidenavComponent {
         )
         .subscribe((clubs) => {
           this.userClubs.set(clubs);
+          this.clubsExpanded.set(true);
           this.cdr.markForCheck();
         });
     }
