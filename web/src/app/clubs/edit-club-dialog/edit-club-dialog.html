@@ -1,16 +1,21 @@
 <h2 mat-dialog-title>
-  @if (isApprovalMode) { Review and Approve Club } @else if (isEditMode) { Edit Club Details } @else
-  { Add New Club }
+  @if (isApprovalMode) {
+    Review and Approve Club
+  } @else if (isEditMode) {
+    Edit Club Details
+  } @else {
+    Add New Club
+  }
 </h2>
 
 <mat-dialog-content>
   <p class="dialog-description">
     @if (isApprovalMode) {
-    <span>Review and validate all club information before approving.</span>
+      <span>Review and validate all club information before approving.</span>
     } @else if (isEditMode) {
-    <span>Update the club information below.</span>
+      <span>Update the club information below.</span>
     } @else {
-    <span>Fill in the details for the new club.</span>
+      <span>Fill in the details for the new club.</span>
     }
   </p>
 
@@ -23,40 +28,41 @@
       </label>
 
       @if (logoUrl()) {
-      <div class="logo-preview">
-        <img [src]="logoUrl()" alt="Club logo preview" class="logo-image" />
-        <button
-          mat-icon-button
-          type="button"
-          (click)="removeLogo()"
-          class="remove-logo-button"
-          aria-label="Remove logo"
-        >
-          <mat-icon>close</mat-icon>
-        </button>
-      </div>
+        <div class="logo-preview">
+          <img [src]="logoUrl()" alt="Club logo preview" class="logo-image" />
+          <button
+            mat-icon-button
+            type="button"
+            (click)="removeLogo()"
+            class="remove-logo-button"
+            aria-label="Remove logo"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
       } @else {
-      <div class="logo-upload-button">
-        <input
-          type="file"
-          accept="image/jpeg,image/png,image/webp,image/gif"
-          (change)="onLogoSelected($event)"
-          #logoInput
-          id="logo-input"
-          class="file-input"
-          aria-label="Upload club logo"
-        />
-        <button mat-stroked-button type="button" (click)="logoInput.click()">
-          <mat-icon>upload</mat-icon>
-          Upload Logo
-        </button>
-        <span class="logo-hint">JPEG, PNG, WEBP, or GIF (Max 5MB)</span>
-      </div>
-      } @if (uploadError()) {
-      <div class="upload-error" role="alert">
-        <mat-icon>error</mat-icon>
-        {{ uploadError() }}
-      </div>
+        <div class="logo-upload-button">
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            (change)="onLogoSelected($event)"
+            #logoInput
+            id="logo-input"
+            class="file-input"
+            aria-label="Upload club logo"
+          />
+          <button mat-stroked-button type="button" (click)="logoInput.click()">
+            <mat-icon>upload</mat-icon>
+            Upload Logo
+          </button>
+          <span class="logo-hint">JPEG, PNG, WEBP, or GIF (Max 5MB)</span>
+        </div>
+      }
+      @if (uploadError()) {
+        <div class="upload-error" role="alert">
+          <mat-icon>error</mat-icon>
+          {{ uploadError() }}
+        </div>
       }
     </div>
 
@@ -71,7 +77,7 @@
       />
       <mat-icon matPrefix>groups</mat-icon>
       @if (getErrorMessage('name')) {
-      <mat-error>{{ getErrorMessage('name') }}</mat-error>
+        <mat-error>{{ getErrorMessage('name') }}</mat-error>
       }
     </mat-form-field>
 
@@ -86,7 +92,7 @@
       />
       <mat-icon matPrefix>radio</mat-icon>
       @if (getErrorMessage('callsign')) {
-      <mat-error>{{ getErrorMessage('callsign') }}</mat-error>
+        <mat-error>{{ getErrorMessage('callsign') }}</mat-error>
       }
     </mat-form-field>
 
@@ -103,11 +109,11 @@
       <mat-icon matPrefix>link</mat-icon>
       <span matTextPrefix>/clubs/</span>
       @if (isClubActive) {
-      <mat-hint>Slug cannot be changed once club is active</mat-hint>
+        <mat-hint>Slug cannot be changed once club is active</mat-hint>
       } @else if (getErrorMessage('slug')) {
-      <mat-error>{{ getErrorMessage('slug') }}</mat-error>
+        <mat-error>{{ getErrorMessage('slug') }}</mat-error>
       } @else {
-      <mat-hint>URL-friendly identifier (lowercase letters, numbers, and hyphens)</mat-hint>
+        <mat-hint>URL-friendly identifier (lowercase letters, numbers, and hyphens)</mat-hint>
       }
     </mat-form-field>
 
@@ -122,7 +128,7 @@
       />
       <mat-icon matPrefix>place</mat-icon>
       @if (getErrorMessage('location')) {
-      <mat-error>{{ getErrorMessage('location') }}</mat-error>
+        <mat-error>{{ getErrorMessage('location') }}</mat-error>
       }
     </mat-form-field>
 
@@ -136,7 +142,7 @@
       />
       <mat-icon matPrefix>link</mat-icon>
       @if (getErrorMessage('website')) {
-      <mat-error>{{ getErrorMessage('website') }}</mat-error>
+        <mat-error>{{ getErrorMessage('website') }}</mat-error>
       }
     </mat-form-field>
 
@@ -152,7 +158,7 @@
       ></textarea>
       <mat-icon matPrefix>description</mat-icon>
       @if (getErrorMessage('description')) {
-      <mat-error>{{ getErrorMessage('description') }}</mat-error>
+        <mat-error>{{ getErrorMessage('description') }}</mat-error>
       }
     </mat-form-field>
   </form>
@@ -177,16 +183,16 @@
     aria-label="Save club details"
   >
     @if (uploadingLogo()) {
-    <mat-spinner diameter="20" class="inline-spinner"></mat-spinner>
-    <span>Uploading...</span>
+      <mat-spinner diameter="20" class="inline-spinner"></mat-spinner>
+      <span>Uploading...</span>
     } @else if (submitting()) {
-    <span>Saving...</span>
+      <span>Saving...</span>
     } @else if (isApprovalMode) {
-    <span>Approve Club</span>
+      <span>Approve Club</span>
     } @else if (isEditMode) {
-    <span>Save Changes</span>
+      <span>Save Changes</span>
     } @else {
-    <span>Create Club</span>
+      <span>Create Club</span>
     }
   </button>
 </mat-dialog-actions>

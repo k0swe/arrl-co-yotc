@@ -88,7 +88,7 @@ export class EventDetailDialog implements OnInit {
           console.error('Error checking membership:', error);
           return of(null);
         }),
-        takeUntilDestroyed(this.destroyRef)
+        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe((membership) => {
         const isMember = membership?.status === MembershipStatus.Active;
@@ -111,7 +111,7 @@ export class EventDetailDialog implements OnInit {
           console.error('Error loading RSVPs:', error);
           return of([]);
         }),
-        takeUntilDestroyed(this.destroyRef)
+        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe((rsvps) => {
         this.rsvps.set(rsvps);
@@ -126,7 +126,7 @@ export class EventDetailDialog implements OnInit {
     }
 
     const userObservables = userIds.map((userId) =>
-      this.userService.getUser(userId).pipe(catchError(() => of(null)))
+      this.userService.getUser(userId).pipe(catchError(() => of(null))),
     );
 
     forkJoin(userObservables)

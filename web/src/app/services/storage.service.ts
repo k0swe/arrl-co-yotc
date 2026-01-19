@@ -1,11 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import {
-  Storage,
-  ref,
-  uploadBytes,
-  getDownloadURL,
-  deleteObject,
-} from '@angular/fire/storage';
+import { Storage, ref, uploadBytes, getDownloadURL, deleteObject } from '@angular/fire/storage';
 import { from, Observable } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 

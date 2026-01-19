@@ -53,7 +53,9 @@
                 [attr.aria-label]="userRsvps().get(event.id) ? 'Remove RSVP' : 'Add RSVP'"
                 [matTooltip]="userRsvps().get(event.id) ? 'Remove RSVP' : 'RSVP to attend'"
               >
-                <mat-icon>{{ userRsvps().get(event.id) ? 'check_circle' : 'check_circle_outline' }}</mat-icon>
+                <mat-icon>{{
+                  userRsvps().get(event.id) ? 'check_circle' : 'check_circle_outline'
+                }}</mat-icon>
               </button>
             }
           </td>

@@ -73,7 +73,7 @@ describe('EditClubDialog', () => {
       });
 
       // Wait for async validation to complete (300ms debounce + processing)
-      await new Promise(resolve => setTimeout(resolve, 400));
+      await new Promise((resolve) => setTimeout(resolve, 400));
       await fixture.whenStable();
 
       expect(form.valid).toBeTruthy();
@@ -91,7 +91,7 @@ describe('EditClubDialog', () => {
       });
 
       // Wait for async validation to complete
-      await new Promise(resolve => setTimeout(resolve, 400));
+      await new Promise((resolve) => setTimeout(resolve, 400));
       await fixture.whenStable();
 
       component['onSubmit']();
@@ -379,7 +379,7 @@ describe('EditClubDialog', () => {
 
     it('should require all fields to be valid before submission', () => {
       const form = component['clubForm'];
-      
+
       // Clear description to make form invalid
       form.patchValue({ description: '' });
       expect(form.valid).toBeFalsy();
@@ -398,7 +398,7 @@ describe('EditClubDialog', () => {
       });
 
       // Wait for async validation to complete
-      await new Promise(resolve => setTimeout(resolve, 400));
+      await new Promise((resolve) => setTimeout(resolve, 400));
       await fixture.whenStable();
 
       component['onSubmit']();
@@ -465,13 +465,15 @@ describe('EditClubDialog', () => {
       const slugControl = component['clubForm'].get('slug');
       slugControl?.setValue('denver-club');
       slugControl?.markAsTouched();
-      
+
       // Wait for async validation (300ms debounce + processing)
-      await new Promise(resolve => setTimeout(resolve, 400));
+      await new Promise((resolve) => setTimeout(resolve, 400));
       await fixture.whenStable();
 
       expect(slugControl?.hasError('slugNotUnique')).toBeTruthy();
-      expect(component['getErrorMessage']('slug')).toBe('This slug is already taken by another club');
+      expect(component['getErrorMessage']('slug')).toBe(
+        'This slug is already taken by another club',
+      );
     });
 
     it('should accept unique slugs in create mode', async () => {
@@ -483,7 +485,7 @@ describe('EditClubDialog', () => {
 
       const slugControl = component['clubForm'].get('slug');
       slugControl?.setValue('unique-slug');
-      
+
       // Wait for async validation
       await fixture.whenStable();
 
@@ -524,7 +526,7 @@ describe('EditClubDialog', () => {
       fixture.detectChanges();
 
       const slugControl = component['clubForm'].get('slug');
-      
+
       // Wait for async validation
       await fixture.whenStable();
 
@@ -581,9 +583,9 @@ describe('EditClubDialog', () => {
       const slugControl = component['clubForm'].get('slug');
       slugControl?.setValue('denver-club');
       slugControl?.markAsTouched();
-      
+
       // Wait for async validation (300ms debounce + processing)
-      await new Promise(resolve => setTimeout(resolve, 400));
+      await new Promise((resolve) => setTimeout(resolve, 400));
       await fixture.whenStable();
 
       expect(slugControl?.hasError('slugNotUnique')).toBeTruthy();
@@ -598,10 +600,10 @@ describe('EditClubDialog', () => {
 
       const slugControl = component['clubForm'].get('slug');
       slugControl?.setValue('checking-slug');
-      
+
       // Wait for debounce but not for completion
-      await new Promise(resolve => setTimeout(resolve, 350));
-      
+      await new Promise((resolve) => setTimeout(resolve, 350));
+
       // While async validation is pending
       expect(slugControl?.pending).toBeTruthy();
       expect(component['getErrorMessage']('slug')).toBe('Checking if slug is available...');
@@ -622,7 +624,7 @@ describe('EditClubDialog', () => {
       };
 
       mockClubService.getClubBySlug.mockReturnValue(of(existingClub));
-      
+
       const dialogData: EditClubDialogData = { club: existingClub };
 
       TestBed.overrideProvider(MAT_DIALOG_DATA, { useValue: dialogData });
@@ -640,16 +642,14 @@ describe('EditClubDialog', () => {
         invalid: true,
         valid: false,
         touched: false,
-        dirty: false
+        dirty: false,
       } as any;
 
       expect(slugErrorStateMatcher.isErrorState(mockControl, null)).toBeTruthy();
     });
 
     it('should handle network errors during validation gracefully', async () => {
-      mockClubService.getClubBySlug.mockReturnValue(
-        throwError(() => new Error('Network error'))
-      );
+      mockClubService.getClubBySlug.mockReturnValue(throwError(() => new Error('Network error')));
 
       fixture = TestBed.createComponent(EditClubDialog);
       component = fixture.componentInstance;
@@ -657,9 +657,9 @@ describe('EditClubDialog', () => {
 
       const slugControl = component['clubForm'].get('slug');
       slugControl?.setValue('network-error-slug');
-      
+
       // Wait for async validation to complete (300ms debounce + processing)
-      await new Promise(resolve => setTimeout(resolve, 400));
+      await new Promise((resolve) => setTimeout(resolve, 400));
       await fixture.whenStable();
 
       // Should not have validation error (validation should return null on error)
@@ -672,7 +672,7 @@ describe('EditClubDialog', () => {
       fixture.detectChanges();
 
       const slugControl = component['clubForm'].get('slug');
-      
+
       // Test empty value
       slugControl?.setValue('');
       expect(mockClubService.getClubBySlug).not.toHaveBeenCalled();
@@ -683,5 +683,4 @@ describe('EditClubDialog', () => {
       expect(mockClubService.getClubBySlug).not.toHaveBeenCalled();
     });
   });
-
 });

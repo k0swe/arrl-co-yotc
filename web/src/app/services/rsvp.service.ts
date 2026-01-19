@@ -28,10 +28,7 @@ export class RsvpService {
    * Get all RSVPs for a specific event
    */
   getEventRsvps(clubId: string, eventId: string): Observable<EventRsvp[]> {
-    const rsvpsCollection = collection(
-      this.firestore,
-      `clubs/${clubId}/events/${eventId}/rsvps`,
-    );
+    const rsvpsCollection = collection(this.firestore, `clubs/${clubId}/events/${eventId}/rsvps`);
     return collectionData(rsvpsCollection, { idField: 'id' }) as Observable<EventRsvp[]>;
   }
 

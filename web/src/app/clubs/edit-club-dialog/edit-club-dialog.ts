@@ -260,7 +260,7 @@ export class EditClubDialog {
             this.submitting.set(false);
             this.uploadingLogo.set(false);
             return of(null);
-          })
+          }),
         )
         .subscribe((logoUrl) => {
           this.uploadingLogo.set(false);

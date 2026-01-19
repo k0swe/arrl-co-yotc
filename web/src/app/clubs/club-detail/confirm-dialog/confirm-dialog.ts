@@ -28,7 +28,7 @@ export interface ConfirmDialogData {
     .align-end {
       justify-content: flex-end;
     }
-    
+
     mat-dialog-content {
       padding: 1.5rem 0;
     }

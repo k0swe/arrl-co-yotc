@@ -1,9 +1,4 @@
-import {
-  Component,
-  ChangeDetectionStrategy,
-  signal,
-  inject,
-} from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -55,22 +50,10 @@ export class EditEventDialog {
       this.data?.event?.description || '',
       [Validators.required, Validators.minLength(10), Validators.maxLength(1000)],
     ],
-    startDate: [
-      this.toDate(this.data?.event?.startTime),
-      [Validators.required],
-    ],
-    startTime: [
-      this.toTimeString(this.data?.event?.startTime),
-      [Validators.required],
-    ],
-    endDate: [
-      this.toDate(this.data?.event?.endTime),
-      [Validators.required],
-    ],
-    endTime: [
-      this.toTimeString(this.data?.event?.endTime),
-      [Validators.required],
-    ],
+    startDate: [this.toDate(this.data?.event?.startTime), [Validators.required]],
+    startTime: [this.toTimeString(this.data?.event?.startTime), [Validators.required]],
+    endDate: [this.toDate(this.data?.event?.endTime), [Validators.required]],
+    endTime: [this.toTimeString(this.data?.event?.endTime), [Validators.required]],
   });
 
   protected onCancel(): void {
@@ -84,15 +67,15 @@ export class EditEventDialog {
     }
 
     const formData = this.eventForm.getRawValue();
-    
+
     // Combine date and time fields into Date objects
     const startDateTime = this.combineDateAndTime(formData.startDate, formData.startTime);
     const endDateTime = this.combineDateAndTime(formData.endDate, formData.endTime);
-    
+
     if (!startDateTime || !endDateTime) {
       return; // Should not happen due to required validators
     }
-    
+
     // Validate that end time is after start time
     if (endDateTime <= startDateTime) {
       // Show error on endTime field
@@ -144,7 +127,11 @@ export class EditEventDialog {
     if (timestamp instanceof Date) {
       return timestamp;
     }
-    if (typeof timestamp === 'object' && 'toDate' in timestamp && typeof timestamp.toDate === 'function') {
+    if (
+      typeof timestamp === 'object' &&
+      'toDate' in timestamp &&
+      typeof timestamp.toDate === 'function'
+    ) {
       return timestamp.toDate();
     }
     if (typeof timestamp === 'string') {
@@ -174,12 +161,12 @@ export class EditEventDialog {
     if (!date || !timeString) {
       return null;
     }
-    
+
     const [hours, minutes] = timeString.split(':').map(Number);
     if (isNaN(hours) || isNaN(minutes)) {
       return null;
     }
-    
+
     const combined = new Date(date);
     combined.setHours(hours, minutes, 0, 0);
     return combined;
