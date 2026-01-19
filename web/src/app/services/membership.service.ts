@@ -6,7 +6,6 @@ import {
   collectionGroup,
   setDoc,
   doc,
-  docData,
   getDoc,
   query,
   where,
@@ -36,7 +35,7 @@ export class MembershipService {
   getUserMemberships(userId: string): Observable<ClubMembership[]> {
     const membershipsGroup = collectionGroup(this.firestore, 'memberships');
     const q = query(membershipsGroup, where('userId', '==', userId));
-    return collectionData(q, { idField: 'id' }) as Observable<ClubMembership[]>;
+    return collectionData(q, { idField: 'id' }).pipe(map((data) => data as ClubMembership[]));
   }
 
   /**
