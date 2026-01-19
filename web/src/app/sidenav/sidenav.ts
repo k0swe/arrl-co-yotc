@@ -1,6 +1,7 @@
 import {
   Component,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   inject,
   computed,
   effect,
@@ -43,6 +44,7 @@ export class SidenavComponent {
   private membershipService = inject(MembershipService);
   private clubService = inject(ClubService);
   private destroyRef = inject(DestroyRef);
+  private cdr = inject(ChangeDetectorRef);
 
   isMobile = input.required<boolean>();
   navItemClick = output<void>();
@@ -101,6 +103,7 @@ export class SidenavComponent {
         )
         .subscribe((clubs) => {
           this.userClubs.set(clubs);
+          this.cdr.markForCheck();
         });
     } else {
       // Regular users see only clubs where they have confirmed membership
@@ -120,6 +123,7 @@ export class SidenavComponent {
         )
         .subscribe((clubs) => {
           this.userClubs.set(clubs);
+          this.cdr.markForCheck();
         });
     }
   }
