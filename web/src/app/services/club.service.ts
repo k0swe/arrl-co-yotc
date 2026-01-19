@@ -31,14 +31,8 @@ export class ClubService {
    * Get all active clubs ordered by name
    */
   getActiveClubs(): Observable<Club[]> {
-    console.log('[ClubService] getActiveClubs called');
     const q = query(this.clubsCollection, where('isActive', '==', true), orderBy('name', 'asc'));
-    return (collectionData(q, { idField: 'id' }) as Observable<Club[]>).pipe(
-      map((clubs) => {
-        console.log('[ClubService] getActiveClubs result:', clubs.length, 'clubs');
-        return clubs;
-      }),
-    );
+    return collectionData(q, { idField: 'id' }) as Observable<Club[]>;
   }
 
   /**
