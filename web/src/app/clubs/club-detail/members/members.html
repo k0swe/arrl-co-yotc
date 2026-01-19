@@ -27,7 +27,9 @@
                     <mat-icon class="user-icon">person</mat-icon>
                     <div class="user-details">
                       @if (item.user) {
-                        <span class="user-name">{{ item.user.name }} ({{ item.user.callsign }})</span>
+                        <span class="user-name"
+                          >{{ item.user.name }} ({{ item.user.callsign }})</span
+                        >
                       } @else {
                         <span class="user-name">User ID: {{ item.membership.userId }}</span>
                       }
@@ -121,8 +123,12 @@
                         <button
                           mat-icon-button
                           color="warn"
-                          (click)="demoteToMember(item.membership.userId, item.user?.name || 'User')"
-                          [attr.aria-label]="'Demote ' + (item.user?.name || 'user') + ' to regular member'"
+                          (click)="
+                            demoteToMember(item.membership.userId, item.user?.name || 'User')
+                          "
+                          [attr.aria-label]="
+                            'Demote ' + (item.user?.name || 'user') + ' to regular member'
+                          "
                           matTooltip="Demote to regular member"
                         >
                           <mat-icon>arrow_downward</mat-icon>
@@ -131,8 +137,12 @@
                         <button
                           mat-icon-button
                           color="primary"
-                          (click)="promoteToLeader(item.membership.userId, item.user?.name || 'User')"
-                          [attr.aria-label]="'Promote ' + (item.user?.name || 'user') + ' to club leader'"
+                          (click)="
+                            promoteToLeader(item.membership.userId, item.user?.name || 'User')
+                          "
+                          [attr.aria-label]="
+                            'Promote ' + (item.user?.name || 'user') + ' to club leader'
+                          "
                           matTooltip="Promote to club leader"
                         >
                           <mat-icon>arrow_upward</mat-icon>

@@ -70,14 +70,21 @@ export class EventList {
 
   protected readonly loading = signal(true);
   protected readonly events = signal<Event[]>([]);
-  protected readonly displayedColumns = ['name', 'startTime', 'endTime', 'rsvp', 'attendees', 'actions'];
+  protected readonly displayedColumns = [
+    'name',
+    'startTime',
+    'endTime',
+    'rsvp',
+    'attendees',
+    'actions',
+  ];
 
   // Map of eventId to array of RSVPs
   protected readonly eventRsvps = signal<Map<string, EventRsvp[]>>(new Map());
-  
+
   // Map of eventId to whether current user has RSVP'd
   protected readonly userRsvps = signal<Map<string, boolean>>(new Map());
-  
+
   // Map of userId to user name/callsign for display
   protected readonly userNames = signal<Map<string, string>>(new Map());
 
@@ -194,9 +201,7 @@ export class EventList {
 
     // Load all missing user names
     const userObservables = missingUserIds.map((userId) =>
-      this.userService.getUser(userId).pipe(
-        catchError(() => of(null)),
-      ),
+      this.userService.getUser(userId).pipe(catchError(() => of(null))),
     );
 
     forkJoin(userObservables)
@@ -382,7 +387,11 @@ export class EventList {
     if (timestamp instanceof Date) {
       return timestamp;
     }
-    if (typeof timestamp === 'object' && 'toDate' in timestamp && typeof timestamp.toDate === 'function') {
+    if (
+      typeof timestamp === 'object' &&
+      'toDate' in timestamp &&
+      typeof timestamp.toDate === 'function'
+    ) {
       return timestamp.toDate();
     }
     if (typeof timestamp === 'string') {

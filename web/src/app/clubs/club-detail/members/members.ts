@@ -118,13 +118,13 @@ export class Members {
       catchError((error) => {
         console.error('[Members] Error loading active members:', error);
         return of([]);
-      })
+      }),
     );
     const pendingQuery = this.membershipService.getPendingMemberships(clubId).pipe(
       catchError((error) => {
         console.error('[Members] Error loading pending memberships:', error);
         return of([]);
-      })
+      }),
     );
 
     combineLatest({
@@ -145,7 +145,7 @@ export class Members {
             pendingMembers: pendingUsers$,
           });
         }),
-        takeUntilDestroyed(this.destroyRef)
+        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
         next: ({ activeMembers, pendingMembers }) => {
@@ -161,15 +161,15 @@ export class Members {
   }
 
   private loadUsersForMembershipsObservable(
-    memberships: ClubMembership[]
+    memberships: ClubMembership[],
   ): Observable<MemberWithUser[]> {
     const userFetches = memberships.map((membership) =>
       this.userService.getUser(membership.userId).pipe(
         catchError((error) => {
           console.error(`Error fetching user ${membership.userId}:`, error);
           return of(null);
-        })
-      )
+        }),
+      ),
     );
 
     return forkJoin(userFetches).pipe(
@@ -181,8 +181,8 @@ export class Members {
         memberships.map((membership, index) => ({
           membership,
           user: users[index],
-        }))
-      )
+        })),
+      ),
     );
   }
 
@@ -268,7 +268,7 @@ export class Members {
           this.snackBar.open('Failed to promote member', 'Close', { duration: 3000 });
           return of(undefined);
         }),
-        takeUntilDestroyed(this.destroyRef)
+        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe((result) => {
         if (result !== undefined) {
@@ -307,7 +307,7 @@ export class Members {
           this.snackBar.open('Failed to demote member', 'Close', { duration: 3000 });
           return of(undefined);
         }),
-        takeUntilDestroyed(this.destroyRef)
+        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe((result) => {
         if (result !== undefined) {

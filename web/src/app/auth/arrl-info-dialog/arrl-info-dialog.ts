@@ -5,11 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-arrl-info-dialog',
-  imports: [
-    MatDialogModule,
-    MatButtonModule,
-    MatIconModule,
-  ],
+  imports: [MatDialogModule, MatButtonModule, MatIconModule],
   templateUrl: './arrl-info-dialog.html',
   styleUrl: './arrl-info-dialog.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

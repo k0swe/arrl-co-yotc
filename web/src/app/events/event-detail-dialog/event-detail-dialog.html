@@ -40,33 +40,34 @@
     </div>
 
     @if (canViewRsvps()) {
-    <mat-divider></mat-divider>
+      <mat-divider></mat-divider>
 
-    <div class="rsvp-section">
-      <h3>Attendees</h3>
+      <div class="rsvp-section">
+        <h3>Attendees</h3>
 
-      @if (loadingRsvps()) {
-      <div class="loading-container" role="status" aria-live="polite">
-        <mat-spinner [diameter]="32"></mat-spinner>
-        <p>Loading attendees...</p>
-      </div>
-      } @else if (rsvps().length === 0) {
-      <p class="no-attendees">No RSVPs yet</p>
-      } @else {
-      <mat-list>
-        @for (rsvp of rsvps(); track rsvp.id; let last = $last) {
-        <mat-list-item>
-          <mat-icon matListItemIcon>person</mat-icon>
-          <div matListItemTitle>
-            {{ userNames().get(rsvp.userId) || 'Loading...' }}
+        @if (loadingRsvps()) {
+          <div class="loading-container" role="status" aria-live="polite">
+            <mat-spinner [diameter]="32"></mat-spinner>
+            <p>Loading attendees...</p>
           </div>
-        </mat-list-item>
-        @if (!last) {
-        <mat-divider></mat-divider>
-        } }
-      </mat-list>
-      }
-    </div>
+        } @else if (rsvps().length === 0) {
+          <p class="no-attendees">No RSVPs yet</p>
+        } @else {
+          <mat-list>
+            @for (rsvp of rsvps(); track rsvp.id; let last = $last) {
+              <mat-list-item>
+                <mat-icon matListItemIcon>person</mat-icon>
+                <div matListItemTitle>
+                  {{ userNames().get(rsvp.userId) || 'Loading...' }}
+                </div>
+              </mat-list-item>
+              @if (!last) {
+                <mat-divider></mat-divider>
+              }
+            }
+          </mat-list>
+        }
+      </div>
     }
   </div>
 </mat-dialog-content>

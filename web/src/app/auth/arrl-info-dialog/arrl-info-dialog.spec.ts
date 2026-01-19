@@ -13,10 +13,7 @@ describe('ArrlInfoDialog', () => {
 
     await TestBed.configureTestingModule({
       imports: [ArrlInfoDialog],
-      providers: [
-        provideAnimationsAsync(),
-        { provide: MatDialogRef, useValue: mockDialogRef },
-      ],
+      providers: [provideAnimationsAsync(), { provide: MatDialogRef, useValue: mockDialogRef }],
     }).compileComponents();
   });
 

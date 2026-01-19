@@ -1,4 +1,11 @@
-import { Component, ChangeDetectionStrategy, inject, signal, DestroyRef, computed } from '@angular/core';
+import {
+  Component,
+  ChangeDetectionStrategy,
+  inject,
+  signal,
+  DestroyRef,
+  computed,
+} from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatCardModule } from '@angular/material/card';
@@ -58,7 +65,7 @@ export class ClubDetail {
     if (!currentClub) {
       return false;
     }
-    
+
     // Admins can edit any club
     if (this.authService.isAdmin()) {
       return true;
@@ -82,7 +89,7 @@ export class ClubDetail {
     if (!currentClub) {
       return false;
     }
-    
+
     // Admins can manage events for any club
     if (this.authService.isAdmin()) {
       return true;
@@ -112,7 +119,7 @@ export class ClubDetail {
     if (!currentClub) {
       return false;
     }
-    
+
     // Admins can view members of any club
     if (this.authService.isAdmin()) {
       return true;
@@ -200,7 +207,7 @@ export class ClubDetail {
     dialogRef
       .afterClosed()
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((result: ClubFormData & { logoUrl?: string } | undefined) => {
+      .subscribe((result: (ClubFormData & { logoUrl?: string }) | undefined) => {
         if (result) {
           this.loading.set(true);
           this.clubService

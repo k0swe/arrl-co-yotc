@@ -46,7 +46,11 @@ export class EventService {
   /**
    * Create a new event for a club
    */
-  createEvent(clubId: string, eventData: Omit<Event, 'id' | 'clubId' | 'createdAt' | 'updatedAt' | 'createdBy'>, userId: string): Observable<string> {
+  createEvent(
+    clubId: string,
+    eventData: Omit<Event, 'id' | 'clubId' | 'createdAt' | 'updatedAt' | 'createdBy'>,
+    userId: string,
+  ): Observable<string> {
     const eventsCollection = collection(this.firestore, `clubs/${clubId}/events`);
     const newEvent = {
       ...eventData,
@@ -55,9 +59,7 @@ export class EventService {
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     };
-    return from(
-      addDoc(eventsCollection, newEvent).then((docRef) => docRef.id),
-    );
+    return from(addDoc(eventsCollection, newEvent).then((docRef) => docRef.id));
   }
 
   /**

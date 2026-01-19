@@ -81,13 +81,13 @@ describe('App', () => {
       { id: '2', name: 'Club 2', isActive: false } as any,
       { id: '3', name: 'Club 3', isActive: false } as any,
     ];
-    
+
     // Use vi.spyOn for Vitest
     const spy = vi.spyOn(clubService, 'getPendingClubs').mockReturnValue(of(mockPendingClubs));
 
     // Call the method directly to test it
     app['loadPendingClubsCount']();
-    
+
     // Wait for observable to complete
     await fixture.whenStable();
     fixture.detectChanges();
@@ -156,7 +156,7 @@ describe('App', () => {
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
     const bugReportLink = compiled.querySelector(
-      'a[href="https://github.com/k0swe/arrl-co-yotc/issues"]'
+      'a[href="https://github.com/k0swe/arrl-co-yotc/issues"]',
     );
     expect(bugReportLink).toBeTruthy();
     expect(bugReportLink?.getAttribute('target')).toBe('_blank');
@@ -170,7 +170,7 @@ describe('App', () => {
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
     const merchandiseLink = compiled.querySelector(
-      'a[href="https://colorado-arrl.creator-spring.com/"]'
+      'a[href="https://colorado-arrl.creator-spring.com/"]',
     );
     expect(merchandiseLink).toBeTruthy();
     expect(merchandiseLink?.getAttribute('target')).toBe('_blank');

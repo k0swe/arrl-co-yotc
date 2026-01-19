@@ -46,7 +46,7 @@ export class ClubService {
           return { id: docSnapshot.id, ...docSnapshot.data() } as Club;
         }
         return null;
-      })
+      }),
     );
   }
 
@@ -61,7 +61,7 @@ export class ClubService {
           return clubs[0];
         }
         return null;
-      })
+      }),
     );
   }
 
@@ -79,7 +79,7 @@ export class ClubService {
         }
         // Otherwise try by ID
         return this.getClubById(slugOrId);
-      })
+      }),
     );
   }
 
@@ -98,7 +98,7 @@ export class ClubService {
     const q = query(
       this.clubsCollection,
       where('isActive', '==', false),
-      orderBy('createdAt', 'desc')
+      orderBy('createdAt', 'desc'),
     );
     return collectionData(q, { idField: 'id' }) as Observable<Club[]>;
   }
@@ -123,9 +123,7 @@ export class ClubService {
       updatedAt: serverTimestamp(),
     };
 
-    return from(
-      addDoc(this.clubsCollection, clubData).then(() => void 0)
-    );
+    return from(addDoc(this.clubsCollection, clubData).then(() => void 0));
   }
 
   /**
@@ -137,7 +135,7 @@ export class ClubService {
       updateDoc(clubDoc, {
         isActive: true,
         updatedAt: serverTimestamp(),
-      }).then(() => void 0)
+      }).then(() => void 0),
     );
   }
 
@@ -162,7 +160,7 @@ export class ClubService {
       updateDoc(clubDoc, {
         ...updates,
         updatedAt: serverTimestamp(),
-      }).then(() => void 0)
+      }).then(() => void 0),
     );
   }
 
@@ -176,7 +174,7 @@ export class ClubService {
       updateDoc(clubDoc, {
         leaderIds,
         updatedAt: serverTimestamp(),
-      }).then(() => void 0)
+      }).then(() => void 0),
     );
   }
 }

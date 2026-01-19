@@ -133,7 +133,7 @@ describe('Members', () => {
     authService.isAdmin.set(true);
     fixture.componentRef.setInput('clubId', 'test-club-id');
     fixture.componentRef.setInput('clubLeaderIds', undefined);
-    
+
     // This should not throw an error
     expect(() => {
       component['promoteToLeader']('user-123', 'Test User');
@@ -144,7 +144,7 @@ describe('Members', () => {
     authService.isAdmin.set(true);
     fixture.componentRef.setInput('clubId', 'test-club-id');
     fixture.componentRef.setInput('clubLeaderIds', undefined);
-    
+
     // This should not throw an error
     expect(() => {
       component['demoteToMember']('user-123', 'Test User');

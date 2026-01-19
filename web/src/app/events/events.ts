@@ -62,15 +62,15 @@ export class Events {
 
           // Get unique club IDs
           const clubIds = [...new Set(events.map((event) => event.clubId))];
-          
+
           // Fetch all club details
           const clubRequests = clubIds.map((clubId) =>
             this.clubService.getClubById(clubId).pipe(
               catchError((error) => {
                 console.error(`Error loading club ${clubId}:`, error);
                 return of(null);
-              })
-            )
+              }),
+            ),
           );
 
           // Wait for all club details to load, then combine with events
@@ -89,14 +89,14 @@ export class Events {
                   club: clubMap.get(event.clubId) ?? undefined,
                 }))
                 .filter((event) => event.club?.isActive === true);
-            })
+            }),
           );
         }),
         catchError((error) => {
           console.error('Error loading events:', error);
           return of([]);
         }),
-        takeUntilDestroyed(this.destroyRef)
+        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe((eventsWithClubs) => {
         this.events.set(eventsWithClubs);

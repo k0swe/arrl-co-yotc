@@ -4,7 +4,7 @@
       <mat-card-title>Create Account</mat-card-title>
       <mat-card-subtitle>Join ARRL Colorado YOTC</mat-card-subtitle>
     </mat-card-header>
-    
+
     <mat-card-content>
       @if (errorMessage()) {
         <div class="error-message" role="alert">
@@ -153,7 +153,10 @@
             @if (registerForm.get('confirmPassword')?.hasError('required')) {
               <mat-error>Please confirm your password</mat-error>
             }
-            @if (registerForm.hasError('passwordMismatch') && registerForm.get('confirmPassword')?.touched) {
+            @if (
+              registerForm.hasError('passwordMismatch') &&
+              registerForm.get('confirmPassword')?.touched
+            ) {
               <mat-error>Passwords do not match</mat-error>
             }
           </mat-form-field>
@@ -169,9 +172,7 @@
 
           <div class="auth-links">
             <span class="auth-text">Already have an account?</span>
-            <a routerLink="/login" mat-button class="auth-link">
-              Sign in
-            </a>
+            <a routerLink="/login" mat-button class="auth-link"> Sign in </a>
           </div>
         </form>
       }

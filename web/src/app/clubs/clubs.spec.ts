@@ -91,19 +91,24 @@ describe('Clubs', () => {
   it('should filter clubs by name', () => {
     const fixture = TestBed.createComponent(Clubs);
     const component = fixture.componentInstance;
-    
+
     // Set up test data
     const testClubs = [
       { id: '1', name: 'Denver Radio Club', callsign: 'W0DRC', location: 'Denver, CO' },
       { id: '2', name: 'Boulder Amateur Radio Club', callsign: 'W0BRC', location: 'Boulder, CO' },
-      { id: '3', name: 'Springs Radio Society', callsign: 'W0SRS', location: 'Colorado Springs, CO' },
+      {
+        id: '3',
+        name: 'Springs Radio Society',
+        callsign: 'W0SRS',
+        location: 'Colorado Springs, CO',
+      },
     ] as any;
-    
+
     component['clubs'].set(testClubs);
-    
+
     // Test no filter
     expect(component['filteredClubs']().length).toBe(3);
-    
+
     // Test filter by name
     component['filterText'].set('denver');
     expect(component['filteredClubs']().length).toBe(1);
@@ -113,14 +118,14 @@ describe('Clubs', () => {
   it('should filter clubs by callsign', () => {
     const fixture = TestBed.createComponent(Clubs);
     const component = fixture.componentInstance;
-    
+
     const testClubs = [
       { id: '1', name: 'Denver Radio Club', callsign: 'W0DRC', location: 'Denver, CO' },
       { id: '2', name: 'Boulder Amateur Radio Club', callsign: 'W0BRC', location: 'Boulder, CO' },
     ] as any;
-    
+
     component['clubs'].set(testClubs);
-    
+
     component['filterText'].set('w0brc');
     expect(component['filteredClubs']().length).toBe(1);
     expect(component['filteredClubs']()[0].callsign).toBe('W0BRC');
@@ -129,15 +134,20 @@ describe('Clubs', () => {
   it('should filter clubs by location', () => {
     const fixture = TestBed.createComponent(Clubs);
     const component = fixture.componentInstance;
-    
+
     const testClubs = [
       { id: '1', name: 'Denver Radio Club', callsign: 'W0DRC', location: 'Denver, CO' },
       { id: '2', name: 'Boulder Amateur Radio Club', callsign: 'W0BRC', location: 'Boulder, CO' },
-      { id: '3', name: 'Springs Radio Society', callsign: 'W0SRS', location: 'Colorado Springs, CO' },
+      {
+        id: '3',
+        name: 'Springs Radio Society',
+        callsign: 'W0SRS',
+        location: 'Colorado Springs, CO',
+      },
     ] as any;
-    
+
     component['clubs'].set(testClubs);
-    
+
     component['filterText'].set('boulder');
     expect(component['filteredClubs']().length).toBe(1);
     expect(component['filteredClubs']()[0].location).toBe('Boulder, CO');
@@ -146,13 +156,13 @@ describe('Clubs', () => {
   it('should be case-insensitive when filtering', () => {
     const fixture = TestBed.createComponent(Clubs);
     const component = fixture.componentInstance;
-    
+
     const testClubs = [
       { id: '1', name: 'Denver Radio Club', callsign: 'W0DRC', location: 'Denver, CO' },
     ] as any;
-    
+
     component['clubs'].set(testClubs);
-    
+
     component['filterText'].set('DENVER');
     expect(component['filteredClubs']().length).toBe(1);
   });
@@ -160,14 +170,14 @@ describe('Clubs', () => {
   it('should return all clubs when filter is empty', () => {
     const fixture = TestBed.createComponent(Clubs);
     const component = fixture.componentInstance;
-    
+
     const testClubs = [
       { id: '1', name: 'Denver Radio Club', callsign: 'W0DRC', location: 'Denver, CO' },
       { id: '2', name: 'Boulder Amateur Radio Club', callsign: 'W0BRC', location: 'Boulder, CO' },
     ] as any;
-    
+
     component['clubs'].set(testClubs);
-    
+
     component['filterText'].set('');
     expect(component['filteredClubs']().length).toBe(2);
   });
@@ -175,13 +185,13 @@ describe('Clubs', () => {
   it('should return empty array when no clubs match filter', () => {
     const fixture = TestBed.createComponent(Clubs);
     const component = fixture.componentInstance;
-    
+
     const testClubs = [
       { id: '1', name: 'Denver Radio Club', callsign: 'W0DRC', location: 'Denver, CO' },
     ] as any;
-    
+
     component['clubs'].set(testClubs);
-    
+
     component['filterText'].set('nonexistent');
     expect(component['filteredClubs']().length).toBe(0);
   });

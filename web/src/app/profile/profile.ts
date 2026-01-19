@@ -49,10 +49,7 @@ export class Profile {
 
   protected readonly profileForm = new FormGroup({
     name: new FormControl('', [Validators.required, Validators.minLength(2)]),
-    callsign: new FormControl('', [
-      Validators.required,
-      Validators.pattern(/^[A-Z0-9]{3,7}$/i),
-    ]),
+    callsign: new FormControl('', [Validators.required, Validators.pattern(/^[A-Z0-9]{3,7}$/i)]),
   });
 
   constructor() {

@@ -8,7 +8,7 @@
  * @returns A Date object or null if the input is invalid
  */
 export function toDate(
-  timestamp: Date | { toDate(): Date } | string | null | undefined
+  timestamp: Date | { toDate(): Date } | string | null | undefined,
 ): Date | null {
   if (!timestamp) {
     return null;
