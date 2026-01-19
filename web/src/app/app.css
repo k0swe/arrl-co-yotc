@@ -46,49 +46,6 @@ mat-toolbar img {
   margin-right: 4px;
 }
 
-.nav-expansion-panel {
-  box-shadow: none !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-}
-
-.nav-expansion-header {
-  padding-left: 0 !important;
-}
-
-.nav-expansion-header .mat-content {
-  align-items: stretch !important;
-}
-
-nav-expansion-panel-body {
-  padding: 0 0 0 16px;
-}
-
-.expansion-list-item {
-  flex: 1;
-  pointer-events: none;
-}
-
-.nested-nav-item {
-  padding-left: 16px !important;
-}
-
-.nested-nav-item .club-logo-icon {
-  width: 24px;
-  height: 24px;
-  object-fit: contain;
-  border-radius: 4px;
-  background-color: #fff;
-  border: 1px solid rgba(0, 0, 0, 0.12);
-}
-
-.badge-container {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-}
-
 .toolbar-title {
   display: inline;
 }
