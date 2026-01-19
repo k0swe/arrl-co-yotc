@@ -1,0 +1,107 @@
+<mat-nav-list>
+  <a mat-list-item routerLink="/" aria-label="Navigate to home" (click)="onNavItemClick()">
+    <mat-icon matListItemIcon>home</mat-icon>
+    <span matListItemTitle>Home</span>
+  </a>
+  @if (hasConfirmedMemberships()) {
+    <mat-expansion-panel class="nav-expansion-panel">
+      <mat-expansion-panel-header class="nav-expansion-header">
+        <mat-panel-title>
+          <a
+            mat-list-item
+            routerLink="/clubs"
+            aria-label="Navigate to clubs"
+            (click)="onNavItemClick()"
+          >
+            <mat-icon matListItemIcon>groups</mat-icon>
+            <span matListItemTitle>Clubs</span>
+          </a>
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+      @for (club of userClubs(); track club.id) {
+        <a
+          mat-list-item
+          [routerLink]="['/clubs', club.slug || club.id]"
+          class="nested-nav-item"
+          [attr.aria-label]="'Navigate to ' + club.name"
+          (click)="onNavItemClick()"
+        >
+          <span
+            matListItemIcon
+            [matBadge]="getPendingMembershipCount(club.id)"
+            [matBadgeHidden]="getPendingMembershipCount(club.id) === 0"
+            matBadgeColor="warn"
+            matBadgeSize="small"
+            class="badge-container"
+          >
+            @if (club.logoUrl) {
+              <img
+                [ngSrc]="club.logoUrl"
+                [alt]="'Logo for ' + club.name"
+                width="24"
+                height="24"
+                class="club-logo-icon"
+              />
+            } @else {
+              <mat-icon>groups</mat-icon>
+            }
+          </span>
+          <span matListItemTitle>{{ club.name }}</span>
+        </a>
+      }
+    </mat-expansion-panel>
+  } @else {
+    <a mat-list-item routerLink="/clubs" aria-label="Navigate to clubs" (click)="onNavItemClick()">
+      <mat-icon matListItemIcon>groups</mat-icon>
+      <span matListItemTitle>Clubs</span>
+    </a>
+  }
+  <a mat-list-item routerLink="/events" aria-label="Navigate to events" (click)="onNavItemClick()">
+    <mat-icon matListItemIcon>event</mat-icon>
+    <span matListItemTitle>Events</span>
+  </a>
+  <a
+    mat-list-item
+    routerLink="/standings"
+    aria-label="Navigate to standings"
+    (click)="onNavItemClick()"
+  >
+    <mat-icon matListItemIcon>leaderboard</mat-icon>
+    <span matListItemTitle>Standings</span>
+  </a>
+  <a
+    mat-list-item
+    href="https://colorado-arrl.creator-spring.com/"
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="Event Merchandise (opens in new tab)"
+  >
+    <mat-icon matListItemIcon>shopping_cart</mat-icon>
+    <span matListItemTitle>Event Merchandise</span>
+  </a>
+  @if (authService.isAdmin()) {
+    <a mat-list-item routerLink="/admin" aria-label="Navigate to admin" (click)="onNavItemClick()">
+      <mat-icon
+        matListItemIcon
+        [matBadge]="pendingClubsCount()"
+        [matBadgeHidden]="pendingClubsCount() === 0"
+        matBadgeColor="warn"
+        >admin_panel_settings</mat-icon
+      >
+      Admin
+    </a>
+  }
+  <a
+    mat-list-item
+    href="https://github.com/k0swe/arrl-co-yotc/issues"
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="Bug reports and feature requests (opens in new tab)"
+  >
+    <mat-icon matListItemIcon>bug_report</mat-icon>
+    <span matListItemTitle>
+      Bug reports and<br />
+      feature requests
+    </span>
+  </a>
+</mat-nav-list>
