@@ -30,6 +30,6 @@
       <app-members [clubId]="clubData.id" [clubLeaderIds]="clubData.leaderIds" />
     }
 
-    <app-event-list [clubId]="clubData.id" [canEdit]="canEdit()" />
+    <app-event-list [clubId]="clubData.id" [canEdit]="canManageEvents()" />
   }
 </div>

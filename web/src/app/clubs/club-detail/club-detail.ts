@@ -66,11 +66,41 @@ export class ClubDetail {
 
     // Club leaders can edit their club
     const currentUser = this.authService.currentUser();
-    if (currentUser && currentClub?.leaderIds?.includes(currentUser.uid)) {
+    if (currentUser && currentClub.leaderIds?.includes(currentUser.uid)) {
       return true;
     }
 
     return false;
+  });
+
+  /**
+   * Computed signal that determines if the current user can manage events.
+   * Users can manage events if they are an admin, a leader of the club, or an active member.
+   */
+  protected readonly canManageEvents = computed(() => {
+    const currentClub = this.club();
+    if (!currentClub) {
+      return false;
+    }
+    
+    // Admins can manage events for any club
+    if (this.authService.isAdmin()) {
+      return true;
+    }
+
+    const currentUser = this.authService.currentUser();
+    if (!currentUser) {
+      return false;
+    }
+
+    // Club leaders can manage events
+    if (currentClub.leaderIds?.includes(currentUser.uid)) {
+      return true;
+    }
+
+    // Active club members can manage events
+    const membershipStatus = this.userMembershipStatus();
+    return membershipStatus === MembershipStatus.Active;
   });
 
   /**
@@ -94,7 +124,7 @@ export class ClubDetail {
     }
 
     // Club leaders can view members
-    if (currentClub?.leaderIds?.includes(currentUser.uid)) {
+    if (currentClub.leaderIds?.includes(currentUser.uid)) {
       return true;
     }
 

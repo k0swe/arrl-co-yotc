@@ -8,6 +8,7 @@ import { ClubDetail } from './club-detail';
 import { firebaseTestConfig } from '../../firebase-test.config';
 import { AuthService } from '../../auth/auth.service';
 import { Club } from '@arrl-co-yotc/shared/build/app/models/club.model';
+import { MembershipStatus } from '@arrl-co-yotc/shared/build/app/models/user.model';
 
 describe('ClubDetail', () => {
   let authService: AuthService;
@@ -149,5 +150,141 @@ describe('ClubDetail', () => {
     component['club'].set(testClub);
 
     expect(component['canEdit']()).toBe(false);
+  });
+
+  it('should allow event management when user is an admin', () => {
+    const fixture = TestBed.createComponent(ClubDetail);
+    const component = fixture.componentInstance;
+
+    // Set up an admin user
+    authService.isAdmin.set(true);
+    authService.currentUser.set({ uid: 'test-user-id' } as any);
+
+    // Set up a club
+    const testClub: Club = {
+      id: 'test-club-id',
+      name: 'Test Club',
+      description: 'Test description',
+      callsign: 'W0TEST',
+      location: 'Test Location',
+      slug: 'test-club',
+      isActive: true,
+      leaderIds: ['other-user-id'],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    component['club'].set(testClub);
+
+    expect(component['canManageEvents']()).toBe(true);
+  });
+
+  it('should allow event management when user is a club leader', () => {
+    const fixture = TestBed.createComponent(ClubDetail);
+    const component = fixture.componentInstance;
+
+    // Set up a regular user (not admin)
+    authService.isAdmin.set(false);
+    authService.currentUser.set({ uid: 'test-user-id' } as any);
+
+    // Set up a club where the user is a leader
+    const testClub: Club = {
+      id: 'test-club-id',
+      name: 'Test Club',
+      description: 'Test description',
+      callsign: 'W0TEST',
+      location: 'Test Location',
+      slug: 'test-club',
+      isActive: true,
+      leaderIds: ['test-user-id'],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    component['club'].set(testClub);
+
+    expect(component['canManageEvents']()).toBe(true);
+  });
+
+  it('should allow event management when user is an active member', () => {
+    const fixture = TestBed.createComponent(ClubDetail);
+    const component = fixture.componentInstance;
+
+    // Set up a regular user (not admin)
+    authService.isAdmin.set(false);
+    authService.currentUser.set({ uid: 'test-user-id' } as any);
+
+    // Set up a club where the user is NOT a leader
+    const testClub: Club = {
+      id: 'test-club-id',
+      name: 'Test Club',
+      description: 'Test description',
+      callsign: 'W0TEST',
+      location: 'Test Location',
+      slug: 'test-club',
+      isActive: true,
+      leaderIds: ['other-user-id'],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    component['club'].set(testClub);
+
+    // Set the user as an active member
+    component['userMembershipStatus'].set(MembershipStatus.Active);
+
+    expect(component['canManageEvents']()).toBe(true);
+  });
+
+  it('should not allow event management when user is not an active member', () => {
+    const fixture = TestBed.createComponent(ClubDetail);
+    const component = fixture.componentInstance;
+
+    // Set up a regular user (not admin)
+    authService.isAdmin.set(false);
+    authService.currentUser.set({ uid: 'test-user-id' } as any);
+
+    // Set up a club where the user is NOT a leader
+    const testClub: Club = {
+      id: 'test-club-id',
+      name: 'Test Club',
+      description: 'Test description',
+      callsign: 'W0TEST',
+      location: 'Test Location',
+      slug: 'test-club',
+      isActive: true,
+      leaderIds: ['other-user-id'],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    component['club'].set(testClub);
+
+    // Set the user as a pending member
+    component['userMembershipStatus'].set(MembershipStatus.Pending);
+
+    expect(component['canManageEvents']()).toBe(false);
+  });
+
+  it('should not allow event management when user is not logged in', () => {
+    const fixture = TestBed.createComponent(ClubDetail);
+    const component = fixture.componentInstance;
+
+    // Set up no user
+    authService.isAdmin.set(false);
+    authService.currentUser.set(null);
+
+    // Set up a club
+    const testClub: Club = {
+      id: 'test-club-id',
+      name: 'Test Club',
+      description: 'Test description',
+      callsign: 'W0TEST',
+      location: 'Test Location',
+      slug: 'test-club',
+      isActive: true,
+      leaderIds: ['other-user-id'],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    component['club'].set(testClub);
+
+    expect(component['canManageEvents']()).toBe(false);
   });
 });

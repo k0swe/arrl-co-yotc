@@ -159,8 +159,8 @@ service cloud.firestore {
         // Authenticated users can read all events
         allow read: if isAuthenticated();
         
-        // Club leaders can create events for their club
-        allow create: if isClubLeader(clubId) &&
+        // Active club members can create events for their club
+        allow create: if isActiveMember(clubId) &&
                          request.resource.data.clubId == clubId &&
                          request.resource.data.createdBy == request.auth.uid &&
                          request.resource.data.createdAt == request.time &&
