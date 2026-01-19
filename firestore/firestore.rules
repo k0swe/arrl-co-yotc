@@ -244,5 +244,16 @@ service cloud.firestore {
       // The application filters by active clubs
       allow read: if true;
     }
+    
+    // Collection group query support for memberships
+    // This matches memberships at any nesting level for collection group queries
+    // Allows users to query all their memberships across clubs
+    match /{path=**}/memberships/{membershipId} {
+      // Authenticated users can query their own memberships across all clubs
+      allow read: if isAuthenticated() && membershipId == request.auth.uid;
+      
+      // Admins can query all memberships
+      allow read: if isAdmin();
+    }
   }
 }
