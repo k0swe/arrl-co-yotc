@@ -8,6 +8,7 @@ import { SidenavComponent } from './sidenav';
 import { firebaseTestConfig } from '../firebase-test.config';
 import { ClubService } from '../services/club.service';
 import { MembershipService } from '../services/membership.service';
+import { MembershipStatus } from '@arrl-co-yotc/shared/build/app/models/user.model';
 import { of } from 'rxjs';
 import { vi } from 'vitest';
 
@@ -75,6 +76,12 @@ describe('SidenavComponent', () => {
     const fixture = TestBed.createComponent(SidenavComponent);
     const component = fixture.componentInstance;
     expect(component['pendingMembershipCounts']().size).toBe(0);
+  });
+
+  it('should initialize clubsExpanded to false', () => {
+    const fixture = TestBed.createComponent(SidenavComponent);
+    const component = fixture.componentInstance;
+    expect(component['clubsExpanded']()).toBe(false);
   });
 
   it('should return 0 for clubs with no pending memberships', () => {
@@ -173,5 +180,53 @@ describe('SidenavComponent', () => {
 
     component['onNavItemClick']();
     expect(emitted).toBe(true);
+  });
+
+  it('should set clubsExpanded to true when clubs are loaded for admin', async () => {
+    const fixture = TestBed.createComponent(SidenavComponent);
+    const component = fixture.componentInstance;
+    const clubService = TestBed.inject(ClubService);
+
+    // Mock clubs
+    const mockClubs = [
+      { id: 'club1', name: 'Club 1', isActive: true } as any,
+      { id: 'club2', name: 'Club 2', isActive: true } as any,
+    ];
+
+    vi.spyOn(clubService, 'getActiveClubs').mockReturnValue(of(mockClubs));
+
+    // Simulate loading clubs as admin
+    component['loadUserClubs']('user1', true);
+
+    // Wait for observable to complete
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    // Verify clubsExpanded is set to true
+    expect(component['clubsExpanded']()).toBe(true);
+  });
+
+  it('should set clubsExpanded to true when clubs are loaded for regular user', async () => {
+    const fixture = TestBed.createComponent(SidenavComponent);
+    const component = fixture.componentInstance;
+    const clubService = TestBed.inject(ClubService);
+    const membershipService = TestBed.inject(MembershipService);
+
+    // Mock memberships and clubs
+    const mockMemberships = [{ clubId: 'club1', status: 'active' as MembershipStatus }];
+    const mockClubs = [{ id: 'club1', name: 'Club 1', isActive: true } as any];
+
+    vi.spyOn(membershipService, 'getUserMemberships').mockReturnValue(of(mockMemberships as any));
+    vi.spyOn(clubService, 'getActiveClubs').mockReturnValue(of(mockClubs));
+
+    // Simulate loading clubs as regular user
+    component['loadUserClubs']('user1', false);
+
+    // Wait for observable to complete
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    // Verify clubsExpanded is set to true
+    expect(component['clubsExpanded']()).toBe(true);
   });
 });

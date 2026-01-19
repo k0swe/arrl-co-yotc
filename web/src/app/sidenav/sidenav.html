@@ -4,7 +4,7 @@
     <span matListItemTitle>Home</span>
   </a>
   @if (hasConfirmedMemberships()) {
-    <mat-expansion-panel class="nav-expansion-panel">
+    <mat-expansion-panel class="nav-expansion-panel" [expanded]="clubsExpanded()">
       <mat-expansion-panel-header class="nav-expansion-header">
         <mat-panel-title>
           <a
