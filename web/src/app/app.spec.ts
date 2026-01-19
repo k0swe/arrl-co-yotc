@@ -163,4 +163,18 @@ describe('App', () => {
     expect(bugReportLink?.getAttribute('rel')).toBe('noopener noreferrer');
     expect(bugReportLink?.textContent).toContain('Bug reports and feature requests');
   });
+
+  it('should have event merchandise link in sidenav', async () => {
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const compiled = fixture.nativeElement as HTMLElement;
+    const merchandiseLink = compiled.querySelector(
+      'a[href="https://colorado-arrl.creator-spring.com/"]'
+    );
+    expect(merchandiseLink).toBeTruthy();
+    expect(merchandiseLink?.getAttribute('target')).toBe('_blank');
+    expect(merchandiseLink?.getAttribute('rel')).toBe('noopener noreferrer');
+    expect(merchandiseLink?.textContent).toContain('Event Merchandise');
+  });
 });
