@@ -104,9 +104,7 @@ export class SidenavComponent {
         )
         .subscribe((clubs) => {
           this.userClubs.set(clubs);
-          if (clubs.length > 0) {
-            this.clubsExpanded.set(true);
-          }
+          this.clubsExpanded.set(true);
           this.cdr.markForCheck();
         });
     } else {
@@ -127,9 +125,7 @@ export class SidenavComponent {
         )
         .subscribe((clubs) => {
           this.userClubs.set(clubs);
-          if (clubs.length > 0) {
-            this.clubsExpanded.set(true);
-          }
+          this.clubsExpanded.set(true);
           this.cdr.markForCheck();
         });
     }
