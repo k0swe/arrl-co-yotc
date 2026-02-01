@@ -139,15 +139,10 @@ export class MembershipService {
   /**
    * Reject an active membership
    * Updates the membership status from 'active' to 'denied'
+   * This is a convenience method that delegates to denyMembership
    */
   rejectMembership(clubId: string, userId: string): Observable<void> {
-    const membershipRef = doc(this.firestore, `clubs/${clubId}/memberships/${userId}`);
-    return from(
-      updateDoc(membershipRef, {
-        status: MembershipStatus.Denied,
-        updatedAt: serverTimestamp(),
-      }),
-    );
+    return this.denyMembership(clubId, userId);
   }
 
   /**
