@@ -138,8 +138,10 @@ export class MembershipService {
 
   /**
    * Reject an active membership
-   * Updates the membership status from 'active' to 'denied'
-   * This is a convenience method that delegates to denyMembership
+   * Updates the membership status from 'active' to 'denied'.
+   * This is a convenience method that delegates to denyMembership.
+   * Use this when rejecting an already-active membership; it has the same
+   * effect as denyMembership but with clearer naming in the UI context.
    */
   rejectMembership(clubId: string, userId: string): Observable<void> {
     return this.denyMembership(clubId, userId);
@@ -147,7 +149,11 @@ export class MembershipService {
 
   /**
    * Accept a denied membership
-   * Updates the membership status from 'denied' to 'active'
+   * Updates the membership status from 'denied' to 'active'.
+   * This reinstates a previously rejected member and records who approved
+   * the reinstatement. Note: This will update approvedAt and approvedBy fields,
+   * replacing any previous approval metadata to create an audit trail of the
+   * reinstatement action.
    */
   acceptDeniedMembership(clubId: string, userId: string, approvedBy: string): Observable<void> {
     const membershipRef = doc(this.firestore, `clubs/${clubId}/memberships/${userId}`);
