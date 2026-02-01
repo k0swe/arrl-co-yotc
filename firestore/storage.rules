@@ -4,12 +4,15 @@ rules_version = '2';
 //
 // Storage structure:
 // - club-logos/{clubId}/{filename} - Club logo images
+// - event-documents/{clubId}/{eventId}/{filename} - Event verification documents
 //
 // Security model:
 // - Anyone can read club logos (public access)
 // - Club leaders and admins can upload/update logos for their clubs
-// - File size limit: 5MB
-// - Allowed file types: JPEG, PNG, WEBP, GIF
+// - Authenticated users with RSVP can upload event documents
+// - Club members and admins can read event documents
+// - File size limit: 5MB for logos, 50MB for event documents
+// - Allowed file types: JPEG, PNG, WEBP, GIF for logos; various types for documents
 
 service firebase.storage {
   match /b/{bucket}/o {
@@ -32,14 +35,41 @@ service firebase.storage {
              firestore.get(/databases/(default)/documents/clubs/$(clubId)).data.leaderIds.hasAny([request.auth.uid]);
     }
     
+    // Check if the user is an active member of a specific club
+    function isActiveMember(clubId) {
+      return isAuthenticated() &&
+             firestore.exists(/databases/(default)/documents/clubs/$(clubId)/memberships/$(request.auth.uid)) &&
+             firestore.get(/databases/(default)/documents/clubs/$(clubId)/memberships/$(request.auth.uid)).data.status == 'active';
+    }
+    
+    // Check if the user has RSVP'd to a specific event
+    function hasRsvp(clubId, eventId) {
+      return isAuthenticated() &&
+             firestore.exists(/databases/(default)/documents/clubs/$(clubId)/events/$(eventId)/rsvps/$(request.auth.uid));
+    }
+    
     // Validate image file type
     function isValidImageType() {
       return request.resource.contentType.matches('image/(jpeg|png|webp|gif)');
     }
     
-    // Validate file size (max 5MB)
-    function isValidSize() {
+    // Validate document file type (allow common document and image formats)
+    function isValidDocumentType() {
+      return request.resource.contentType.matches('image/.*') ||
+             request.resource.contentType.matches('application/pdf') ||
+             request.resource.contentType.matches('text/.*') ||
+             request.resource.contentType == 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+             request.resource.contentType == 'application/msword';
+    }
+    
+    // Validate logo file size (max 5MB)
+    function isValidLogoSize() {
       return request.resource.size < 5 * 1024 * 1024;
+    }
+    
+    // Validate document file size (max 50MB)
+    function isValidDocumentSize() {
+      return request.resource.size < 50 * 1024 * 1024;
     }
     
     // Club logos
@@ -50,7 +80,21 @@ service firebase.storage {
       // Club leaders can upload/update/delete logos for their club
       allow write: if (isClubLeader(clubId) || isAdmin()) && 
                       isValidImageType() && 
-                      isValidSize();
+                      isValidLogoSize();
+    }
+    
+    // Event documents
+    match /event-documents/{clubId}/{eventId}/{filename} {
+      // Club members and admins can read event documents
+      allow read: if isActiveMember(clubId) || isAdmin();
+      
+      // Users with RSVP can upload documents for the event
+      allow create: if hasRsvp(clubId, eventId) && 
+                       isValidDocumentType() && 
+                       isValidDocumentSize();
+      
+      // Admins can delete event documents
+      allow delete: if isAdmin();
     }
   }
 }

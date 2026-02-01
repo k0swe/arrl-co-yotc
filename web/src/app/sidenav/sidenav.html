@@ -69,6 +69,17 @@
     <mat-icon matListItemIcon>leaderboard</mat-icon>
     <span matListItemTitle>Standings</span>
   </a>
+  @if (authService.isAuthenticated()) {
+    <a
+      mat-list-item
+      routerLink="/upload"
+      aria-label="Navigate to upload documents"
+      (click)="onNavItemClick()"
+    >
+      <mat-icon matListItemIcon>cloud_upload</mat-icon>
+      <span matListItemTitle>Upload Documents</span>
+    </a>
+  }
   <a
     mat-list-item
     href="https://colorado-arrl.creator-spring.com/"

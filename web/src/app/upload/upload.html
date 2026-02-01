@@ -1,0 +1,119 @@
+<div class="upload-container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Upload Event Documents</mat-card-title>
+      <mat-card-subtitle>
+        Upload files to verify your event for points. For on-the-air operations, upload ADIF logs. For other events like VE testing, upload pictures or flier PDFs.
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      @if (loading()) {
+        <div class="loading-container" role="status" aria-live="polite">
+          <mat-spinner [diameter]="48"></mat-spinner>
+          <p>Loading your events...</p>
+        </div>
+      } @else if (rsvpedEvents().length === 0) {
+        <div class="no-events">
+          <mat-icon>event_busy</mat-icon>
+          <p>You haven't RSVP'd to any events yet.</p>
+          <p class="hint">Visit the Events page to RSVP to events you plan to attend.</p>
+        </div>
+      } @else {
+        <mat-form-field appearance="outline" class="event-select">
+          <mat-label>Select Event</mat-label>
+          <mat-select
+            [value]="selectedEvent()"
+            (selectionChange)="onEventSelect($event.value)"
+            [attr.aria-label]="'Select an event to upload documents for'"
+          >
+            @for (eventWithClub of rsvpedEvents(); track eventWithClub.event.id) {
+              <mat-option [value]="eventWithClub">
+                {{ eventWithClub.event.name }} - {{ eventWithClub.club.name }} ({{ toDate(eventWithClub.event.startTime) | date: 'short' }})
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        @if (selectedEvent()) {
+          <div class="upload-section">
+            <h3>Upload Files</h3>
+
+            <div class="file-input-container">
+              <input
+                type="file"
+                id="file-input"
+                multiple
+                (change)="onFileSelect($event)"
+                accept=".adi,.adif,.pdf,.jpg,.jpeg,.png,.gif,.txt"
+                class="file-input"
+                [attr.aria-label]="'Select files to upload'"
+              />
+              <label for="file-input" class="file-input-label">
+                <mat-icon>attach_file</mat-icon>
+                Choose Files
+              </label>
+            </div>
+
+            @if (selectedFiles().length > 0) {
+              <div class="selected-files">
+                <h4>Selected Files:</h4>
+                <mat-list>
+                  @for (file of selectedFiles(); track file.name) {
+                    <mat-list-item>
+                      <mat-icon matListItemIcon>description</mat-icon>
+                      <div matListItemTitle>{{ file.name }}</div>
+                      <div matListItemLine>{{ (file.size / 1024).toFixed(2) }} KB</div>
+                    </mat-list-item>
+                  }
+                </mat-list>
+              </div>
+            }
+
+            <button
+              mat-raised-button
+              color="primary"
+              (click)="onUpload()"
+              [disabled]="selectedFiles().length === 0 || uploading()"
+              class="upload-button"
+              [attr.aria-label]="'Upload selected files'"
+            >
+              @if (uploading()) {
+                <mat-spinner [diameter]="20"></mat-spinner>
+                <span>Uploading...</span>
+              } @else {
+                <ng-container>
+                  <mat-icon>cloud_upload</mat-icon>
+                  <span>Upload Files</span>
+                </ng-container>
+              }
+            </button>
+          </div>
+
+          @if (existingDocuments().length > 0) {
+            <div class="existing-documents">
+              <h3>Previously Uploaded Documents</h3>
+
+              @if (loadingDocuments()) {
+                <div class="loading-container" role="status" aria-live="polite">
+                  <mat-spinner [diameter]="32"></mat-spinner>
+                  <p>Loading documents...</p>
+                </div>
+              } @else {
+                <mat-list>
+                  @for (doc of existingDocuments(); track doc.id) {
+                    <mat-list-item>
+                      <mat-icon matListItemIcon>description</mat-icon>
+                      <div matListItemTitle>{{ doc.filename }}</div>
+                      <div matListItemLine>Uploaded {{ toDate(doc.uploadedAt) | date: 'short' }}</div>
+                    </mat-list-item>
+                  }
+                </mat-list>
+              }
+            </div>
+          }
+        }
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

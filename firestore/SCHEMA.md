@@ -14,6 +14,8 @@ control:
   permissions
 - **`events/{eventId}/rsvps/{rsvpId}`**: RSVPs as sub-collections of events enable event-scoped
   access control
+- **`events/{eventId}/documents/{documentId}`**: Event verification documents as sub-collections 
+  enable RSVP-based upload permissions
 
 This structure allows security rules to enforce club leader permissions without queries:
 
@@ -185,6 +187,8 @@ Stores user RSVPs for a specific event. The full path is
 
 ### `events/{eventId}/logs` (sub-collection)
 
+**DEPRECATED**: This sub-collection is being phased out in favor of the more flexible `documents` sub-collection. Kept for backward compatibility.
+
 Stores ADIF log files uploaded for a specific event. The full path is
 `clubs/{clubId}/events/{eventId}/logs/{logId}`.
 
@@ -196,17 +200,53 @@ Stores ADIF log files uploaded for a specific event. The full path is
 - `eventId` (string): ID of the parent event (denormalized for convenience)
 - `clubId` (string): ID of the club (denormalized for convenience)
 - `uploadedBy` (string): ID of the user who uploaded the log
-- `storagePath` (string): Path to the ADIF file in Cloud Storage
-- `filename` (string): Original filename of the uploaded ADIF file
+- `storagePath` (string): Path to the file in Cloud Storage
+- `filename` (string): Original filename of the uploaded file
 - `uploadedAt` (timestamp): When the log was uploaded
 
 **Access**:
 
 - Public: None
-- Authenticated: Read logs for events they attended (have an RSVP), upload logs for events they
-  attended
+- Authenticated: Read logs they uploaded
+- Active Club Members: Read all logs for their club's events
+- Users with RSVP: Upload logs for events they've RSVP'd to
 - Club Leaders: Read all logs for their club's events
 - Admin: Full access to all logs
+
+**Indexes**:
+
+- Sub-collection automatically indexed by `uploadedAt` for chronological listing
+
+---
+
+### `events/{eventId}/documents` (sub-collection)
+
+Stores event verification documents (ADIF logs, photos, PDFs, etc.) uploaded for a specific event. 
+This flexible sub-collection supports various types of event verification beyond just ADIF logs,
+as there are now more ways to earn event points. The full path is
+`clubs/{clubId}/events/{eventId}/documents/{documentId}`.
+
+**Document ID**: Auto-generated
+
+**Fields**:
+
+- `id` (string): Document record's unique identifier (matches document ID)
+- `eventId` (string): ID of the parent event (denormalized for convenience)
+- `clubId` (string): ID of the club (denormalized for convenience)
+- `uploadedBy` (string): ID of the user who uploaded the document
+- `storagePath` (string): Path to the file in Cloud Storage (at `event-documents/{clubId}/{eventId}/{filename}`)
+- `downloadUrl` (string): Direct download URL for the file
+- `filename` (string): Original filename of the uploaded file
+- `uploadedAt` (timestamp): When the document was uploaded
+
+**Access**:
+
+- Public: None
+- Authenticated: Read documents they uploaded
+- Active Club Members: Read all documents for their club's events
+- Users with RSVP: Upload documents for events they've RSVP'd to
+- Club Leaders: Read all documents for their club's events
+- Admin: Full access to all documents
 
 **Indexes**:
 
@@ -249,10 +289,11 @@ Stores ADIF log files uploaded for a specific event. The full path is
 - Event attendees are in the RSVPs sub-collection
 - Query: `clubs/{clubId}/events/{eventId}/rsvps`
 
-### Event to Logs
+### Event to Documents
 
-- Event logs are in the logs sub-collection
-- Query: `clubs/{clubId}/events/{eventId}/logs` ordered by `uploadedAt`
+- Event verification documents are in the documents sub-collection
+- Query: `clubs/{clubId}/events/{eventId}/documents` ordered by `uploadedAt`
+- Legacy logs sub-collection: `clubs/{clubId}/events/{eventId}/logs` (deprecated)
 
 ---
 
