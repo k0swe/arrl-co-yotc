@@ -6,7 +6,8 @@ rules_version='2';
 // - clubs/{clubId}/memberships/{userId} - Club memberships
 // - clubs/{clubId}/events/{eventId} - Club events
 // - clubs/{clubId}/events/{eventId}/rsvps/{userId} - Event RSVPs
-// - clubs/{clubId}/events/{eventId}/logs/{logId} - Event logs
+// - clubs/{clubId}/events/{eventId}/documents/{documentId} - Event verification documents
+// - clubs/{clubId}/events/{eventId}/logs/{logId} - Event logs (deprecated, kept for backward compatibility)
 //
 // Key advantages:
 // 1. Club leaders verified via leaderIds array in club document (no queries needed)
@@ -16,7 +17,7 @@ rules_version='2';
 // Security model:
 // - Public: Read active clubs and their events (no authentication required)
 // - Authenticated: Read all clubs/events, create club suggestions and membership requests
-// - Club Leaders: Manage their club's details, events, memberships, and logs
+// - Club Leaders: Manage their club's details, events, memberships, and documents
 // - Admins: Full access via Custom Claims (recommended for production)
 
 service cloud.firestore {
@@ -213,10 +214,13 @@ service cloud.firestore {
           allow write: if isAdmin();
         }
         
-        // Logs sub-collection
+        // Logs sub-collection (legacy - keeping for backward compatibility)
         match /logs/{logId} {
           // Authenticated users can read logs they uploaded
           allow read: if isAuthenticated() && resource.data.uploadedBy == request.auth.uid;
+          
+          // Active club members can read all logs for their club's events
+          allow read: if isActiveMember(clubId);
           
           // Club leaders can read all logs for their club's events
           allow read: if isClubLeader(clubId);
@@ -224,14 +228,41 @@ service cloud.firestore {
           // Admins can read all logs
           allow read: if isAdmin();
           
-          // Authenticated users can upload logs
+          // Users with RSVP can upload logs for events
           allow create: if isAuthenticated() && 
                            request.resource.data.uploadedBy == request.auth.uid &&
                            request.resource.data.eventId == eventId &&
                            request.resource.data.clubId == clubId &&
-                           request.resource.data.uploadedAt == request.time;
+                           request.resource.data.uploadedAt == request.time &&
+                           exists(/databases/$(database)/documents/clubs/$(clubId)/events/$(eventId)/rsvps/$(request.auth.uid));
           
           // Admins can do anything with logs
+          allow write: if isAdmin();
+        }
+        
+        // Documents sub-collection (for event verification documents)
+        match /documents/{documentId} {
+          // Authenticated users can read documents they uploaded
+          allow read: if isAuthenticated() && resource.data.uploadedBy == request.auth.uid;
+          
+          // Active club members can read all documents for their club's events
+          allow read: if isActiveMember(clubId);
+          
+          // Club leaders can read all documents for their club's events
+          allow read: if isClubLeader(clubId);
+          
+          // Admins can read all documents
+          allow read: if isAdmin();
+          
+          // Users with RSVP can upload documents for events
+          allow create: if isAuthenticated() && 
+                           request.resource.data.uploadedBy == request.auth.uid &&
+                           request.resource.data.eventId == eventId &&
+                           request.resource.data.clubId == clubId &&
+                           request.resource.data.uploadedAt == request.time &&
+                           exists(/databases/$(database)/documents/clubs/$(clubId)/events/$(eventId)/rsvps/$(request.auth.uid));
+          
+          // Admins can do anything with documents
           allow write: if isAdmin();
         }
       }
