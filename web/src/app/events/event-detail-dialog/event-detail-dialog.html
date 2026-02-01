@@ -69,6 +69,38 @@
         }
       </div>
     }
+
+    @if (canViewRsvps() && documents().length > 0) {
+      <mat-divider></mat-divider>
+
+      <div class="documents-section">
+        <h3>Uploaded Documents</h3>
+
+        @if (loadingDocuments()) {
+          <div class="loading-container" role="status" aria-live="polite">
+            <mat-spinner [diameter]="32"></mat-spinner>
+            <p>Loading documents...</p>
+          </div>
+        } @else {
+          <mat-list>
+            @for (doc of documents(); track doc.id; let last = $last) {
+              <mat-list-item>
+                <mat-icon matListItemIcon>description</mat-icon>
+                <div matListItemTitle>
+                  <a [href]="doc.downloadUrl" target="_blank" rel="noopener noreferrer">
+                    {{ doc.filename }}
+                  </a>
+                </div>
+                <div matListItemLine>Uploaded {{ toDate(doc.uploadedAt) | date: 'short' }}</div>
+              </mat-list-item>
+              @if (!last) {
+                <mat-divider></mat-divider>
+              }
+            }
+          </mat-list>
+        }
+      </div>
+    }
   </div>
 </mat-dialog-content>
 

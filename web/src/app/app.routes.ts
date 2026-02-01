@@ -9,6 +9,7 @@ import { Events } from './events/events';
 import { Standings } from './standings/standings';
 import { Admin } from './admin/admin';
 import { Profile } from './profile/profile';
+import { Upload } from './upload/upload';
 import { authGuard } from './auth/auth.guard';
 import { adminGuard } from './auth/admin.guard';
 import { profileCompleteGuard } from './auth/profile-complete.guard';
@@ -19,6 +20,7 @@ export const routes: Routes = [
   { path: 'clubs/:slug', component: ClubDetail, canActivate: [profileCompleteGuard] },
   { path: 'events', component: Events, canActivate: [profileCompleteGuard] },
   { path: 'standings', component: Standings, canActivate: [profileCompleteGuard] },
+  { path: 'upload', component: Upload, canActivate: [authGuard, profileCompleteGuard] },
   { path: 'admin', component: Admin, canActivate: [authGuard, profileCompleteGuard, adminGuard] },
   { path: 'profile', component: Profile, canActivate: [authGuard] },
   { path: 'login', component: Login },

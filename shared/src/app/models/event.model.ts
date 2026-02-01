@@ -72,6 +72,9 @@ export interface EventLog {
   /** Storage path to the ADIF file */
   storagePath: string;
 
+  /** Download URL for the file */
+  downloadUrl: string;
+
   /** Original filename of the uploaded ADIF file */
   filename: string;
 

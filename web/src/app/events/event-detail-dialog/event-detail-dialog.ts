@@ -14,12 +14,13 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatListModule } from '@angular/material/list';
 import { MatDividerModule } from '@angular/material/divider';
-import { Event, EventRsvp } from '@arrl-co-yotc/shared/build/app/models/event.model';
+import { Event, EventRsvp, EventLog } from '@arrl-co-yotc/shared/build/app/models/event.model';
 import { Club } from '@arrl-co-yotc/shared/build/app/models/club.model';
 import { MembershipStatus } from '@arrl-co-yotc/shared/build/app/models/user.model';
 import { RsvpService } from '../../services/rsvp.service';
 import { MembershipService } from '../../services/membership.service';
 import { UserService } from '../../services/user.service';
+import { DocumentService } from '../../services/document.service';
 import { AuthService } from '../../auth/auth.service';
 import { catchError, forkJoin, of } from 'rxjs';
 import { toDate } from '../../utils/timestamp.util';
@@ -49,6 +50,7 @@ export class EventDetailDialog implements OnInit {
   private rsvpService = inject(RsvpService);
   private membershipService = inject(MembershipService);
   private userService = inject(UserService);
+  private documentService = inject(DocumentService);
   private authService = inject(AuthService);
   private destroyRef = inject(DestroyRef);
 
@@ -58,9 +60,12 @@ export class EventDetailDialog implements OnInit {
   protected readonly rsvps = signal<EventRsvp[]>([]);
   protected readonly userNames = signal<Map<string, string>>(new Map());
   protected readonly canViewRsvps = signal(false);
+  protected readonly loadingDocuments = signal(true);
+  protected readonly documents = signal<EventLog[]>([]);
 
   ngOnInit(): void {
     this.checkPermissionsAndLoadRsvps();
+    this.loadDocuments();
   }
 
   private checkPermissionsAndLoadRsvps(): void {
@@ -139,6 +144,24 @@ export class EventDetailDialog implements OnInit {
           }
         });
         this.userNames.set(namesMap);
+      });
+  }
+
+  private loadDocuments(): void {
+    this.loadingDocuments.set(true);
+
+    this.documentService
+      .getEventDocuments(this.data.event.clubId, this.data.event.id)
+      .pipe(
+        catchError((error) => {
+          console.error('Error loading documents:', error);
+          return of([]);
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((documents) => {
+        this.documents.set(documents);
+        this.loadingDocuments.set(false);
       });
   }
 
