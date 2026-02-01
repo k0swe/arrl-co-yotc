@@ -136,6 +136,20 @@ mat-list-item::part(content) {
   margin-left: auto;
 }
 
+.rejected-panel {
+  margin-top: 1rem;
+}
+
+.rejected-panel mat-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.rejected-panel mat-list {
+  padding-top: 0;
+}
+
 @media (max-width: 600px) {
   .membership-item {
     flex-direction: column;

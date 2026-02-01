@@ -18,6 +18,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { MembershipService } from '../../../services/membership.service';
 import { UserService } from '../../../services/user.service';
 import { ClubService } from '../../../services/club.service';
@@ -43,6 +44,7 @@ interface MemberWithUser {
     MatButtonModule,
     MatTooltipModule,
     MatDividerModule,
+    MatExpansionModule,
   ],
   templateUrl: './members.html',
   styleUrl: './members.css',
@@ -69,6 +71,7 @@ export class Members {
   protected readonly loading = signal(true);
   protected readonly activeMembersWithUsers = signal<MemberWithUser[]>([]);
   protected readonly pendingMembershipsWithUsers = signal<MemberWithUser[]>([]);
+  protected readonly deniedMembershipsWithUsers = signal<MemberWithUser[]>([]);
   protected readonly processingMembership = signal<string | null>(null);
 
   /**
@@ -113,7 +116,7 @@ export class Members {
     this.loading.set(true);
     const clubId = this.clubId();
 
-    // Load both active and pending members in parallel
+    // Load active, pending, and denied members in parallel
     const activeQuery = this.membershipService.getActiveMembers(clubId).pipe(
       catchError((error) => {
         console.error('[Members] Error loading active members:', error);
@@ -126,31 +129,42 @@ export class Members {
         return of([]);
       }),
     );
+    const deniedQuery = this.membershipService.getDeniedMembers(clubId).pipe(
+      catchError((error) => {
+        console.error('[Members] Error loading denied members:', error);
+        return of([]);
+      }),
+    );
 
     combineLatest({
       active: activeQuery,
       pending: pendingQuery,
+      denied: deniedQuery,
     })
       .pipe(
-        switchMap(({ active, pending }) => {
+        switchMap(({ active, pending, denied }) => {
           // Create observables for loading users
           const activeUsers$ =
             active.length > 0 ? this.loadUsersForMembershipsObservable(active) : of([]);
           const pendingUsers$ =
             pending.length > 0 ? this.loadUsersForMembershipsObservable(pending) : of([]);
+          const deniedUsers$ =
+            denied.length > 0 ? this.loadUsersForMembershipsObservable(denied) : of([]);
 
-          // Load users for both active and pending members in parallel
+          // Load users for active, pending, and denied members in parallel
           return forkJoin({
             activeMembers: activeUsers$,
             pendingMembers: pendingUsers$,
+            deniedMembers: deniedUsers$,
           });
         }),
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
-        next: ({ activeMembers, pendingMembers }) => {
+        next: ({ activeMembers, pendingMembers, deniedMembers }) => {
           this.activeMembersWithUsers.set(activeMembers);
           this.pendingMembershipsWithUsers.set(pendingMembers);
+          this.deniedMembershipsWithUsers.set(deniedMembers);
           this.loading.set(false);
         },
         error: (error) => {
@@ -240,6 +254,64 @@ export class Members {
 
   protected isProcessing(userId: string): boolean {
     return this.processingMembership() === userId;
+  }
+
+  /**
+   * Reject an active membership
+   */
+  protected rejectMembership(membershipWithUser: MemberWithUser): void {
+    const membership = membershipWithUser.membership;
+    this.processingMembership.set(membership.userId);
+
+    this.membershipService
+      .rejectMembership(membership.clubId, membership.userId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.snackBar.open('Membership rejected', 'Close', { duration: 3000 });
+          // Reload members to reflect the changes
+          this.loadMembers();
+          this.processingMembership.set(null);
+        },
+        error: (error) => {
+          console.error('Error rejecting membership:', error);
+          this.snackBar.open('Failed to reject membership', 'Close', { duration: 3000 });
+          this.processingMembership.set(null);
+        },
+      });
+  }
+
+  /**
+   * Accept a denied membership
+   */
+  protected acceptDeniedMembership(membershipWithUser: MemberWithUser): void {
+    const currentUser = this.authService.currentUser();
+    if (!currentUser) {
+      this.snackBar.open('You must be logged in to accept memberships', 'Close', {
+        duration: 3000,
+      });
+      return;
+    }
+
+    const membership = membershipWithUser.membership;
+    this.processingMembership.set(membership.userId);
+
+    this.membershipService
+      .acceptDeniedMembership(membership.clubId, membership.userId, currentUser.uid)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.snackBar.open('Membership accepted', 'Close', { duration: 3000 });
+          // Reload members to reflect the changes
+          this.loadMembers();
+          this.processingMembership.set(null);
+        },
+        error: (error) => {
+          console.error('Error accepting denied membership:', error);
+          this.snackBar.open('Failed to accept membership', 'Close', { duration: 3000 });
+          this.processingMembership.set(null);
+        },
+      });
   }
 
   /**
