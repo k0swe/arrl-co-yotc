@@ -117,8 +117,8 @@
                       </span>
                     }
                   </div>
-                  @if (canManageRoles()) {
-                    <div class="action-buttons">
+                  <div class="action-buttons">
+                    @if (canManageRoles()) {
                       @if (item.membership.role === 'leader') {
                         <button
                           mat-icon-button
@@ -148,13 +148,86 @@
                           <mat-icon>arrow_upward</mat-icon>
                         </button>
                       }
-                    </div>
-                  }
+                    }
+                    @if (canApproveMemberships()) {
+                      <button
+                        mat-icon-button
+                        color="warn"
+                        (click)="rejectMembership(item)"
+                        [disabled]="isProcessing(item.membership.userId)"
+                        [attr.aria-label]="'Reject membership for ' + (item.user?.name || 'user')"
+                        matTooltip="Reject membership"
+                      >
+                        @if (isProcessing(item.membership.userId)) {
+                          <mat-spinner diameter="20"></mat-spinner>
+                        } @else {
+                          <mat-icon>person_remove</mat-icon>
+                        }
+                      </button>
+                    }
+                  </div>
                 </div>
               </mat-list-item>
             }
           </mat-list>
         </div>
+      }
+
+      @if (canApproveMemberships() && deniedMembershipsWithUsers().length > 0) {
+        <mat-divider class="section-divider"></mat-divider>
+        <mat-expansion-panel class="rejected-panel">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <mat-icon>block</mat-icon>
+              Rejected Members ({{ deniedMembershipsWithUsers().length }})
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <mat-list role="list">
+            @for (item of deniedMembershipsWithUsers(); track item.membership.userId) {
+              <mat-list-item role="listitem">
+                <div class="membership-item">
+                  <div class="membership-info">
+                    <mat-icon class="user-icon">person_off</mat-icon>
+                    <div class="user-details">
+                      @if (item.user) {
+                        <span class="user-name"
+                          >{{ item.user.name }} ({{ item.user.callsign }})</span
+                        >
+                      } @else {
+                        <span class="user-name">User ID: {{ item.membership.userId }}</span>
+                      }
+                      @if (item.membership.updatedAt) {
+                        <span class="applied-date">
+                          Rejected: {{ toDate(item.membership.updatedAt) | date: 'short' }}
+                        </span>
+                      }
+                    </div>
+                  </div>
+
+                  <div class="membership-actions">
+                    <button
+                      mat-raised-button
+                      color="primary"
+                      (click)="acceptDeniedMembership(item)"
+                      [disabled]="isProcessing(item.membership.userId)"
+                      [attr.aria-label]="
+                        'Accept membership for ' +
+                        (item.user ? item.user.name : item.membership.userId)
+                      "
+                    >
+                      @if (isProcessing(item.membership.userId)) {
+                        <mat-spinner diameter="20"></mat-spinner>
+                      } @else {
+                        <mat-icon>check</mat-icon>
+                      }
+                      Accept
+                    </button>
+                  </div>
+                </div>
+              </mat-list-item>
+            }
+          </mat-list>
+        </mat-expansion-panel>
       }
     }
   </mat-card-content>
