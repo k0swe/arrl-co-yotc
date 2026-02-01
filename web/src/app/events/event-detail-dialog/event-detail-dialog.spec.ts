@@ -3,6 +3,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideAuth, getAuth, connectAuthEmulator } from '@angular/fire/auth';
 import { provideFirestore, getFirestore, connectFirestoreEmulator } from '@angular/fire/firestore';
+import { provideStorage, getStorage, connectStorageEmulator } from '@angular/fire/storage';
 import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
 import { EventDetailDialog } from './event-detail-dialog';
 import { firebaseTestConfig } from '../../firebase-test.config';
@@ -56,6 +57,11 @@ describe('EventDetailDialog', () => {
           const firestore = getFirestore();
           connectFirestoreEmulator(firestore, '127.0.0.1', 8080);
           return firestore;
+        }),
+        provideStorage(() => {
+          const storage = getStorage();
+          connectStorageEmulator(storage, '127.0.0.1', 9199);
+          return storage;
         }),
         { provide: MatDialogRef, useValue: { close: () => {} } },
         { provide: MAT_DIALOG_DATA, useValue: mockDialogData },
