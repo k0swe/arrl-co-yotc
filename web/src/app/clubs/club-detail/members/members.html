@@ -155,9 +155,7 @@
                         color="warn"
                         (click)="rejectMembership(item)"
                         [disabled]="isProcessing(item.membership.userId)"
-                        [attr.aria-label]="
-                          'Reject membership for ' + (item.user?.name || 'user')
-                        "
+                        [attr.aria-label]="'Reject membership for ' + (item.user?.name || 'user')"
                         matTooltip="Reject membership"
                       >
                         @if (isProcessing(item.membership.userId)) {
