@@ -97,6 +97,16 @@ export class MembershipService {
   }
 
   /**
+   * Get all denied members for a specific club
+   * Returns memberships with status 'denied'
+   */
+  getDeniedMembers(clubId: string): Observable<ClubMembership[]> {
+    const membershipsCollection = collection(this.firestore, `clubs/${clubId}/memberships`);
+    const q = query(membershipsCollection, where('status', '==', MembershipStatus.Denied));
+    return collectionData(q, { idField: 'id' }) as Observable<ClubMembership[]>;
+  }
+
+  /**
    * Approve a pending membership request
    * Updates the membership status to 'active' and records who approved it
    */
@@ -121,6 +131,37 @@ export class MembershipService {
     return from(
       updateDoc(membershipRef, {
         status: MembershipStatus.Denied,
+        updatedAt: serverTimestamp(),
+      }),
+    );
+  }
+
+  /**
+   * Reject an active membership
+   * Updates the membership status from 'active' to 'denied'.
+   * This is a convenience method that delegates to denyMembership.
+   * Use this when rejecting an already-active membership; it has the same
+   * effect as denyMembership but with clearer naming in the UI context.
+   */
+  rejectMembership(clubId: string, userId: string): Observable<void> {
+    return this.denyMembership(clubId, userId);
+  }
+
+  /**
+   * Accept a denied membership
+   * Updates the membership status from 'denied' to 'active'.
+   * This reinstates a previously rejected member and records who approved
+   * the reinstatement. Note: This will update approvedAt and approvedBy fields,
+   * replacing any previous approval metadata to create an audit trail of the
+   * reinstatement action.
+   */
+  acceptDeniedMembership(clubId: string, userId: string, approvedBy: string): Observable<void> {
+    const membershipRef = doc(this.firestore, `clubs/${clubId}/memberships/${userId}`);
+    return from(
+      updateDoc(membershipRef, {
+        status: MembershipStatus.Active,
+        approvedAt: serverTimestamp(),
+        approvedBy,
         updatedAt: serverTimestamp(),
       }),
     );

@@ -90,4 +90,37 @@ describe('MembershipService', () => {
     expect(result).toBeDefined();
     expect(result.subscribe).toBeDefined();
   });
+
+  it('should have getDeniedMembers method', () => {
+    expect(service.getDeniedMembers).toBeDefined();
+    expect(typeof service.getDeniedMembers).toBe('function');
+  });
+
+  it('should return an observable from getDeniedMembers', () => {
+    const result = service.getDeniedMembers('test-club-id');
+    expect(result).toBeDefined();
+    expect(result.subscribe).toBeDefined();
+  });
+
+  it('should have rejectMembership method', () => {
+    expect(service.rejectMembership).toBeDefined();
+    expect(typeof service.rejectMembership).toBe('function');
+  });
+
+  it('should return an observable from rejectMembership', () => {
+    const result = service.rejectMembership('test-club-id', 'test-user-id');
+    expect(result).toBeDefined();
+    expect(result.subscribe).toBeDefined();
+  });
+
+  it('should have acceptDeniedMembership method', () => {
+    expect(service.acceptDeniedMembership).toBeDefined();
+    expect(typeof service.acceptDeniedMembership).toBe('function');
+  });
+
+  it('should return an observable from acceptDeniedMembership', () => {
+    const result = service.acceptDeniedMembership('test-club-id', 'test-user-id', 'approver-id');
+    expect(result).toBeDefined();
+    expect(result.subscribe).toBeDefined();
+  });
 });

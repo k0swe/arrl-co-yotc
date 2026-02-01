@@ -76,6 +76,11 @@ describe('Members', () => {
     expect(Array.isArray(component['pendingMembershipsWithUsers']())).toBe(true);
   });
 
+  it('should have deniedMembershipsWithUsers signal', () => {
+    expect(component['deniedMembershipsWithUsers']).toBeDefined();
+    expect(Array.isArray(component['deniedMembershipsWithUsers']())).toBe(true);
+  });
+
   it('should have canManageRoles computed signal', () => {
     expect(component['canManageRoles']).toBeDefined();
     expect(typeof component['canManageRoles']()).toBe('boolean');
