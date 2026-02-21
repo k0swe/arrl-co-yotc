@@ -21,6 +21,7 @@ jobs:
           cache-dependency-path: |
             shared/package-lock.json
             web/package-lock.json
+            functions/package-lock.json
 
       - name: Install shared dependencies
         working-directory: shared
@@ -36,4 +37,12 @@ jobs:
 
       - name: Run tests
         working-directory: web
+        run: npm test
+
+      - name: Install Cloud Run function dependencies
+        working-directory: functions
+        run: npm ci
+
+      - name: Run Cloud Run function tests
+        working-directory: functions
         run: npm test

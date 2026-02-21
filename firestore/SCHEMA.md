@@ -254,6 +254,33 @@ as there are now more ways to earn event points. The full path is
 
 ---
 
+### `mail`
+
+Outbound email queue consumed by the
+[firebase/firestore-send-email](https://extensions.dev/extensions/firebase/firestore-send-email)
+extension. Documents are written **server-side only** by Cloud Run functions — clients cannot
+read or write this collection.
+
+**Document ID**: Auto-generated
+
+**Fields**:
+
+- `toUids` (array of strings): Firebase Auth UIDs of the recipients. The extension resolves these
+  to email addresses via the `users` collection (`email` field).
+- `message.subject` (string): Email subject line.
+- `message.html` (string): HTML body of the email.
+
+**Written by**: `notifyAdminsOnClubSuggestion` Cloud Run function (see `functions/src/index.ts`).
+
+**Access**:
+
+- Public: None
+- Authenticated: None
+- Admin SDK (Cloud Run functions): Write-only (bypasses security rules)
+- firebase/firestore-send-email extension: Read/delete (server-side, bypasses security rules)
+
+---
+
 ## Data Relationships
 
 ### User to Club Membership
