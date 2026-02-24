@@ -107,6 +107,15 @@
   vertical-align: middle;
 }
 
+.past-events-panel {
+  margin-top: 1rem;
+}
+
+.event-icon.past {
+  background-color: rgba(0, 0, 0, 0.08);
+  color: rgba(0, 0, 0, 0.38);
+}
+
 @media (max-width: 600px) {
   .events-container {
     padding: 1rem 0.5rem;
