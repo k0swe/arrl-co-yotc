@@ -43,22 +43,32 @@ export class Events {
   private destroyRef = inject(DestroyRef);
   private dialog = inject(MatDialog);
 
+  private static readonly TWO_WEEKS_MS = 14 * 24 * 60 * 60 * 1000;
+
   protected readonly loading = signal(true);
   protected readonly events = signal<EventWithClub[]>([]);
 
   protected readonly upcomingEvents = computed(() => {
     const now = Date.now();
+    const twoWeeksAgo = now - Events.TWO_WEEKS_MS;
     return this.events().filter((e) => {
       const end = toDate(e.endTime);
-      return end !== null && end.getTime() >= now;
+      const start = toDate(e.startTime);
+      const hasEnded = end !== null && end.getTime() < now;
+      const startedLongAgo = start !== null && start.getTime() < twoWeeksAgo;
+      return !hasEnded && !startedLongAgo;
     });
   });
 
   protected readonly pastEvents = computed(() => {
     const now = Date.now();
+    const twoWeeksAgo = now - Events.TWO_WEEKS_MS;
     return this.events().filter((e) => {
       const end = toDate(e.endTime);
-      return end !== null && end.getTime() < now;
+      const start = toDate(e.startTime);
+      const hasEnded = end !== null && end.getTime() < now;
+      const startedLongAgo = start !== null && start.getTime() < twoWeeksAgo;
+      return hasEnded || startedLongAgo;
     });
   });
 

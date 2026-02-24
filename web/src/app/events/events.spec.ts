@@ -68,24 +68,29 @@ describe('Events', () => {
     const component = fixture.componentInstance;
     const futureDate = new Date(Date.now() + 86400000);
     const pastDate = new Date(Date.now() - 86400000);
+    const threeWeeksAgo = new Date(Date.now() - 21 * 86400000);
     const baseEvent = {
       id: '1',
       clubId: 'c1',
       name: 'Test',
       description: '',
-      startTime: pastDate,
       createdAt: pastDate,
       updatedAt: pastDate,
       createdBy: 'u1',
     };
     component['events'].set([
-      { ...baseEvent, id: '1', endTime: futureDate },
-      { ...baseEvent, id: '2', endTime: pastDate },
+      // Upcoming: future end, recent start
+      { ...baseEvent, id: '1', startTime: pastDate, endTime: futureDate },
+      // Past: already ended
+      { ...baseEvent, id: '2', startTime: pastDate, endTime: pastDate },
+      // Past: started more than 2 weeks ago even though end is in future
+      { ...baseEvent, id: '3', startTime: threeWeeksAgo, endTime: futureDate },
     ]);
     expect(component['upcomingEvents']().length).toBe(1);
     expect(component['upcomingEvents']()[0].id).toBe('1');
-    expect(component['pastEvents']().length).toBe(1);
-    expect(component['pastEvents']()[0].id).toBe('2');
+    expect(component['pastEvents']().length).toBe(2);
+    expect(component['pastEvents']().map((e) => e.id)).toContain('2');
+    expect(component['pastEvents']().map((e) => e.id)).toContain('3');
   });
 
   it('should render header', async () => {
