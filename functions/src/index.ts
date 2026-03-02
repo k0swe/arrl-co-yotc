@@ -9,8 +9,9 @@ export {
 } from './notify-admins-on-club-suggestion';
 
 export {
-  StandingRow,
   parseStandingRow,
   processStandingsUpload,
 } from './process-standings-upload';
+
+export { StandingEntry } from '@arrl-co-yotc/shared/build/app/models/standing.model';
 

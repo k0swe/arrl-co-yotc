@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { escapeHtml, buildClubSuggestionHtml, parseStandingRow, StandingRow } from './index';
+import { escapeHtml, buildClubSuggestionHtml, parseStandingRow, StandingEntry } from './index';
 import ExcelJS from 'exceljs';
 
 describe('escapeHtml', () => {
@@ -105,7 +105,7 @@ describe('parseStandingRow', () => {
 
   it('parses all numeric fields', () => {
     const row = makeRow(fullValues);
-    const entry = parseStandingRow(row) as StandingRow;
+    const entry = parseStandingRow(row) as Omit<StandingEntry, 'updatedAt'>;
     expect(entry.totalQsos).toBe(42);
     expect(entry.was).toBe(30);
     expect(entry.veSessions).toBe(2);
@@ -115,7 +115,7 @@ describe('parseStandingRow', () => {
 
   it('parses boolean fields', () => {
     const row = makeRow(fullValues);
-    const entry = parseStandingRow(row) as StandingRow;
+    const entry = parseStandingRow(row) as Omit<StandingEntry, 'updatedAt'>;
     expect(entry.arrlFieldDay).toBe(true);
     expect(entry.winterFieldDay).toBe(false);
     expect(entry.interClubEvent).toBe(true);
@@ -135,7 +135,7 @@ describe('parseStandingRow', () => {
 
   it('defaults missing numeric values to 0', () => {
     const row = makeRow(['W0TEST', null, null, '', null, null, null, false, false, false]);
-    const entry = parseStandingRow(row) as StandingRow;
+    const entry = parseStandingRow(row) as Omit<StandingEntry, 'updatedAt'>;
     expect(entry.totalQsos).toBe(0);
     expect(entry.was).toBe(0);
   });

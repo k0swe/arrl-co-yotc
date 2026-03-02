@@ -2,26 +2,10 @@ import { onObjectFinalized } from 'firebase-functions/v2/storage';
 import { getFirestore } from 'firebase-admin/firestore';
 import { getStorage } from 'firebase-admin/storage';
 import ExcelJS from 'exceljs';
+import { StandingEntry } from '@arrl-co-yotc/shared/build/app/models/standing.model';
 
 /**
- * Shape of a single standings row as parsed from the uploaded Excel file.
- * Column names match those specified in the Excel template.
- */
-export interface StandingRow {
-  callsign: string;
-  totalQsos: number;
-  was: number;
-  coloClubs: string;
-  veSessions: number;
-  newMembers: number;
-  publicEvents: number;
-  arrlFieldDay: boolean;
-  winterFieldDay: boolean;
-  interClubEvent: boolean;
-}
-
-/**
- * Parses a single Excel worksheet row (1-based column index) into a StandingRow.
+ * Parses a single Excel worksheet row (1-based column index) into a StandingEntry.
  * Returns null if the row is empty or missing a callsign.
  *
  * Expected column order (from the Excel template):
@@ -29,7 +13,7 @@ export interface StandingRow {
  *   5: VE Session        6: New Members  7: Public Event
  *   8: ARRL Field Day    9: Winter Field Day  10: Inter-Club Event
  */
-export function parseStandingRow(row: ExcelJS.Row): StandingRow | null {
+export function parseStandingRow(row: ExcelJS.Row): Omit<StandingEntry, 'updatedAt'> | null {
   const callsign = String(row.getCell(1).value ?? '').trim().toUpperCase();
   if (!callsign) return null;
 
