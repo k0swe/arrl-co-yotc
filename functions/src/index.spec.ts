@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { escapeHtml, buildClubSuggestionHtml } from './index';
+import { escapeHtml, buildClubSuggestionHtml, parseStandingRow, StandingRow } from './index';
+import ExcelJS from 'exceljs';
 
 describe('escapeHtml', () => {
   it('leaves plain text unchanged', () => {
@@ -76,5 +77,66 @@ describe('buildClubSuggestionHtml', () => {
       website: 'https://example.com?a=1&b=2',
     });
     expect(html).toContain('&amp;');
+  });
+});
+
+/** Helper: build an ExcelJS Row with the given cell values. */
+function makeRow(values: (string | number | boolean | null)[]): ExcelJS.Row {
+  const workbook = new ExcelJS.Workbook();
+  const sheet = workbook.addWorksheet('test');
+  sheet.addRow(values);
+  return sheet.getRow(1);
+}
+
+describe('parseStandingRow', () => {
+  const fullValues: (string | number | boolean)[] = [
+    'W0TEST', 42, 30, 'DARC', 2, 5, 3, true, false, true,
+  ];
+
+  it('returns null for a row with no callsign', () => {
+    const row = makeRow(['', 1, 2, '', 0, 0, 0, false, false, false]);
+    expect(parseStandingRow(row)).toBeNull();
+  });
+
+  it('parses callsign in uppercase', () => {
+    const row = makeRow(['w0test', 0, 0, '', 0, 0, 0, false, false, false]);
+    expect(parseStandingRow(row)?.callsign).toBe('W0TEST');
+  });
+
+  it('parses all numeric fields', () => {
+    const row = makeRow(fullValues);
+    const entry = parseStandingRow(row) as StandingRow;
+    expect(entry.totalQsos).toBe(42);
+    expect(entry.was).toBe(30);
+    expect(entry.veSessions).toBe(2);
+    expect(entry.newMembers).toBe(5);
+    expect(entry.publicEvents).toBe(3);
+  });
+
+  it('parses boolean fields', () => {
+    const row = makeRow(fullValues);
+    const entry = parseStandingRow(row) as StandingRow;
+    expect(entry.arrlFieldDay).toBe(true);
+    expect(entry.winterFieldDay).toBe(false);
+    expect(entry.interClubEvent).toBe(true);
+  });
+
+  it('parses truthy string "yes" as true', () => {
+    const values = [...fullValues];
+    values[7] = 'yes' as unknown as boolean;
+    const row = makeRow(values);
+    expect(parseStandingRow(row)?.arrlFieldDay).toBe(true);
+  });
+
+  it('parses coloClubs string', () => {
+    const row = makeRow(fullValues);
+    expect(parseStandingRow(row)?.coloClubs).toBe('DARC');
+  });
+
+  it('defaults missing numeric values to 0', () => {
+    const row = makeRow(['W0TEST', null, null, '', null, null, null, false, false, false]);
+    const entry = parseStandingRow(row) as StandingRow;
+    expect(entry.totalQsos).toBe(0);
+    expect(entry.was).toBe(0);
   });
 });

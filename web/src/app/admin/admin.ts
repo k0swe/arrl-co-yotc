@@ -8,6 +8,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ClubService } from '../services/club.service';
+import { StorageService } from '../services/storage.service';
 import { Club } from '@arrl-co-yotc/shared/build/app/models/club.model';
 import { User } from '@arrl-co-yotc/shared/build/app/models/user.model';
 import { ClubCard } from '../clubs/club-card/club-card';
@@ -32,6 +33,7 @@ import { EditClubDialog, ClubFormData } from '../clubs/edit-club-dialog/edit-clu
 })
 export class Admin {
   private clubService = inject(ClubService);
+  private storageService = inject(StorageService);
   private firestore = inject(Firestore);
   private snackBar = inject(MatSnackBar);
   private destroyRef = inject(DestroyRef);
@@ -41,6 +43,7 @@ export class Admin {
   protected readonly pendingClubs = signal<Club[]>([]);
   protected readonly processingClubIds = signal<Set<string>>(new Set());
   protected readonly userNames = signal<Map<string, string>>(new Map());
+  protected readonly standingsUploading = signal(false);
 
   constructor() {
     this.loadPendingClubs();
@@ -223,5 +226,29 @@ export class Admin {
 
   private showSnackBar(message: string): void {
     this.snackBar.open(message, 'Close', { duration: 3000 });
+  }
+
+  protected onStandingsFileSelect(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    this.standingsUploading.set(true);
+    this.storageService
+      .uploadStandingsFile(file)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.showSnackBar('Standings file uploaded. Processing will begin shortly.');
+          this.standingsUploading.set(false);
+          // Reset the file input so the same file can be re-uploaded if needed.
+          input.value = '';
+        },
+        error: (error) => {
+          console.error('Error uploading standings file:', error);
+          this.showSnackBar('Failed to upload standings file. Please try again.');
+          this.standingsUploading.set(false);
+        },
+      });
   }
 }

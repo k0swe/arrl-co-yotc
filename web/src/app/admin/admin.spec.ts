@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideFirestore, getFirestore, connectFirestoreEmulator } from '@angular/fire/firestore';
 import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
+import { provideStorage, getStorage, connectStorageEmulator } from '@angular/fire/storage';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Admin } from './admin';
 import { firebaseTestConfig } from '../firebase-test.config';
@@ -18,6 +19,11 @@ describe('Admin', () => {
           const firestore = getFirestore();
           connectFirestoreEmulator(firestore, '127.0.0.1', 8080);
           return firestore;
+        }),
+        provideStorage(() => {
+          const storage = getStorage();
+          connectStorageEmulator(storage, '127.0.0.1', 9199);
+          return storage;
         }),
       ],
     }).compileComponents();
@@ -38,6 +44,15 @@ describe('Admin', () => {
 
   it('should render the pending clubs section heading', () => {
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h2')?.textContent).toContain('Pending Club Suggestions');
+    const headings = compiled.querySelectorAll('h2');
+    const headingTexts = Array.from(headings).map((h) => h.textContent ?? '');
+    expect(headingTexts.some((t) => t.includes('Pending Club Suggestions'))).toBe(true);
+  });
+
+  it('should render the standings upload section heading', () => {
+    const compiled = fixture.nativeElement as HTMLElement;
+    const headings = compiled.querySelectorAll('h2');
+    const headingTexts = Array.from(headings).map((h) => h.textContent ?? '');
+    expect(headingTexts.some((t) => t.includes('Upload Standings'))).toBe(true);
   });
 });

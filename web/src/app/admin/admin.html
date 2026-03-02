@@ -90,4 +90,49 @@
       </div>
     }
   </section>
+
+  <section class="standings-upload-section">
+    <h2>Upload Standings</h2>
+    <mat-card>
+      <mat-card-content>
+        <p>
+          Upload an Excel file exported from the ARRL Colorado Section Year of the Club spreadsheet.
+          The file will be processed automatically and the standings page will be updated.
+        </p>
+        <p class="upload-note">
+          <mat-icon aria-hidden="true">info</mat-icon>
+          Expected columns: STATION_CALLSIGN, Total QSO's, WAS, Colo_Clubs, VE Session, New Members,
+          Public Event, ARRL Field Day, Winter Field Day, Inter-Club Event
+        </p>
+      </mat-card-content>
+      <mat-card-actions>
+        <label for="standings-file-input">
+          <button
+            mat-raised-button
+            color="primary"
+            [disabled]="standingsUploading()"
+            (click)="standingsFileInput.click()"
+            aria-label="Upload standings Excel file"
+          >
+            @if (standingsUploading()) {
+              <mat-spinner diameter="20"></mat-spinner>
+            }
+            @if (!standingsUploading()) {
+              <mat-icon>upload_file</mat-icon>
+            }
+            <span>{{ standingsUploading() ? 'Uploading...' : 'Upload Standings File' }}</span>
+          </button>
+        </label>
+        <input
+          #standingsFileInput
+          id="standings-file-input"
+          type="file"
+          accept=".xlsx,.xls"
+          class="hidden-file-input"
+          aria-label="Select standings Excel file"
+          (change)="onStandingsFileSelect($event)"
+        />
+      </mat-card-actions>
+    </mat-card>
+  </section>
 </div>

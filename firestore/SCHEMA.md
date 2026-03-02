@@ -281,6 +281,40 @@ read or write this collection.
 
 ---
 
+### `standings`
+
+Stores per-club standings data, populated by the `processStandingsUpload` Cloud Run function
+when an admin uploads an Excel report to the `standings-uploads/` Firebase Storage path.
+
+**Document ID**: Club station callsign (e.g., `W0DEN`), derived from the Excel column
+`STATION_CALLSIGN`.
+
+**Fields**:
+
+- `callsign` (string): Club station callsign (matches document ID)
+- `totalQsos` (number): Total number of QSOs logged
+- `was` (number): Worked All States count
+- `coloClubs` (string): Colorado clubs affiliation string
+- `veSessions` (number): Number of VE (volunteer examiner) sessions
+- `newMembers` (number): Number of new members brought in
+- `publicEvents` (number): Number of public events participated in
+- `arrlFieldDay` (boolean): Whether the club participated in ARRL Field Day
+- `winterFieldDay` (boolean): Whether the club participated in Winter Field Day
+- `interClubEvent` (boolean): Whether the club participated in an inter-club event
+- `updatedAt` (string): ISO 8601 timestamp of when this entry was last written
+
+**Written by**: `processStandingsUpload` Cloud Run function triggered by a file upload to
+`standings-uploads/{filename}` in Firebase Storage (see `functions/src/index.ts`).
+
+**Access**:
+
+- Public: Read all standings (no authentication required)
+- Authenticated: Read all standings
+- Admin SDK (Cloud Run functions): Write-only (bypasses security rules)
+- Admin (client): Cannot write directly — upload the Excel file to trigger ETL
+
+---
+
 ## Data Relationships
 
 ### User to Club Membership

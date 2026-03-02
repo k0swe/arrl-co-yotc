@@ -1,10 +1,23 @@
 import { TestBed } from '@angular/core/testing';
+import { provideFirestore, getFirestore, connectFirestoreEmulator } from '@angular/fire/firestore';
+import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { Standings } from './standings';
+import { firebaseTestConfig } from '../firebase-test.config';
 
 describe('Standings', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [Standings],
+      providers: [
+        provideAnimationsAsync(),
+        provideFirebaseApp(() => initializeApp(firebaseTestConfig)),
+        provideFirestore(() => {
+          const firestore = getFirestore();
+          connectFirestoreEmulator(firestore, '127.0.0.1', 8080);
+          return firestore;
+        }),
+      ],
     }).compileComponents();
   });
 
@@ -22,11 +35,10 @@ describe('Standings', () => {
     expect(heading?.textContent).toContain('Standings');
   });
 
-  it('should display coming soon message', () => {
+  it('should show loading spinner initially', () => {
     const fixture = TestBed.createComponent(Standings);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    const comingSoonMessage = compiled.querySelector('.coming-soon-message');
-    expect(comingSoonMessage?.textContent).toContain('Coming Soon!');
+    expect(compiled.querySelector('mat-spinner')).toBeTruthy();
   });
 });

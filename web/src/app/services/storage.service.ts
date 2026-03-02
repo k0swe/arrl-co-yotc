@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { Storage, ref, uploadBytes, getDownloadURL, deleteObject } from '@angular/fire/storage';
 import { from, Observable } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { map, switchMap } from 'rxjs/operators';
 
 /**
  * Service for managing file uploads to Firebase Storage.
@@ -68,6 +68,21 @@ export class StorageService {
     const downloadUrl = await getDownloadURL(uploadResult.ref);
 
     return { storagePath, downloadUrl };
+  }
+
+  /**
+   * Upload a standings Excel file to Firebase Storage.
+   * The Cloud Function `processStandingsUpload` will pick it up and ETL the data.
+   * @param file - The Excel file to upload
+   * @returns Observable that emits the storage path of the uploaded file
+   */
+  uploadStandingsFile(file: File): Observable<string> {
+    const timestamp = Date.now();
+    const filename = `${timestamp}-${file.name}`;
+    const storagePath = `standings-uploads/${filename}`;
+    const storageRef = ref(this.storage, storagePath);
+
+    return from(uploadBytes(storageRef, file)).pipe(map(() => storagePath));
   }
 
   /**
