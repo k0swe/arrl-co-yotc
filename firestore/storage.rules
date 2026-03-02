@@ -96,5 +96,12 @@ service firebase.storage {
       // Admins can delete event documents
       allow delete: if isAdmin();
     }
+
+    // Standings uploads — only admins can upload the Excel report; the Cloud Run
+    // function (processStandingsUpload) reads and processes these files server-side.
+    match /standings-uploads/{filename} {
+      allow write: if isAdmin();
+      allow read: if false;
+    }
   }
 }

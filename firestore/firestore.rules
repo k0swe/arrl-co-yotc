@@ -275,6 +275,13 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // Standings collection — populated by the processStandingsUpload Cloud Run function.
+    // Anyone can read standings; only the backend (Admin SDK) may write.
+    match /standings/{callsign} {
+      allow read: if true;
+      allow write: if false;
+    }
+
     // Collection group query support for events
     // This matches events at any nesting level for collection group queries
     match /{path=**}/events/{eventId} {

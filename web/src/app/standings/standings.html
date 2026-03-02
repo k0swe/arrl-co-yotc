@@ -8,14 +8,86 @@
     </div>
   </header>
 
-  <section class="coming-soon">
-    <p class="coming-soon-message">
-      <strong>Coming Soon!</strong>
-    </p>
-    <p>
-      The Standings page is currently under development. This page will display club and operator
-      rankings throughout the Year of the Club.
-    </p>
-    <p>Check back soon to see how clubs across the Colorado Section are competing!</p>
-  </section>
+  @if (loading()) {
+    <div class="loading-container" role="status" aria-live="polite">
+      <mat-spinner></mat-spinner>
+      <p>Loading standings...</p>
+    </div>
+  } @else if (standings().length === 0) {
+    <div class="empty-state" role="status">
+      <mat-icon class="empty-icon">leaderboard</mat-icon>
+      <h3>No Standings Yet</h3>
+      <p>Standings will appear here once results have been published.</p>
+      <p>Check back soon to see how clubs across the Colorado Section are competing!</p>
+    </div>
+  } @else {
+    <div class="table-container" role="region" aria-label="Club standings table">
+      <table mat-table [dataSource]="standings()" class="standings-table">
+        <ng-container matColumnDef="callsign">
+          <th mat-header-cell *matHeaderCellDef scope="col">Callsign</th>
+          <td mat-cell *matCellDef="let row">{{ row.callsign }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="totalQsos">
+          <th mat-header-cell *matHeaderCellDef scope="col">Total QSOs</th>
+          <td mat-cell *matCellDef="let row">{{ row.totalQsos }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="was">
+          <th mat-header-cell *matHeaderCellDef scope="col">WAS</th>
+          <td mat-cell *matCellDef="let row">{{ row.was }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="coloClubs">
+          <th mat-header-cell *matHeaderCellDef scope="col">Colo Clubs</th>
+          <td mat-cell *matCellDef="let row">{{ row.coloClubs }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="veSessions">
+          <th mat-header-cell *matHeaderCellDef scope="col">VE Sessions</th>
+          <td mat-cell *matCellDef="let row">{{ row.veSessions }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="newMembers">
+          <th mat-header-cell *matHeaderCellDef scope="col">New Members</th>
+          <td mat-cell *matCellDef="let row">{{ row.newMembers }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="publicEvents">
+          <th mat-header-cell *matHeaderCellDef scope="col">Public Events</th>
+          <td mat-cell *matCellDef="let row">{{ row.publicEvents }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="arrlFieldDay">
+          <th mat-header-cell *matHeaderCellDef scope="col">ARRL Field Day</th>
+          <td mat-cell *matCellDef="let row">
+            @if (row.arrlFieldDay) {
+              <mat-icon aria-label="Yes">check_circle</mat-icon>
+            }
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="winterFieldDay">
+          <th mat-header-cell *matHeaderCellDef scope="col">Winter Field Day</th>
+          <td mat-cell *matCellDef="let row">
+            @if (row.winterFieldDay) {
+              <mat-icon aria-label="Yes">check_circle</mat-icon>
+            }
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="interClubEvent">
+          <th mat-header-cell *matHeaderCellDef scope="col">Inter-Club Event</th>
+          <td mat-cell *matCellDef="let row">
+            @if (row.interClubEvent) {
+              <mat-icon aria-label="Yes">check_circle</mat-icon>
+            }
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+    </div>
+  }
 </div>
