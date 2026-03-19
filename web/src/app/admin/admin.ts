@@ -242,7 +242,10 @@ export class Admin {
   private defaultSinceDate(): string {
     const d = new Date();
     d.setDate(d.getDate() - 7);
-    return d.toISOString().substring(0, 10);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   protected openRecentDocuments(): void {
@@ -251,9 +254,11 @@ export class Admin {
       this.showSnackBar('Please select a date to search from.');
       return;
     }
+    // Append T00:00:00 so the date string is parsed as local midnight rather
+    // than UTC midnight (which would be the previous day for negative-offset timezones).
     this.dialog.open<RecentDocumentsDialog, RecentDocumentsDialogData>(RecentDocumentsDialog, {
       width: '700px',
-      data: { since: new Date(sinceValue) },
+      data: { since: new Date(`${sinceValue}T00:00:00`) },
     });
   }
 
