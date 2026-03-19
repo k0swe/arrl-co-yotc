@@ -24,6 +24,7 @@
 
 import { initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
+import { getFirestore, FieldValue } from "firebase-admin/firestore";
 
 // Parse command line arguments
 const args = process.argv.slice(2);
@@ -72,9 +73,10 @@ async function setAdminClaim() {
     console.log(`Setting admin custom claim for user: ${userId}`);
 
     // Verify user exists first
+    let authUser;
     try {
-      const userRecord = await auth.getUser(userId);
-      console.log(`Found user: ${userRecord.email || userRecord.uid}`);
+      authUser = await auth.getUser(userId);
+      console.log(`Found user: ${authUser.email || authUser.uid}`);
     } catch (error) {
       if (error.code === "auth/user-not-found") {
         console.error(`Error: User with ID '${userId}' not found`);
@@ -93,9 +95,35 @@ async function setAdminClaim() {
     console.log("for the new custom claims to take effect.");
     console.log("");
 
+    // Update (or create) the Firestore user document with isAdmin: true.
+    // This allows querying Firestore for admins without needing Auth lookups.
+    const db = getFirestore();
+    const userDocRef = db.collection("users").doc(userId);
+    const userDocSnap = await userDocRef.get();
+
+    if (userDocSnap.exists) {
+      await userDocRef.update({
+        isAdmin: true,
+        updatedAt: FieldValue.serverTimestamp(),
+      });
+      console.log("✓ Updated existing Firestore user document with isAdmin: true");
+    } else {
+      await userDocRef.set({
+        id: userId,
+        isAdmin: true,
+        email: authUser.email || "",
+        name: authUser.displayName || "",
+        callsign: "",
+        createdAt: FieldValue.serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
+      });
+      console.log("✓ Created Firestore user document with isAdmin: true");
+    }
+    console.log("");
+
     // Verify the claim was set
-    const userRecord = await auth.getUser(userId);
-    if (userRecord.customClaims && userRecord.customClaims.admin === true) {
+    const verifiedRecord = await auth.getUser(userId);
+    if (verifiedRecord.customClaims && verifiedRecord.customClaims.admin === true) {
       console.log("✓ Verified: Admin claim is now set on the user");
     } else {
       console.warn("⚠ Warning: Could not verify admin claim was set");

@@ -78,14 +78,24 @@ service cloud.firestore {
       // this level of access is acceptable.
       allow read: if isAuthenticated();
       
-      // Admins can read and write all user documents
-      allow read, write: if isAdmin();
+      // Admins can read all user documents
+      allow read: if isAdmin();
       
       // Allow user creation when they first sign in
+      // isAdmin must be false; the Admin SDK manages this field server-side
       allow create: if isAuthenticated() && 
                        request.auth.uid == userId &&
                        request.resource.data.id == userId &&
                        request.resource.data.isAdmin == false;
+
+      // Users can update their own document, and admins can update any user document,
+      // but neither may change the isAdmin field.
+      // (isAdmin is managed exclusively by the Admin SDK via server-side scripts)
+      allow update: if (isAuthenticated() && request.auth.uid == userId || isAdmin()) &&
+                       request.resource.data.isAdmin == resource.data.isAdmin;
+
+      // Admins can delete user documents
+      allow delete: if isAdmin();
     }
     
     // Clubs collection
