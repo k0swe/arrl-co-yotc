@@ -34,4 +34,8 @@ describe('DocumentService', () => {
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
+
+  it('should have getDocumentsSince method', () => {
+    expect(typeof service.getDocumentsSince).toBe('function');
+  });
 });

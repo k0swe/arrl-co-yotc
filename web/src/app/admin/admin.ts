@@ -4,9 +4,12 @@ import { doc, getDoc, Firestore } from '@angular/fire/firestore';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { FormsModule } from '@angular/forms';
 import { ClubService } from '../services/club.service';
 import { StorageService } from '../services/storage.service';
 import { Club } from '@arrl-co-yotc/shared/build/app/models/club.model';
@@ -15,6 +18,10 @@ import { ClubCard } from '../clubs/club-card/club-card';
 import { catchError, of, from, forkJoin } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { EditClubDialog, ClubFormData } from '../clubs/edit-club-dialog/edit-club-dialog';
+import {
+  RecentDocumentsDialog,
+  RecentDocumentsDialogData,
+} from './recent-documents-dialog/recent-documents-dialog';
 
 @Component({
   selector: 'app-admin',
@@ -22,9 +29,12 @@ import { EditClubDialog, ClubFormData } from '../clubs/edit-club-dialog/edit-clu
     MatCardModule,
     MatButtonModule,
     MatIconModule,
+    MatInputModule,
+    MatFormFieldModule,
     MatProgressSpinnerModule,
     MatSnackBarModule,
     MatDialogModule,
+    FormsModule,
     ClubCard,
   ],
   templateUrl: './admin.html',
@@ -44,6 +54,7 @@ export class Admin {
   protected readonly processingClubIds = signal<Set<string>>(new Set());
   protected readonly userNames = signal<Map<string, string>>(new Map());
   protected readonly standingsUploading = signal(false);
+  protected readonly sinceDate = signal<string>(this.defaultSinceDate());
 
   constructor() {
     this.loadPendingClubs();
@@ -226,6 +237,24 @@ export class Admin {
 
   private showSnackBar(message: string): void {
     this.snackBar.open(message, 'Close', { duration: 3000 });
+  }
+
+  private defaultSinceDate(): string {
+    const d = new Date();
+    d.setDate(d.getDate() - 7);
+    return d.toISOString().substring(0, 10);
+  }
+
+  protected openRecentDocuments(): void {
+    const sinceValue = this.sinceDate();
+    if (!sinceValue) {
+      this.showSnackBar('Please select a date to search from.');
+      return;
+    }
+    this.dialog.open<RecentDocumentsDialog, RecentDocumentsDialogData>(RecentDocumentsDialog, {
+      width: '700px',
+      data: { since: new Date(sinceValue) },
+    });
   }
 
   protected onStandingsFileSelect(event: Event): void {

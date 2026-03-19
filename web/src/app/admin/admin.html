@@ -91,6 +91,40 @@
     }
   </section>
 
+  <section class="recent-uploads-section">
+    <h2>Recent Document Uploads</h2>
+    <mat-card>
+      <mat-card-content>
+        <p>
+          Search for event verification documents uploaded on or after a specific date. Use this to
+          review new standings evidence without browsing every event individually.
+        </p>
+        <mat-form-field appearance="outline" class="date-field">
+          <mat-label>Uploaded on or after</mat-label>
+          <input
+            matInput
+            type="date"
+            [ngModel]="sinceDate()"
+            (ngModelChange)="sinceDate.set($event)"
+            aria-label="Search documents uploaded on or after this date"
+          />
+        </mat-form-field>
+      </mat-card-content>
+      <mat-card-actions>
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="openRecentDocuments()"
+          [disabled]="!sinceDate()"
+          aria-label="Search for documents uploaded since the selected date"
+        >
+          <mat-icon>search</mat-icon>
+          <span>Search Uploads</span>
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </section>
+
   <section class="standings-upload-section">
     <h2>Upload Standings</h2>
     <mat-card>
