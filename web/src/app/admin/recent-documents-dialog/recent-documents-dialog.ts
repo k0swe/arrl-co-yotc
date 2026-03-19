@@ -15,7 +15,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatListModule } from '@angular/material/list';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTableModule } from '@angular/material/table';
-import { catchError, forkJoin, of } from 'rxjs';
+import { catchError, forkJoin, Observable, of } from 'rxjs';
 import { EventLog } from '@arrl-co-yotc/shared/build/app/models/event.model';
 import { Club } from '@arrl-co-yotc/shared/build/app/models/club.model';
 import { Event } from '@arrl-co-yotc/shared/build/app/models/event.model';
@@ -61,6 +61,7 @@ export class RecentDocumentsDialog implements OnInit {
   protected readonly loading = signal(true);
   protected readonly documents = signal<EventLog[]>([]);
   protected readonly openingEventId = signal<string | null>(null);
+  protected readonly eventNames = signal<Map<string, string>>(new Map());
 
   protected readonly displayedColumns = ['filename', 'uploadedAt', 'actions'];
 
@@ -84,7 +85,36 @@ export class RecentDocumentsDialog implements OnInit {
       .subscribe((docs) => {
         this.documents.set(docs);
         this.loading.set(false);
+        this.loadEventNames(docs);
       });
+  }
+
+  private loadEventNames(docs: EventLog[]): void {
+    const uniqueKeys = new Set(docs.map((d) => this.eventKey(d)));
+    if (uniqueKeys.size === 0) return;
+
+    const fetches: Record<string, Observable<Event | null>> = {};
+    for (const key of uniqueKeys) {
+      const [clubId, eventId] = key.split(':');
+      fetches[key] = this.eventService.getEvent(clubId, eventId).pipe(catchError(() => of(null)));
+    }
+    forkJoin(fetches)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((results) => {
+        const names = new Map<string, string>();
+        for (const [key, event] of Object.entries(results)) {
+          if (event) names.set(key, event.name);
+        }
+        this.eventNames.set(names);
+      });
+  }
+
+  private eventKey(doc: EventLog): string {
+    return `${doc.clubId}:${doc.eventId}`;
+  }
+
+  protected getEventName(doc: EventLog): string {
+    return this.eventNames().get(this.eventKey(doc)) ?? 'View Event';
   }
 
   protected openEventDetail(document: EventLog): void {

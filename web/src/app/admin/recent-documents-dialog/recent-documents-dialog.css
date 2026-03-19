@@ -5,7 +5,7 @@
 mat-dialog-content {
   padding: 0 !important;
   margin: 0;
-  min-width: 500px;
+  min-width: 600px;
 }
 
 .dialog-subtitle {
@@ -72,10 +72,19 @@ mat-dialog-content {
   display: inline-flex !important;
   align-items: center !important;
   gap: 0.25rem;
+  max-width: 220px;
 }
 
 .view-event-button mat-spinner {
   margin: 0;
+  flex-shrink: 0;
+}
+
+.event-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 }
 
 @media (max-width: 600px) {

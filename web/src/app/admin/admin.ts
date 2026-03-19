@@ -257,7 +257,7 @@ export class Admin {
     // Append T00:00:00 so the date string is parsed as local midnight rather
     // than UTC midnight (which would be the previous day for negative-offset timezones).
     this.dialog.open<RecentDocumentsDialog, RecentDocumentsDialogData>(RecentDocumentsDialog, {
-      width: '700px',
+      width: '860px',
       data: { since: new Date(`${sinceValue}T00:00:00`) },
     });
   }
