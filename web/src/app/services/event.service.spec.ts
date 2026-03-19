@@ -24,4 +24,8 @@ describe('EventService', () => {
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
+
+  it('should have getEvent method', () => {
+    expect(typeof service.getEvent).toBe('function');
+  });
 });

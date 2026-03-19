@@ -112,6 +112,14 @@ h3 {
   margin-bottom: 2rem;
 }
 
+.recent-uploads-section {
+  margin-bottom: 2rem;
+}
+
+.date-field {
+  margin-top: 0.75rem;
+}
+
 .upload-note {
   display: flex;
   align-items: flex-start;

@@ -7,6 +7,7 @@ import {
   deleteDoc,
   doc,
   Firestore,
+  getDoc,
   orderBy,
   query,
   serverTimestamp,
@@ -24,6 +25,21 @@ import { Event } from '@arrl-co-yotc/shared/build/app/models/event.model';
 })
 export class EventService {
   private firestore = inject(Firestore);
+
+  /**
+   * Get a specific event by club ID and event ID
+   */
+  getEvent(clubId: string, eventId: string): Observable<Event | null> {
+    const eventDoc = doc(this.firestore, `clubs/${clubId}/events`, eventId);
+    return from(
+      getDoc(eventDoc).then((docSnapshot) => {
+        if (docSnapshot.exists()) {
+          return { id: docSnapshot.id, ...docSnapshot.data() } as Event;
+        }
+        return null;
+      }),
+    );
+  }
 
   /**
    * Get all events across all clubs ordered by start time

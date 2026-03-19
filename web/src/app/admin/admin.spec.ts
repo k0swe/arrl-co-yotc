@@ -55,4 +55,18 @@ describe('Admin', () => {
     const headingTexts = Array.from(headings).map((h) => h.textContent ?? '');
     expect(headingTexts.some((t) => t.includes('Upload Standings'))).toBe(true);
   });
+
+  it('should render the recent uploads section heading', () => {
+    const compiled = fixture.nativeElement as HTMLElement;
+    const headings = compiled.querySelectorAll('h2');
+    const headingTexts = Array.from(headings).map((h) => h.textContent ?? '');
+    expect(headingTexts.some((t) => t.includes('Recent Document Uploads'))).toBe(true);
+  });
+
+  it('should render the search uploads button', () => {
+    const compiled = fixture.nativeElement as HTMLElement;
+    const buttons = compiled.querySelectorAll('button');
+    const buttonTexts = Array.from(buttons).map((b) => b.textContent ?? '');
+    expect(buttonTexts.some((t) => t.includes('Search Uploads'))).toBe(true);
+  });
 });

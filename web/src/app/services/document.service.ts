@@ -3,10 +3,15 @@ import {
   addDoc,
   collection,
   collectionData,
+  collectionGroup,
   deleteDoc,
   doc,
   Firestore,
+  orderBy,
+  query,
   serverTimestamp,
+  Timestamp,
+  where,
 } from '@angular/fire/firestore';
 import { from, Observable } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
@@ -24,6 +29,19 @@ import { StorageService } from './storage.service';
 export class DocumentService {
   private firestore = inject(Firestore);
   private storageService = inject(StorageService);
+
+  /**
+   * Get all documents uploaded on or after the given date, across all clubs and events.
+   * Uses a Firestore collection group query and is restricted to admins by security rules.
+   */
+  getDocumentsSince(since: Date): Observable<EventLog[]> {
+    const documentsGroupQuery = query(
+      collectionGroup(this.firestore, 'documents'),
+      where('uploadedAt', '>=', Timestamp.fromDate(since)),
+      orderBy('uploadedAt', 'desc'),
+    );
+    return collectionData(documentsGroupQuery, { idField: 'id' }) as Observable<EventLog[]>;
+  }
 
   /**
    * Get all documents for a specific event

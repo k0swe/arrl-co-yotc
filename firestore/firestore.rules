@@ -268,6 +268,12 @@ service cloud.firestore {
       }
     }
     
+    // Collection group query support for documents
+    // Allows admins to query all documents across all clubs/events
+    match /{path=**}/documents/{documentId} {
+      allow read: if isAdmin();
+    }
+
     // Mail collection — written server-side by the notifyAdminsOnClubSuggestion Cloud Run
     // function and consumed by the firebase/firestore-send-email extension.
     // Clients (including authenticated users) are not permitted to read or write here.
