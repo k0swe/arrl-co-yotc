@@ -16,8 +16,12 @@
       } @else if (rsvpedEvents().length === 0) {
         <div class="no-events">
           <mat-icon>event_busy</mat-icon>
-          <p>You haven't RSVP'd to any events yet.</p>
-          <p class="hint">Visit the Events page to RSVP to events you plan to attend.</p>
+          @if (isAdmin()) {
+            <p>There are no events available yet.</p>
+          } @else {
+            <p>You haven't RSVP'd to any events yet.</p>
+            <p class="hint">Visit the Events page to RSVP to events you plan to attend.</p>
+          }
         </div>
       } @else {
         <mat-form-field appearance="outline" class="event-select">
