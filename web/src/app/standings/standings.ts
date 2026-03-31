@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, DestroyRef, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, DestroyRef, signal, computed } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatTableModule } from '@angular/material/table';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -20,18 +20,11 @@ export class Standings {
 
   protected readonly loading = signal(true);
   protected readonly standings = signal<StandingEntry[]>([]);
-  protected readonly displayedColumns = [
-    'callsign',
-    'totalQsos',
-    'was',
-    'coloClubs',
-    'veSessions',
-    'newMembers',
-    'publicEvents',
-    'arrlFieldDay',
-    'winterFieldDay',
-    'interClubEvent',
-  ];
+  protected readonly columns = computed(() => {
+    const entries = this.standings();
+    if (entries.length === 0) return [];
+    return Object.keys(entries[0]).filter((k) => k !== 'updatedAt');
+  });
 
   constructor() {
     this.standingsService
