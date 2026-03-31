@@ -62,8 +62,9 @@ export class RecentDocumentsDialog implements OnInit {
   protected readonly documents = signal<EventLog[]>([]);
   protected readonly openingEventId = signal<string | null>(null);
   protected readonly eventNames = signal<Map<string, string>>(new Map());
+  protected readonly clubNames = signal<Map<string, string>>(new Map());
 
-  protected readonly displayedColumns = ['filename', 'uploadedAt', 'actions'];
+  protected readonly displayedColumns = ['filename', 'uploadedAt', 'club', 'actions'];
 
   readonly toDate = toDate;
 
@@ -86,6 +87,7 @@ export class RecentDocumentsDialog implements OnInit {
         this.documents.set(docs);
         this.loading.set(false);
         this.loadEventNames(docs);
+        this.loadClubNames(docs);
       });
   }
 
@@ -111,6 +113,29 @@ export class RecentDocumentsDialog implements OnInit {
 
   private eventKey(doc: EventLog): string {
     return `${doc.clubId}:${doc.eventId}`;
+  }
+
+  private loadClubNames(docs: EventLog[]): void {
+    const uniqueClubIds = new Set(docs.map((d) => d.clubId));
+    if (uniqueClubIds.size === 0) return;
+
+    const fetches: Record<string, Observable<Club | null>> = {};
+    for (const clubId of uniqueClubIds) {
+      fetches[clubId] = this.clubService.getClubById(clubId).pipe(catchError(() => of(null)));
+    }
+    forkJoin(fetches)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((results) => {
+        const names = new Map<string, string>();
+        for (const [clubId, club] of Object.entries(results)) {
+          if (club) names.set(clubId, club.name);
+        }
+        this.clubNames.set(names);
+      });
+  }
+
+  protected getClubName(doc: EventLog): string {
+    return this.clubNames().get(doc.clubId) ?? doc.clubId;
   }
 
   protected getEventName(doc: EventLog): string {
