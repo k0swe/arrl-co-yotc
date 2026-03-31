@@ -12,7 +12,7 @@ rules_version = '2';
 // - Authenticated users with RSVP (or admins) can upload event documents
 // - Club members and admins can read event documents
 // - File size limit: 5MB for logos, 50MB for event documents
-// - Allowed file types: JPEG, PNG, WEBP, GIF for logos; various types for documents
+// - Allowed file types: JPEG, PNG, WEBP, GIF for logos; various types for documents (including ADIF)
 
 service firebase.storage {
   match /b/{bucket}/o {
@@ -62,6 +62,13 @@ service firebase.storage {
              request.resource.contentType == 'application/msword';
     }
     
+    // Validate ADIF (Amateur Data Interchange Format) file by extension.
+    // Browsers send .adi/.adif files as application/octet-stream because there
+    // is no registered MIME type for ADIF, so we allow these by filename instead.
+    function isValidAdifFile() {
+      return request.resource.name.matches('.*\\.(adi|adif)$');
+    }
+    
     // Validate logo file size (max 5MB)
     function isValidLogoSize() {
       return request.resource.size < 5 * 1024 * 1024;
@@ -90,7 +97,7 @@ service firebase.storage {
       
       // Users with RSVP or admins can upload documents for the event
       allow create: if (isAdmin() || hasRsvp(clubId, eventId)) && 
-                       isValidDocumentType() && 
+                       (isValidDocumentType() || isValidAdifFile()) && 
                        isValidDocumentSize();
       
       // Admins can delete event documents
