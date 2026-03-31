@@ -9,7 +9,7 @@ rules_version = '2';
 // Security model:
 // - Anyone can read club logos (public access)
 // - Club leaders and admins can upload/update logos for their clubs
-// - Authenticated users with RSVP can upload event documents
+// - Authenticated users with RSVP (or admins) can upload event documents
 // - Club members and admins can read event documents
 // - File size limit: 5MB for logos, 50MB for event documents
 // - Allowed file types: JPEG, PNG, WEBP, GIF for logos; various types for documents
@@ -88,8 +88,8 @@ service firebase.storage {
       // Club members and admins can read event documents
       allow read: if isActiveMember(clubId) || isAdmin();
       
-      // Users with RSVP can upload documents for the event
-      allow create: if hasRsvp(clubId, eventId) && 
+      // Users with RSVP or admins can upload documents for the event
+      allow create: if (isAdmin() || hasRsvp(clubId, eventId)) && 
                        isValidDocumentType() && 
                        isValidDocumentSize();
       

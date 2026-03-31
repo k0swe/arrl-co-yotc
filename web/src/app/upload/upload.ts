@@ -62,6 +62,7 @@ export class Upload implements OnInit {
   private snackBar = inject(MatSnackBar);
   private destroyRef = inject(DestroyRef);
 
+  protected readonly isAdmin = this.authService.isAdmin;
   protected readonly loading = signal(true);
   protected readonly uploading = signal(false);
   protected readonly rsvpedEvents = signal<EventWithClub[]>([]);
@@ -92,8 +93,12 @@ export class Upload implements OnInit {
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe((events) => {
-        // Filter events where user has RSVP'd
-        this.filterRsvpedEvents(events, currentUser.uid);
+        // Admins can upload for any event; others are limited to events they RSVP'd to
+        if (this.authService.isAdmin()) {
+          this.loadClubsForEvents(events);
+        } else {
+          this.filterRsvpedEvents(events, currentUser.uid);
+        }
       });
   }
 

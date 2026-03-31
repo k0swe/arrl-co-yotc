@@ -17,6 +17,7 @@ describe('Upload', () => {
   beforeEach(async () => {
     const authServiceMock = {
       currentUser: vi.fn(),
+      isAdmin: vi.fn().mockReturnValue(false),
     };
     const rsvpServiceMock = {
       getUserRsvp: vi.fn(),
