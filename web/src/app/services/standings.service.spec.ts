@@ -35,4 +35,15 @@ describe('StandingsService', () => {
     expect(result).toBeDefined();
     expect(result.subscribe).toBeDefined();
   });
+
+  it('should have getStandingsData method', () => {
+    expect(service.getStandingsData).toBeDefined();
+    expect(typeof service.getStandingsData).toBe('function');
+  });
+
+  it('should return an observable from getStandingsData', () => {
+    const result = service.getStandingsData();
+    expect(result).toBeDefined();
+    expect(result.subscribe).toBeDefined();
+  });
 });

@@ -77,41 +77,42 @@ export const processStandingsUpload = onObjectFinalized(
     // Fetch existing document refs so we can delete any that are no longer in
     // the new upload (avoids stale rows persisting after a re-upload).
     const existingRefs = await standingsCollection.listDocuments();
-    const existingIds = new Set(existingRefs.map((r) => r.id));
 
-    const batch = db.batch();
+    // Build the array-of-arrays representation: first row is headers, each
+    // subsequent row mirrors the column order from the Excel sheet exactly.
+    // This preserves column ordering, which Firestore named fields do not
+    // guarantee across reads.
+    const dataRows: (string | number | boolean | null)[][] = [];
     let rowCount = 0;
-    const newIds = new Set<string>();
 
     worksheet.eachRow((row, rowNumber) => {
       // Skip the header row.
       if (rowNumber === 1) return;
 
-      // Build a record from header names to primitive cell values.
-      const entry: Record<string, unknown> = {};
-      row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
-        const header = headers[colNumber - 1];
-        if (header) {
-          entry[header] = toPrimitive(cell.value);
-        }
-      });
+      // Map each column by index so that empty cells become null and column
+      // position is always preserved.
+      const rowValues = headers.map((_, i) => toPrimitive(row.getCell(i + 1).value));
 
-      // Use the first column's value as the document ID; skip empty rows.
-      const docId = String(entry[headers[0]] ?? '').trim();
-      if (!docId) return;
+      // Skip entirely empty rows (first cell is blank).
+      if (!String(rowValues[0] ?? '').trim()) return;
 
-      newIds.add(docId);
-      const docRef = standingsCollection.doc(docId);
-      // Full overwrite (no merge) so that fields from a previous upload with
-      // different column names do not persist alongside the new columns.
-      batch.set(docRef, { ...entry, updatedAt });
+      dataRows.push(rowValues);
       rowCount++;
     });
 
-    // Delete documents that are no longer present in the new upload.
-    for (const oldId of existingIds) {
-      if (!newIds.has(oldId)) {
-        batch.delete(standingsCollection.doc(oldId));
+    const batch = db.batch();
+
+    // Write a single document that encodes the full table as an array of
+    // arrays. Document ID "latest" is a well-known sentinel that the client
+    // reads first before falling back to the legacy per-row format.
+    const latestRef = standingsCollection.doc('latest');
+    batch.set(latestRef, { rows: [headers, ...dataRows], updatedAt });
+
+    // Delete all previously stored documents (old per-row docs and any prior
+    // "latest" document) so the collection stays clean.
+    for (const ref of existingRefs) {
+      if (ref.id !== 'latest') {
+        batch.delete(ref);
       }
     }
 
