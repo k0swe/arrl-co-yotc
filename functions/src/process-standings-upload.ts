@@ -28,9 +28,10 @@ function toPrimitive(value: ExcelJS.CellValue): string | number | boolean | null
  * `standings-uploads/` path in Firebase Storage.
  *
  * It reads the first worksheet of the Excel workbook, treats row 1 as column
- * headers, and upserts each subsequent row into the `standings` Firestore
- * collection keyed by the value in the first column. All cell values are
- * stored as-is without any type coercion.
+ * headers, and replaces the entire `standings` Firestore collection with the
+ * rows from the new file. Documents whose IDs are no longer in the new file
+ * are deleted, and existing documents are fully overwritten (not merged) so
+ * that stale fields from previous uploads are removed.
  */
 export const processStandingsUpload = onObjectFinalized(
   { bucket: 'arrl-co-yotc.firebasestorage.app' },
@@ -73,8 +74,14 @@ export const processStandingsUpload = onObjectFinalized(
     const standingsCollection = db.collection('standings');
     const updatedAt = new Date().toISOString();
 
+    // Fetch existing document refs so we can delete any that are no longer in
+    // the new upload (avoids stale rows persisting after a re-upload).
+    const existingRefs = await standingsCollection.listDocuments();
+    const existingIds = new Set(existingRefs.map((r) => r.id));
+
     const batch = db.batch();
     let rowCount = 0;
+    const newIds = new Set<string>();
 
     worksheet.eachRow((row, rowNumber) => {
       // Skip the header row.
@@ -93,10 +100,20 @@ export const processStandingsUpload = onObjectFinalized(
       const docId = String(entry[headers[0]] ?? '').trim();
       if (!docId) return;
 
+      newIds.add(docId);
       const docRef = standingsCollection.doc(docId);
-      batch.set(docRef, { ...entry, updatedAt }, { merge: true });
+      // Full overwrite (no merge) so that fields from a previous upload with
+      // different column names do not persist alongside the new columns.
+      batch.set(docRef, { ...entry, updatedAt });
       rowCount++;
     });
+
+    // Delete documents that are no longer present in the new upload.
+    for (const oldId of existingIds) {
+      if (!newIds.has(oldId)) {
+        batch.delete(standingsCollection.doc(oldId));
+      }
+    }
 
     await batch.commit();
     console.log(`Standings ETL complete: ${rowCount} row(s) written to Firestore.`);
