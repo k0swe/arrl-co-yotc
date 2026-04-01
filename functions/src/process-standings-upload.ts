@@ -29,9 +29,12 @@ function toPrimitive(value: ExcelJS.CellValue): string | number | boolean | null
  *
  * It reads the first worksheet of the Excel workbook, treats row 1 as column
  * headers, and replaces the entire `standings` Firestore collection with the
- * rows from the new file. Documents whose IDs are no longer in the new file
- * are deleted, and existing documents are fully overwritten (not merged) so
- * that stale fields from previous uploads are removed.
+ * rows from the new file. Each data row is stored as an individual document
+ * keyed by the first column value (station callsign). A companion
+ * `standings/columns` document records the authoritative column order.
+ * Documents that are no longer in the new file are deleted, and existing
+ * documents are fully overwritten (not merged) so that stale fields from
+ * previous uploads are removed.
  */
 export const processStandingsUpload = onObjectFinalized(
   { bucket: 'arrl-co-yotc.firebasestorage.app' },
@@ -78,40 +81,49 @@ export const processStandingsUpload = onObjectFinalized(
     // the new upload (avoids stale rows persisting after a re-upload).
     const existingRefs = await standingsCollection.listDocuments();
 
-    // Build the array-of-arrays representation: first row is headers, each
-    // subsequent row mirrors the column order from the Excel sheet exactly.
-    // This preserves column ordering, which Firestore named fields do not
-    // guarantee across reads.
-    const dataRows: (string | number | boolean | null)[][] = [];
+    // Build per-row documents keyed by the first column (station callsign).
+    const rowDocs: Record<string, Record<string, string | number | boolean | null>> = {};
     let rowCount = 0;
 
     worksheet.eachRow((row, rowNumber) => {
       // Skip the header row.
       if (rowNumber === 1) return;
 
-      // Map each column by index so that empty cells become null and column
-      // position is always preserved.
-      const rowValues = headers.map((_, i) => toPrimitive(row.getCell(i + 1).value));
+      // Map each column by name so field values align with their header.
+      const entry: Record<string, string | number | boolean | null> = {};
+      headers.forEach((header, i) => {
+        entry[header] = toPrimitive(row.getCell(i + 1).value);
+      });
 
       // Skip entirely empty rows (first cell is blank).
-      if (!String(rowValues[0] ?? '').trim()) return;
+      const firstKey = headers[0];
+      if (!String(entry[firstKey] ?? '').trim()) return;
 
-      dataRows.push(rowValues);
+      // Use the first column value as the document ID (station callsign).
+      const docId = String(entry[firstKey]);
+      rowDocs[docId] = entry;
       rowCount++;
     });
 
     const batch = db.batch();
 
-    // Write a single document that encodes the full table as an array of
-    // arrays. Document ID "latest" is a well-known sentinel that the client
-    // reads first before falling back to the legacy per-row format.
-    const latestRef = standingsCollection.doc('latest');
-    batch.set(latestRef, { rows: [headers, ...dataRows], updatedAt });
+    // Write a companion "columns" document that records the authoritative
+    // column order from the Excel sheet. Firestore does not guarantee field
+    // key ordering on per-row documents, so this is the source of truth for
+    // column sequence in the UI.
+    const columnsRef = standingsCollection.doc('columns');
+    batch.set(columnsRef, { columns: headers, updatedAt });
 
-    // Delete all previously stored documents (old per-row docs and any prior
-    // "latest" document) so the collection stays clean.
+    // Write one document per row.
+    for (const [docId, fields] of Object.entries(rowDocs)) {
+      batch.set(standingsCollection.doc(docId), fields);
+    }
+
+    // Delete all previously stored documents that are no longer in the new
+    // upload (stale per-row docs, the legacy "latest" doc, etc.).
+    const incomingIds = new Set(['columns', ...Object.keys(rowDocs)]);
     for (const ref of existingRefs) {
-      if (ref.id !== 'latest') {
+      if (!incomingIds.has(ref.id)) {
         batch.delete(ref);
       }
     }
