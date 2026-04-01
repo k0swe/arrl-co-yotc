@@ -2,56 +2,35 @@ import { onObjectFinalized } from 'firebase-functions/v2/storage';
 import { getFirestore } from 'firebase-admin/firestore';
 import { getStorage } from 'firebase-admin/storage';
 import ExcelJS from 'exceljs';
-import { StandingEntry } from '@arrl-co-yotc/shared/build/app/models/standing.model';
 
 /**
- * Parses a single Excel worksheet row (1-based column index) into a StandingEntry.
- * Returns null if the row is empty or missing a callsign.
- *
- * Expected column order (from the Excel template):
- *   1: STATION_CALLSIGN  2: Total QSO's  3: WAS  4: Colo_Clubs
- *   5: VE Session        6: New Members  7: Public Event
- *   8: ARRL Field Day    9: Winter Field Day  10: Inter-Club Event
+ * Normalises an ExcelJS cell value to a Firestore-safe primitive.
+ * Dates become ISO strings; formula cells resolve to their result;
+ * rich-text and hyperlink objects are collapsed to plain strings.
+ * Everything else (string, number, boolean, null) is returned as-is.
  */
-export function parseStandingRow(row: ExcelJS.Row): Omit<StandingEntry, 'updatedAt'> | null {
-  const callsign = String(row.getCell(1).value ?? '').trim().toUpperCase();
-  if (!callsign) return null;
-
-  const toInt = (cell: ExcelJS.Cell): number => {
-    const v = cell.value;
-    if (typeof v === 'number') return Math.round(v);
-    const n = parseInt(String(v ?? '0'), 10);
-    return isNaN(n) ? 0 : n;
-  };
-
-  const toBool = (cell: ExcelJS.Cell): boolean => {
-    const v = cell.value;
-    if (typeof v === 'boolean') return v;
-    const s = String(v ?? '').trim().toLowerCase();
-    return s === 'true' || s === '1' || s === 'yes';
-  };
-
-  return {
-    callsign,
-    totalQsos: toInt(row.getCell(2)),
-    was: toInt(row.getCell(3)),
-    coloClubs: String(row.getCell(4).value ?? '').trim(),
-    veSessions: toInt(row.getCell(5)),
-    newMembers: toInt(row.getCell(6)),
-    publicEvents: toInt(row.getCell(7)),
-    arrlFieldDay: toBool(row.getCell(8)),
-    winterFieldDay: toBool(row.getCell(9)),
-    interClubEvent: toBool(row.getCell(10)),
-  };
+function toPrimitive(value: ExcelJS.CellValue): string | number | boolean | null {
+  if (value === null || value === undefined) return null;
+  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+    return value;
+  }
+  if (value instanceof Date) return value.toISOString();
+  // Formula cell – use the cached result if available
+  if (typeof value === 'object' && 'result' in value) {
+    return toPrimitive((value as ExcelJS.CellFormulaValue).result ?? null);
+  }
+  // Rich text, hyperlinks, shared-string objects – convert to plain text
+  return String(value);
 }
 
 /**
  * Cloud Run function triggered when a file is uploaded to the
  * `standings-uploads/` path in Firebase Storage.
  *
- * It reads the Excel workbook, parses standings rows from the first sheet
- * (skipping the header row), and upserts each entry into the `standings`
- * Firestore collection, keyed by the station callsign.
+ * It reads the first worksheet of the Excel workbook, treats row 1 as column
+ * headers, and upserts each subsequent row into the `standings` Firestore
+ * collection keyed by the value in the first column. All cell values are
+ * stored as-is without any type coercion.
  */
 export const processStandingsUpload = onObjectFinalized(
   { bucket: 'arrl-co-yotc.firebasestorage.app' },
@@ -84,6 +63,12 @@ export const processStandingsUpload = onObjectFinalized(
       return;
     }
 
+    // Read the header row to determine column names.
+    const headers: string[] = [];
+    worksheet.getRow(1).eachCell((cell) => {
+      headers.push(String(cell.value ?? '').trim());
+    });
+
     const db = getFirestore();
     const standingsCollection = db.collection('standings');
     const updatedAt = new Date().toISOString();
@@ -95,10 +80,20 @@ export const processStandingsUpload = onObjectFinalized(
       // Skip the header row.
       if (rowNumber === 1) return;
 
-      const entry = parseStandingRow(row);
-      if (!entry) return;
+      // Build a record from header names to primitive cell values.
+      const entry: Record<string, unknown> = {};
+      row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+        const header = headers[colNumber - 1];
+        if (header) {
+          entry[header] = toPrimitive(cell.value);
+        }
+      });
 
-      const docRef = standingsCollection.doc(entry.callsign);
+      // Use the first column's value as the document ID; skip empty rows.
+      const docId = String(entry[headers[0]] ?? '').trim();
+      if (!docId) return;
+
+      const docRef = standingsCollection.doc(docId);
       batch.set(docRef, { ...entry, updatedAt }, { merge: true });
       rowCount++;
     });

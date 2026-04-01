@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { collection, collectionData, orderBy, query, Firestore } from '@angular/fire/firestore';
+import { collection, collectionData, Firestore } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import { StandingEntry } from '@arrl-co-yotc/shared/build/app/models/standing.model';
 
@@ -14,10 +14,9 @@ export class StandingsService {
   private standingsCollection = collection(this.firestore, 'standings');
 
   /**
-   * Returns all standings entries ordered by total QSOs descending.
+   * Returns all standings entries in their stored order.
    */
   getStandings(): Observable<StandingEntry[]> {
-    const q = query(this.standingsCollection, orderBy('totalQsos', 'desc'));
-    return collectionData(q, { idField: 'callsign' }) as Observable<StandingEntry[]>;
+    return collectionData(this.standingsCollection) as Observable<StandingEntry[]>;
   }
 }
