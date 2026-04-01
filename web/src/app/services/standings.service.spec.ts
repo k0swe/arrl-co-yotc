@@ -36,13 +36,13 @@ describe('StandingsService', () => {
     expect(result.subscribe).toBeDefined();
   });
 
-  it('should have getStandingsData method', () => {
-    expect(service.getStandingsData).toBeDefined();
-    expect(typeof service.getStandingsData).toBe('function');
+  it('should have getStandingsColumns method', () => {
+    expect(service.getStandingsColumns).toBeDefined();
+    expect(typeof service.getStandingsColumns).toBe('function');
   });
 
-  it('should return an observable from getStandingsData', () => {
-    const result = service.getStandingsData();
+  it('should return an observable from getStandingsColumns', () => {
+    const result = service.getStandingsColumns();
     expect(result).toBeDefined();
     expect(result.subscribe).toBeDefined();
   });
