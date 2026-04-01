@@ -283,30 +283,35 @@ read or write this collection.
 
 ### `standings`
 
-Stores per-club standings data, populated by the `processStandingsUpload` Cloud Run function
-when an admin uploads an Excel report to the `standings-uploads/` Firebase Storage path.
+Stores standings data uploaded by an admin via the `processStandingsUpload` Cloud Run function.
 
-**Document ID**: Club station callsign (e.g., `W0DEN`), derived from the Excel column
-`STATION_CALLSIGN`.
+#### `standings/latest` (well-known document)
+
+The entire standings table is stored in a **single document** so that column ordering is
+preserved exactly as it appears in the uploaded Excel sheet. This is the preferred format for
+new uploads.
+
+**Document ID**: `latest` (fixed sentinel)
 
 **Fields**:
 
-- `callsign` (string): Club station callsign (matches document ID)
-- `totalQsos` (number): Total number of QSOs logged
-- `was` (number): Worked All States count
-- `coloClubs` (string): Colorado clubs affiliation string
-- `veSessions` (number): Number of VE (volunteer examiner) sessions
-- `newMembers` (number): Number of new members brought in
-- `publicEvents` (number): Number of public events participated in
-- `arrlFieldDay` (boolean): Whether the club participated in ARRL Field Day
-- `winterFieldDay` (boolean): Whether the club participated in Winter Field Day
-- `interClubEvent` (boolean): Whether the club participated in an inter-club event
-- `updatedAt` (string): ISO 8601 timestamp of when this entry was last written
+- `rows` (array of arrays): The full standings table. `rows[0]` is the header row (an array of
+  column-name strings); each subsequent element is a data row whose values align positionally
+  with the headers. Cell values are primitives — `string`, `number`, `boolean`, or `null`.
+- `updatedAt` (string): ISO 8601 timestamp of the most recent ETL run.
 
 **Written by**: `processStandingsUpload` Cloud Run function triggered by a file upload to
 `standings-uploads/{filename}` in Firebase Storage (see `functions/src/index.ts`).
 
-**Access**:
+#### Legacy per-row documents (deprecated)
+
+Prior to the array-of-arrays migration, each club row was stored as a separate document whose
+ID was the club's station callsign (e.g., `W0DEN`). Column names were used directly as field
+names, so Firestore's non-deterministic key ordering could change how columns appeared in the
+UI. These documents are automatically deleted when a new upload writes `standings/latest`. The
+frontend still supports reading this format as a fallback during the migration window.
+
+**Access** (both formats):
 
 - Public: Read all standings (no authentication required)
 - Authenticated: Read all standings

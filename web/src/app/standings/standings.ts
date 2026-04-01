@@ -5,7 +5,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { StandingsService } from '../services/standings.service';
 import { StandingEntry } from '@arrl-co-yotc/shared/build/app/models/standing.model';
-import { catchError, of } from 'rxjs';
+import { catchError, of, switchMap } from 'rxjs';
 
 @Component({
   selector: 'app-standings',
@@ -27,9 +27,27 @@ export class Standings {
   });
 
   constructor() {
+    // Try the new array-of-arrays format first (standings/latest document).
+    // When that document is absent or empty, fall back to the legacy per-row
+    // collection format so that data uploaded before the ETL migration is
+    // still displayed.
     this.standingsService
-      .getStandings()
+      .getStandingsData()
       .pipe(
+        switchMap((data) => {
+          if (data && data.rows.length > 1) {
+            // New format: convert rows to the same StandingEntry[] shape used
+            // by the template so the rendering logic is unchanged.
+            const headers = data.rows[0];
+            const entries = data.rows.slice(1).map(
+              (row) =>
+                Object.fromEntries(headers.map((h, i) => [h, row[i]])) as StandingEntry,
+            );
+            return of(entries);
+          }
+          // Fall back to the legacy per-row collection format.
+          return this.standingsService.getStandings();
+        }),
         catchError(() => of([])),
         takeUntilDestroyed(this.destroyRef),
       )
