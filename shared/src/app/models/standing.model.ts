@@ -5,12 +5,12 @@
 export type StandingEntry = Record<string, unknown>;
 
 /**
- * New format for standings data stored as a single Firestore document at
- * `standings/latest`. `rows[0]` contains the column headers (always strings);
- * subsequent rows contain data values in the same column order, preserving the
- * original column ordering from the uploaded Excel sheet.
+ * Stored at `standings/columns` to preserve the original column ordering from
+ * the uploaded Excel sheet. Per-row documents use column names as field keys,
+ * but Firestore does not guarantee key ordering on reads, so this companion
+ * document records the authoritative column sequence.
  */
-export type StandingsData = {
-  rows: [string[], ...(string | number | boolean | null)[][]];
+export type StandingsColumns = {
+  columns: string[];
   updatedAt: string;
 };

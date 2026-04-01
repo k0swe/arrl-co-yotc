@@ -285,31 +285,26 @@ read or write this collection.
 
 Stores standings data uploaded by an admin via the `processStandingsUpload` Cloud Run function.
 
-#### `standings/latest` (well-known document)
+#### `standings/columns` (well-known document)
 
-The entire standings table is stored in a **single document** so that column ordering is
-preserved exactly as it appears in the uploaded Excel sheet. This is the preferred format for
-new uploads.
+Records the authoritative column order from the most recent Excel upload. Firestore does not
+guarantee field-key ordering on read, so this companion document is the source of truth for the
+sequence in which columns should be displayed.
 
-**Document ID**: `latest` (fixed sentinel)
+**Document ID**: `columns` (fixed sentinel)
 
 **Fields**:
 
-- `rows` (array of arrays): The full standings table. `rows[0]` is the header row (an array of
-  column-name strings); each subsequent element is a data row whose values align positionally
-  with the headers. Cell values are primitives — `string`, `number`, `boolean`, or `null`.
+- `columns` (array of strings): Column names in their original Excel order.
 - `updatedAt` (string): ISO 8601 timestamp of the most recent ETL run.
+
+#### Per-row documents
+
+Each club row is stored as a separate document whose ID is the value of the first column (station
+callsign, e.g. `W0DEN`). Column names are used directly as field names.
 
 **Written by**: `processStandingsUpload` Cloud Run function triggered by a file upload to
 `standings-uploads/{filename}` in Firebase Storage (see `functions/src/index.ts`).
-
-#### Legacy per-row documents (deprecated)
-
-Prior to the array-of-arrays migration, each club row was stored as a separate document whose
-ID was the club's station callsign (e.g., `W0DEN`). Column names were used directly as field
-names, so Firestore's non-deterministic key ordering could change how columns appeared in the
-UI. These documents are automatically deleted when a new upload writes `standings/latest`. The
-frontend still supports reading this format as a fallback during the migration window.
 
 **Access** (both formats):
 
