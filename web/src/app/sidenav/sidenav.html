@@ -89,7 +89,7 @@
   >
     <mat-icon matListItemIcon>shopping_cart</mat-icon>
     <span matListItemTitle>Event Merchandise</span>
-    <mat-icon matListItemMeta>open_in_new</mat-icon>
+    <span matListItemMeta aria-hidden="true"><mat-icon>open_in_new</mat-icon></span>
   </a>
   @if (authService.isAdmin()) {
     <a mat-list-item routerLink="/admin" aria-label="Navigate to admin" (click)="onNavItemClick()">
@@ -115,6 +115,6 @@
       Bug reports and<br />
       feature requests
     </span>
-    <mat-icon matListItemMeta>open_in_new</mat-icon>
+    <span matListItemMeta aria-hidden="true"><mat-icon>open_in_new</mat-icon></span>
   </a>
 </mat-nav-list>
