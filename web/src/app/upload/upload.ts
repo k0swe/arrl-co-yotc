@@ -91,7 +91,6 @@ export class Upload implements OnInit {
 
   ngOnInit(): void {
     this.loadRsvpedEvents();
-    this.loadMemberClubs();
   }
 
   private loadRsvpedEvents(): void {
@@ -214,10 +213,13 @@ export class Upload implements OnInit {
       });
   }
 
-  protected onModeChange(mode: UploadMode): void {
-    this.uploadMode.set(mode);
+  protected onModeChange(newMode: UploadMode): void {
+    this.uploadMode.set(newMode);
     this.selectedFiles.set([]);
     this.selectedClubFiles.set([]);
+    if (newMode === 'club' && this.memberClubs().length === 0) {
+      this.loadMemberClubs();
+    }
   }
 
   protected onEventSelect(eventWithClub: EventWithClub): void {
