@@ -4,15 +4,24 @@ on: workflow_dispatch
 jobs:
   update-shared:
     uses: ./.github/workflows/update-shared.yml
+    permissions:
+      contents: write
+      pull-requests: write
     secrets:
       GH_PAT: ${{ secrets.GH_PAT }}
 
   update-web:
     uses: ./.github/workflows/update-web.yml
+    permissions:
+      contents: write
+      pull-requests: write
     secrets:
       GH_PAT: ${{ secrets.GH_PAT }}
 
   update-functions:
     uses: ./.github/workflows/update-functions.yml
+    permissions:
+      contents: write
+      pull-requests: write
     secrets:
       GH_PAT: ${{ secrets.GH_PAT }}
