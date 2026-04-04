@@ -1,0 +1,18 @@
+name: Update Dependencies
+on: workflow_dispatch
+
+jobs:
+  update-shared:
+    uses: ./.github/workflows/update-shared.yml
+    secrets:
+      GH_PAT: ${{ secrets.GH_PAT }}
+
+  update-web:
+    uses: ./.github/workflows/update-web.yml
+    secrets:
+      GH_PAT: ${{ secrets.GH_PAT }}
+
+  update-functions:
+    uses: ./.github/workflows/update-functions.yml
+    secrets:
+      GH_PAT: ${{ secrets.GH_PAT }}
