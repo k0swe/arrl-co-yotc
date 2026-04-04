@@ -162,6 +162,32 @@ service cloud.firestore {
         allow write: if isAdmin();
       }
       
+      // Club-scoped documents sub-collection (not tied to a specific event)
+      // Path: clubs/{clubId}/documents/{documentId}
+      match /documents/{documentId} {
+        // Users can read their own documents
+        allow read: if isAuthenticated() && resource.data.uploadedBy == request.auth.uid;
+        
+        // Active club members can read all club documents
+        allow read: if isActiveMember(clubId);
+        
+        // Club leaders can read all club documents
+        allow read: if isClubLeader(clubId);
+        
+        // Admins can read all club documents
+        allow read: if isAdmin();
+        
+        // Active club members can upload documents to their club
+        allow create: if isAuthenticated() &&
+                         request.resource.data.uploadedBy == request.auth.uid &&
+                         request.resource.data.clubId == clubId &&
+                         request.resource.data.uploadedAt == request.time &&
+                         isActiveMember(clubId);
+        
+        // Admins can do anything with club documents
+        allow write: if isAdmin();
+      }
+
       // Events sub-collection
       match /events/{eventId} {
         // Anyone can read events for active clubs

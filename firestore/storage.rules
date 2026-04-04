@@ -90,6 +90,20 @@ service firebase.storage {
                       isValidLogoSize();
     }
     
+    // Club-scoped documents (not tied to a specific event)
+    match /club-documents/{clubId}/{filename} {
+      // Club members and admins can read club documents
+      allow read: if isActiveMember(clubId) || isAdmin();
+
+      // Active club members or admins can upload club documents
+      allow create: if (isAdmin() || isActiveMember(clubId)) &&
+                       (isValidDocumentType() || isValidAdifFile()) &&
+                       isValidDocumentSize();
+
+      // Admins can delete club documents
+      allow delete: if isAdmin();
+    }
+
     // Event documents
     match /event-documents/{clubId}/{eventId}/{filename} {
       // Club members and admins can read event documents

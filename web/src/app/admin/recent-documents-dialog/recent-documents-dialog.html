@@ -39,21 +39,25 @@
       <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef>Event</th>
         <td mat-cell *matCellDef="let doc">
-          <button
-            mat-button
-            color="primary"
-            (click)="openEventDetail(doc)"
-            [disabled]="openingEventId() === doc.id"
-            [attr.aria-label]="'View event details for ' + doc.filename"
-            class="view-event-button"
-          >
-            @if (openingEventId() === doc.id) {
-              <mat-spinner diameter="16"></mat-spinner>
-            } @else {
-              <mat-icon>open_in_new</mat-icon>
-            }
-            <span class="event-name">{{ getEventName(doc) }}</span>
-          </button>
+          @if (isEventDocument(doc)) {
+            <button
+              mat-button
+              color="primary"
+              (click)="openEventDetail(doc)"
+              [disabled]="openingEventId() === doc.id"
+              [attr.aria-label]="'View event details for ' + doc.filename"
+              class="view-event-button"
+            >
+              @if (openingEventId() === doc.id) {
+                <mat-spinner diameter="16"></mat-spinner>
+              } @else {
+                <mat-icon>open_in_new</mat-icon>
+              }
+              <span class="event-name">{{ getEventName(doc) }}</span>
+            </button>
+          } @else {
+            <span class="club-level-label">Club-level</span>
+          }
         </td>
       </ng-container>
 

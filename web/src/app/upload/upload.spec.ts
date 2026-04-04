@@ -5,6 +5,7 @@ import { RsvpService } from '../services/rsvp.service';
 import { EventService } from '../services/event.service';
 import { ClubService } from '../services/club.service';
 import { DocumentService } from '../services/document.service';
+import { MembershipService } from '../services/membership.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { of } from 'rxjs';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
@@ -27,10 +28,16 @@ describe('Upload', () => {
     };
     const clubServiceMock = {
       getClubById: vi.fn(),
+      getActiveClubs: vi.fn().mockReturnValue(of([])),
     };
     const documentServiceMock = {
       getEventDocuments: vi.fn(),
       uploadDocument: vi.fn(),
+      getClubDocuments: vi.fn(),
+      uploadClubDocument: vi.fn(),
+    };
+    const membershipServiceMock = {
+      getUserMemberships: vi.fn().mockReturnValue(of([])),
     };
     const snackBarMock = {
       open: vi.fn(),
@@ -45,6 +52,7 @@ describe('Upload', () => {
         { provide: EventService, useValue: eventServiceMock },
         { provide: ClubService, useValue: clubServiceMock },
         { provide: DocumentService, useValue: documentServiceMock },
+        { provide: MembershipService, useValue: membershipServiceMock },
         { provide: MatSnackBar, useValue: snackBarMock },
       ],
     }).compileComponents();

@@ -71,6 +71,42 @@ export class StorageService {
   }
 
   /**
+   * Upload a club-scoped document to Firebase Storage
+   * @param clubId - The ID of the club
+   * @param file - The file to upload
+   * @returns Promise that resolves with the storage path and download URL
+   */
+  async uploadClubDocument(
+    clubId: string,
+    file: File,
+  ): Promise<{ storagePath: string; downloadUrl: string }> {
+    const timestamp = Date.now();
+    const filename = `${timestamp}-${file.name}`;
+    const storagePath = `club-documents/${clubId}/${filename}`;
+    const storageRef = ref(this.storage, storagePath);
+
+    const uploadResult = await uploadBytes(storageRef, file);
+    const downloadUrl = await getDownloadURL(uploadResult.ref);
+
+    return { storagePath, downloadUrl };
+  }
+
+  /**
+   * Delete a club-scoped document from Firebase Storage
+   * @param storagePath - The storage path of the document to delete
+   * @returns Observable that completes when the file is deleted
+   */
+  deleteClubDocument(storagePath: string): Observable<void> {
+    try {
+      const storageRef = ref(this.storage, storagePath);
+      return from(deleteObject(storageRef));
+    } catch (error) {
+      console.warn('Failed to delete club document from storage:', storagePath, error);
+      return from(Promise.resolve());
+    }
+  }
+
+  /**
    * Upload a standings Excel file to Firebase Storage.
    * The Cloud Function `processStandingsUpload` will pick it up and ETL the data.
    * @param file - The Excel file to upload
