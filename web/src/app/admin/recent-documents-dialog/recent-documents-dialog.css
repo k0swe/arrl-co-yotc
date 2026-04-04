@@ -87,6 +87,12 @@ mat-dialog-content {
   min-width: 0;
 }
 
+.club-level-label {
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 0.875rem;
+  font-style: italic;
+}
+
 @media (max-width: 600px) {
   mat-dialog-content {
     min-width: 0;

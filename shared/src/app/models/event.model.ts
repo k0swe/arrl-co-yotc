@@ -81,3 +81,39 @@ export interface EventLog {
   /** Timestamp when the log was uploaded */
   uploadedAt: Date;
 }
+
+/**
+ * Represents a document uploaded at club scope (not tied to a specific event).
+ */
+export interface ClubDocument {
+  /** Unique identifier for the document */
+  id: string;
+
+  /** ID of the club this document belongs to */
+  clubId: string;
+
+  /** ID of the user who uploaded the document */
+  uploadedBy: string;
+
+  /** Storage path to the file */
+  storagePath: string;
+
+  /** Download URL for the file */
+  downloadUrl: string;
+
+  /** Original filename of the uploaded file */
+  filename: string;
+
+  /** Timestamp when the document was uploaded */
+  uploadedAt: Date;
+}
+
+/** Union type covering both event-scoped and club-scoped documents */
+export type AnyDocument = EventLog | ClubDocument;
+
+/**
+ * Type guard: returns true when the document is an event-scoped EventLog.
+ */
+export function isEventDocument(doc: AnyDocument): doc is EventLog {
+  return 'eventId' in doc && (doc as EventLog).eventId !== undefined;
+}

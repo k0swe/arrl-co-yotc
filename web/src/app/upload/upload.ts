@@ -9,6 +9,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -22,11 +23,14 @@ import { RsvpService } from '../services/rsvp.service';
 import { EventService } from '../services/event.service';
 import { ClubService } from '../services/club.service';
 import { DocumentService } from '../services/document.service';
+import { MembershipService } from '../services/membership.service';
 import {
   Event as YotcEvent,
   EventLog,
+  ClubDocument,
 } from '@arrl-co-yotc/shared/build/app/models/event.model';
 import { Club } from '@arrl-co-yotc/shared/build/app/models/club.model';
+import { MembershipStatus } from '@arrl-co-yotc/shared/build/app/models/user.model';
 import { catchError, forkJoin, of } from 'rxjs';
 import { toDate } from '../utils/timestamp.util';
 
@@ -35,11 +39,14 @@ interface EventWithClub {
   club: Club;
 }
 
+type UploadMode = 'event' | 'club';
+
 @Component({
   selector: 'app-upload',
   imports: [
     MatCardModule,
     MatButtonModule,
+    MatButtonToggleModule,
     MatIconModule,
     MatSelectModule,
     MatFormFieldModule,
@@ -59,20 +66,32 @@ export class Upload implements OnInit {
   private eventService = inject(EventService);
   private clubService = inject(ClubService);
   private documentService = inject(DocumentService);
+  private membershipService = inject(MembershipService);
   private snackBar = inject(MatSnackBar);
   private destroyRef = inject(DestroyRef);
 
   protected readonly isAdmin = this.authService.isAdmin;
   protected readonly loading = signal(true);
   protected readonly uploading = signal(false);
+  protected readonly uploadMode = signal<UploadMode>('event');
+
+  // Event-upload state
   protected readonly rsvpedEvents = signal<EventWithClub[]>([]);
   protected readonly selectedEvent = signal<EventWithClub | null>(null);
   protected readonly selectedFiles = signal<File[]>([]);
   protected readonly existingDocuments = signal<EventLog[]>([]);
   protected readonly loadingDocuments = signal(false);
 
+  // Club-upload state
+  protected readonly memberClubs = signal<Club[]>([]);
+  protected readonly selectedClub = signal<Club | null>(null);
+  protected readonly selectedClubFiles = signal<File[]>([]);
+  protected readonly existingClubDocuments = signal<ClubDocument[]>([]);
+  protected readonly loadingClubDocuments = signal(false);
+
   ngOnInit(): void {
     this.loadRsvpedEvents();
+    this.loadMemberClubs();
   }
 
   private loadRsvpedEvents(): void {
@@ -145,10 +164,72 @@ export class Upload implements OnInit {
       });
   }
 
+  private loadMemberClubs(): void {
+    const currentUser = this.authService.currentUser();
+    if (!currentUser) {
+      return;
+    }
+
+    if (this.authService.isAdmin()) {
+      this.clubService
+        .getActiveClubs()
+        .pipe(
+          catchError((error) => {
+            console.error('Error loading clubs:', error);
+            return of([]);
+          }),
+          takeUntilDestroyed(this.destroyRef),
+        )
+        .subscribe((clubs) => {
+          this.memberClubs.set(clubs);
+        });
+      return;
+    }
+
+    this.membershipService
+      .getUserMemberships(currentUser.uid)
+      .pipe(
+        catchError((error) => {
+          console.error('Error loading memberships:', error);
+          return of([]);
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((memberships) => {
+        const activeMemberships = memberships.filter(
+          (m) => m.status === MembershipStatus.Active,
+        );
+        if (activeMemberships.length === 0) {
+          return;
+        }
+
+        const clubObservables = activeMemberships.map((m) =>
+          this.clubService.getClubById(m.clubId).pipe(catchError(() => of(null))),
+        );
+        forkJoin(clubObservables)
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe((clubs) => {
+            this.memberClubs.set(clubs.filter((c): c is Club => c !== null));
+          });
+      });
+  }
+
+  protected onModeChange(mode: UploadMode): void {
+    this.uploadMode.set(mode);
+    this.selectedFiles.set([]);
+    this.selectedClubFiles.set([]);
+  }
+
   protected onEventSelect(eventWithClub: EventWithClub): void {
     this.selectedEvent.set(eventWithClub);
     this.selectedFiles.set([]);
     this.loadExistingDocuments(eventWithClub.event);
+  }
+
+  protected onClubSelect(club: Club): void {
+    this.selectedClub.set(club);
+    this.selectedClubFiles.set([]);
+    this.loadExistingClubDocuments(club.id);
   }
 
   private loadExistingDocuments(event: YotcEvent): void {
@@ -168,10 +249,34 @@ export class Upload implements OnInit {
       });
   }
 
+  private loadExistingClubDocuments(clubId: string): void {
+    this.loadingClubDocuments.set(true);
+    this.documentService
+      .getClubDocuments(clubId)
+      .pipe(
+        catchError((error) => {
+          console.error('Error loading club documents:', error);
+          return of([]);
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((documents) => {
+        this.existingClubDocuments.set(documents);
+        this.loadingClubDocuments.set(false);
+      });
+  }
+
   protected onFileSelect(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files) {
       this.selectedFiles.set(Array.from(input.files));
+    }
+  }
+
+  protected onClubFileSelect(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files) {
+      this.selectedClubFiles.set(Array.from(input.files));
     }
   }
 
@@ -205,6 +310,38 @@ export class Upload implements OnInit {
       this.loadExistingDocuments(event.event);
     } catch (error) {
       console.error('Error uploading files:', error);
+      this.snackBar.open('Error uploading files. Please try again.', 'Close', {
+        duration: 5000,
+      });
+    } finally {
+      this.uploading.set(false);
+    }
+  }
+
+  protected async onClubUpload(): Promise<void> {
+    const currentUser = this.authService.currentUser();
+    const club = this.selectedClub();
+    const files = this.selectedClubFiles();
+
+    if (!currentUser || !club || files.length === 0) {
+      return;
+    }
+
+    this.uploading.set(true);
+
+    try {
+      for (const file of files) {
+        await this.documentService.uploadClubDocument(club.id, file, currentUser.uid);
+      }
+
+      this.snackBar.open('Files uploaded successfully!', 'Close', {
+        duration: 3000,
+      });
+
+      this.selectedClubFiles.set([]);
+      this.loadExistingClubDocuments(club.id);
+    } catch (error) {
+      console.error('Error uploading club files:', error);
       this.snackBar.open('Error uploading files. Please try again.', 'Close', {
         duration: 5000,
       });

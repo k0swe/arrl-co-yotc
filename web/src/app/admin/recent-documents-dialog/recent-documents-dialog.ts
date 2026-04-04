@@ -16,7 +16,10 @@ import { MatListModule } from '@angular/material/list';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTableModule } from '@angular/material/table';
 import { catchError, forkJoin, Observable, of } from 'rxjs';
-import { EventLog } from '@arrl-co-yotc/shared/build/app/models/event.model';
+import {
+  AnyDocument,
+  isEventDocument,
+} from '@arrl-co-yotc/shared/build/app/models/event.model';
 import { Club } from '@arrl-co-yotc/shared/build/app/models/club.model';
 import { Event } from '@arrl-co-yotc/shared/build/app/models/event.model';
 import { DocumentService } from '../../services/document.service';
@@ -59,7 +62,7 @@ export class RecentDocumentsDialog implements OnInit {
   protected data = inject<RecentDocumentsDialogData>(MAT_DIALOG_DATA);
 
   protected readonly loading = signal(true);
-  protected readonly documents = signal<EventLog[]>([]);
+  protected readonly documents = signal<AnyDocument[]>([]);
   protected readonly openingEventId = signal<string | null>(null);
   protected readonly eventNames = signal<Map<string, string>>(new Map());
   protected readonly clubNames = signal<Map<string, string>>(new Map());
@@ -67,6 +70,7 @@ export class RecentDocumentsDialog implements OnInit {
   protected readonly displayedColumns = ['filename', 'uploadedAt', 'club', 'actions'];
 
   readonly toDate = toDate;
+  readonly isEventDocument = isEventDocument;
 
   ngOnInit(): void {
     this.loadDocuments();
@@ -91,8 +95,9 @@ export class RecentDocumentsDialog implements OnInit {
       });
   }
 
-  private loadEventNames(docs: EventLog[]): void {
-    const uniqueKeys = new Set(docs.map((d) => this.eventKey(d)));
+  private loadEventNames(docs: AnyDocument[]): void {
+    const eventDocs = docs.filter(isEventDocument);
+    const uniqueKeys = new Set(eventDocs.map((d) => this.eventKey(d.clubId, d.eventId)));
     if (uniqueKeys.size === 0) return;
 
     const fetches: Record<string, Observable<Event | null>> = {};
@@ -111,11 +116,11 @@ export class RecentDocumentsDialog implements OnInit {
       });
   }
 
-  private eventKey(doc: EventLog): string {
-    return `${doc.clubId}:${doc.eventId}`;
+  private eventKey(clubId: string, eventId: string): string {
+    return `${clubId}:${eventId}`;
   }
 
-  private loadClubNames(docs: EventLog[]): void {
+  private loadClubNames(docs: AnyDocument[]): void {
     const uniqueClubIds = new Set(docs.map((d) => d.clubId));
     if (uniqueClubIds.size === 0) return;
 
@@ -134,15 +139,18 @@ export class RecentDocumentsDialog implements OnInit {
       });
   }
 
-  protected getClubName(doc: EventLog): string {
+  protected getClubName(doc: AnyDocument): string {
     return this.clubNames().get(doc.clubId) ?? doc.clubId;
   }
 
-  protected getEventName(doc: EventLog): string {
-    return this.eventNames().get(this.eventKey(doc)) ?? 'View Event';
+  protected getEventName(doc: AnyDocument): string {
+    if (!isEventDocument(doc)) return '';
+    return this.eventNames().get(this.eventKey(doc.clubId, doc.eventId)) ?? 'View Event';
   }
 
-  protected openEventDetail(document: EventLog): void {
+  protected openEventDetail(document: AnyDocument): void {
+    if (!isEventDocument(document)) return;
+
     this.openingEventId.set(document.id);
 
     forkJoin({

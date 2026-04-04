@@ -8,6 +8,11 @@ mat-card {
   margin-bottom: 1rem;
 }
 
+.mode-toggle {
+  display: flex;
+  margin-bottom: 1.5rem;
+}
+
 .loading-container {
   display: flex;
   flex-direction: column;
