@@ -1,3 +1,11 @@
+:host {
+  --mat-list-list-item-trailing-supporting-text-font: 'Material Icons';
+  --mat-list-list-item-trailing-supporting-text-size: 24px;
+  --mat-list-list-item-trailing-supporting-text-line-height: 1;
+  --mat-list-list-item-trailing-supporting-text-tracking: normal;
+  --mat-list-list-item-trailing-supporting-text-weight: 400;
+}
+
 .nav-expansion-panel {
   box-shadow: none !important;
   border-radius: 0 !important;
