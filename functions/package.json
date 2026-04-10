@@ -14,10 +14,10 @@
     "@arrl-co-yotc/shared": "file:../shared",
     "exceljs": "^4.4.0",
     "firebase-admin": "^13.6.1",
-    "firebase-functions": "^7.2.3"
+    "firebase-functions": "^7.2.5"
   },
   "devDependencies": {
     "typescript": "~5.9.3",
-    "vitest": "^4.1.2"
+    "vitest": "^4.1.4"
   }
 }
