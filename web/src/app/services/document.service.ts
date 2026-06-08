@@ -2,17 +2,15 @@ import { inject, Injectable } from '@angular/core';
 import {
   addDoc,
   collection,
-  collectionData,
   collectionGroup,
   deleteDoc,
   doc,
-  Firestore,
   orderBy,
   query,
   serverTimestamp,
   Timestamp,
   where,
-} from '@angular/fire/firestore';
+} from 'firebase/firestore';
 import { from, Observable } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import {
@@ -21,6 +19,8 @@ import {
   EventLog,
 } from '@arrl-co-yotc/shared/build/app/models/event.model';
 import { StorageService } from './storage.service';
+import { collectionData } from '../firebase-observables';
+import { FIREBASE_FIRESTORE } from '../firebase.tokens';
 
 /**
  * Service for managing event document uploads and references in Firestore.
@@ -34,7 +34,7 @@ import { StorageService } from './storage.service';
   providedIn: 'root',
 })
 export class DocumentService {
-  private firestore = inject(Firestore);
+  private firestore = inject(FIREBASE_FIRESTORE);
   private storageService = inject(StorageService);
 
   /**

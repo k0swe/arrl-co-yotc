@@ -2,19 +2,19 @@ import { inject, Injectable } from '@angular/core';
 import {
   addDoc,
   collection,
-  collectionData,
   collectionGroup,
   deleteDoc,
   doc,
-  Firestore,
   getDoc,
   orderBy,
   query,
   serverTimestamp,
   updateDoc,
-} from '@angular/fire/firestore';
+} from 'firebase/firestore';
 import { from, Observable } from 'rxjs';
 import { Event } from '@arrl-co-yotc/shared/build/app/models/event.model';
+import { collectionData } from '../firebase-observables';
+import { FIREBASE_FIRESTORE } from '../firebase.tokens';
 
 /**
  * Service for managing event data from Firestore.
@@ -24,7 +24,7 @@ import { Event } from '@arrl-co-yotc/shared/build/app/models/event.model';
   providedIn: 'root',
 })
 export class EventService {
-  private firestore = inject(Firestore);
+  private firestore = inject(FIREBASE_FIRESTORE);
 
   /**
    * Get a specific event by club ID and event ID

@@ -1,9 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { DocumentService } from './document.service';
 import { StorageService } from './storage.service';
-import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
-import { provideFirestore, getFirestore, connectFirestoreEmulator } from '@angular/fire/firestore';
-import { firebaseTestConfig } from '../firebase-test.config';
+import { provideFirebaseTestServices } from '../firebase-test.providers';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 describe('DocumentService', () => {
@@ -18,13 +16,9 @@ describe('DocumentService', () => {
     TestBed.configureTestingModule({
       providers: [
         DocumentService,
-        provideFirebaseApp(() => initializeApp(firebaseTestConfig)),
-        provideFirestore(() => {
-          const firestore = getFirestore();
-          connectFirestoreEmulator(firestore, '127.0.0.1', 8080);
-          return firestore;
-        }),
         { provide: StorageService, useValue: storageServiceMock },
+        ...provideFirebaseTestServices('document-service', { firestore: true }),
+
       ],
     });
 

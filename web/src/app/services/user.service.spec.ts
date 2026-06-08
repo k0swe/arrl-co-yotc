@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
-import { Firestore } from '@angular/fire/firestore';
 import { UserService } from './user.service';
+import { FIREBASE_FIRESTORE } from '../firebase.tokens';
 
 describe('UserService', () => {
   let service: UserService;
@@ -10,7 +10,7 @@ describe('UserService', () => {
     mockFirestore = {};
 
     TestBed.configureTestingModule({
-      providers: [UserService, { provide: Firestore, useValue: mockFirestore }],
+      providers: [UserService, { provide: FIREBASE_FIRESTORE, useValue: mockFirestore }],
     });
     service = TestBed.inject(UserService);
   });

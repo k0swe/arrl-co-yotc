@@ -1,10 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideFirestore, getFirestore, connectFirestoreEmulator } from '@angular/fire/firestore';
-import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
-import { provideStorage, getStorage, connectStorageEmulator } from '@angular/fire/storage';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Admin } from './admin';
-import { firebaseTestConfig } from '../firebase-test.config';
+import { provideFirebaseTestServices } from '../firebase-test.providers';
 
 describe('Admin', () => {
   let component: Admin;
@@ -14,17 +11,8 @@ describe('Admin', () => {
     await TestBed.configureTestingModule({
       imports: [Admin, NoopAnimationsModule],
       providers: [
-        provideFirebaseApp(() => initializeApp(firebaseTestConfig)),
-        provideFirestore(() => {
-          const firestore = getFirestore();
-          connectFirestoreEmulator(firestore, '127.0.0.1', 8080);
-          return firestore;
-        }),
-        provideStorage(() => {
-          const storage = getStorage();
-          connectStorageEmulator(storage, '127.0.0.1', 9199);
-          return storage;
-        }),
+        ...provideFirebaseTestServices('admin', { firestore: true, storage: true }),
+
       ],
     }).compileComponents();
 

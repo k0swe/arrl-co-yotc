@@ -1,16 +1,15 @@
 import { inject, Injectable } from '@angular/core';
 import {
   collection,
-  collectionData,
   doc,
-  docData,
   documentId,
-  Firestore,
   query,
   where,
-} from '@angular/fire/firestore';
+} from 'firebase/firestore';
 import { Observable } from 'rxjs';
 import { StandingEntry, StandingsColumns } from '@arrl-co-yotc/shared/build/app/models/standing.model';
+import { collectionData, docData } from '../firebase-observables';
+import { FIREBASE_FIRESTORE } from '../firebase.tokens';
 
 /**
  * Service for reading standings data from the Firestore `standings` collection.
@@ -19,7 +18,7 @@ import { StandingEntry, StandingsColumns } from '@arrl-co-yotc/shared/build/app/
   providedIn: 'root',
 })
 export class StandingsService {
-  private firestore = inject(Firestore);
+  private firestore = inject(FIREBASE_FIRESTORE);
   private standingsCollection = collection(this.firestore, 'standings');
 
   /**

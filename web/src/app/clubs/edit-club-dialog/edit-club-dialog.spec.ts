@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { Storage } from '@angular/fire/storage';
+import { FIREBASE_STORAGE } from '../../firebase.tokens';
 import { EditClubDialog, EditClubDialogData } from './edit-club-dialog';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { Club } from '@arrl-co-yotc/shared/build/app/models/club.model';
@@ -11,7 +11,7 @@ describe('EditClubDialog', () => {
   let component: EditClubDialog;
   let fixture: ComponentFixture<EditClubDialog>;
   let mockDialogRef: Partial<MatDialogRef<EditClubDialog>>;
-  let mockStorage: Partial<Storage>;
+  let mockStorage: Record<string, never>;
   let mockClubService: {
     getClubBySlug: ReturnType<typeof vi.fn>;
   };
@@ -33,7 +33,7 @@ describe('EditClubDialog', () => {
         providers: [
           { provide: MatDialogRef, useValue: mockDialogRef },
           { provide: MAT_DIALOG_DATA, useValue: null },
-          { provide: Storage, useValue: mockStorage },
+          { provide: FIREBASE_STORAGE, useValue: mockStorage },
           { provide: ClubService, useValue: mockClubService },
           provideAnimations(),
         ],
@@ -181,7 +181,7 @@ describe('EditClubDialog', () => {
         providers: [
           { provide: MatDialogRef, useValue: mockDialogRef },
           { provide: MAT_DIALOG_DATA, useValue: dialogData },
-          { provide: Storage, useValue: mockStorage },
+          { provide: FIREBASE_STORAGE, useValue: mockStorage },
           { provide: ClubService, useValue: mockClubService },
           provideAnimations(),
         ],
@@ -289,7 +289,7 @@ describe('EditClubDialog', () => {
         providers: [
           { provide: MatDialogRef, useValue: mockDialogRef },
           { provide: MAT_DIALOG_DATA, useValue: dialogData },
-          { provide: Storage, useValue: mockStorage },
+          { provide: FIREBASE_STORAGE, useValue: mockStorage },
           { provide: ClubService, useValue: mockClubService },
           provideAnimations(),
         ],
@@ -339,7 +339,7 @@ describe('EditClubDialog', () => {
         providers: [
           { provide: MatDialogRef, useValue: mockDialogRef },
           { provide: MAT_DIALOG_DATA, useValue: dialogData },
-          { provide: Storage, useValue: mockStorage },
+          { provide: FIREBASE_STORAGE, useValue: mockStorage },
           { provide: ClubService, useValue: mockClubService },
           provideAnimations(),
         ],
@@ -435,7 +435,7 @@ describe('EditClubDialog', () => {
         providers: [
           { provide: MatDialogRef, useValue: mockDialogRef },
           { provide: MAT_DIALOG_DATA, useValue: null },
-          { provide: Storage, useValue: mockStorage },
+          { provide: FIREBASE_STORAGE, useValue: mockStorage },
           { provide: ClubService, useValue: mockClubService },
           provideAnimations(),
         ],
@@ -515,7 +515,7 @@ describe('EditClubDialog', () => {
         providers: [
           { provide: MatDialogRef, useValue: mockDialogRef },
           { provide: MAT_DIALOG_DATA, useValue: dialogData },
-          { provide: Storage, useValue: mockStorage },
+          { provide: FIREBASE_STORAGE, useValue: mockStorage },
           { provide: ClubService, useValue: mockClubService },
           provideAnimations(),
         ],
@@ -568,7 +568,7 @@ describe('EditClubDialog', () => {
         providers: [
           { provide: MatDialogRef, useValue: mockDialogRef },
           { provide: MAT_DIALOG_DATA, useValue: dialogData },
-          { provide: Storage, useValue: mockStorage },
+          { provide: FIREBASE_STORAGE, useValue: mockStorage },
           { provide: ClubService, useValue: mockClubService },
           provideAnimations(),
         ],

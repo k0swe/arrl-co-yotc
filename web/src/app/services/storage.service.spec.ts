@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
-import { Storage } from '@angular/fire/storage';
 import { StorageService } from './storage.service';
+import { FIREBASE_STORAGE } from '../firebase.tokens';
 
 describe('StorageService', () => {
   let service: StorageService;
@@ -9,7 +9,7 @@ describe('StorageService', () => {
     TestBed.configureTestingModule({
       providers: [
         {
-          provide: Storage,
+          provide: FIREBASE_STORAGE,
           useValue: {
             ref: vi.fn(),
           },

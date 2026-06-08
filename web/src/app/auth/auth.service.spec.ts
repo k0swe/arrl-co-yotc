@@ -1,8 +1,6 @@
 import { TestBed } from '@angular/core/testing';
-import { provideAuth, getAuth, Auth, connectAuthEmulator } from '@angular/fire/auth';
-import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
 import { AuthService } from './auth.service';
-import { firebaseTestConfig } from '../firebase-test.config';
+import { provideFirebaseTestServices } from '../firebase-test.providers';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -10,12 +8,8 @@ describe('AuthService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        provideFirebaseApp(() => initializeApp(firebaseTestConfig)),
-        provideAuth(() => {
-          const auth = getAuth();
-          connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
-          return auth;
-        }),
+        ...provideFirebaseTestServices('auth-service', { auth: true }),
+
       ],
     });
     service = TestBed.inject(AuthService);
