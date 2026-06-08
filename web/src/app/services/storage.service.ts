@@ -1,7 +1,8 @@
 import { inject, Injectable } from '@angular/core';
-import { Storage, ref, uploadBytes, getDownloadURL, deleteObject } from '@angular/fire/storage';
+import { deleteObject, getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { from, Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
+import { FIREBASE_STORAGE } from '../firebase.tokens';
 
 /**
  * Service for managing file uploads to Firebase Storage.
@@ -10,7 +11,7 @@ import { map, switchMap } from 'rxjs/operators';
   providedIn: 'root',
 })
 export class StorageService {
-  private storage = inject(Storage);
+  private storage = inject(FIREBASE_STORAGE);
 
   /**
    * Upload a club logo image to Firebase Storage

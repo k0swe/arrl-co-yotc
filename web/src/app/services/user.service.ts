@@ -1,14 +1,15 @@
 import { inject, Injectable } from '@angular/core';
-import { Firestore, doc, getDoc, setDoc, serverTimestamp } from '@angular/fire/firestore';
+import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { from, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { User } from '@arrl-co-yotc/shared/build/app/models/user.model';
+import { FIREBASE_FIRESTORE } from '../firebase.tokens';
 
 @Injectable({
   providedIn: 'root',
 })
 export class UserService {
-  private firestore = inject(Firestore);
+  private firestore = inject(FIREBASE_FIRESTORE);
 
   /**
    * Get a user by ID

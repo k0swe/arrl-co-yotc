@@ -1,18 +1,17 @@
 import { inject, Injectable } from '@angular/core';
 import {
   collection,
-  collectionData,
   deleteDoc,
   doc,
-  docData,
-  Firestore,
   getDoc,
   serverTimestamp,
   setDoc,
-} from '@angular/fire/firestore';
+} from 'firebase/firestore';
 import { from, Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { EventRsvp } from '@arrl-co-yotc/shared/build/app/models/event.model';
+import { collectionData } from '../firebase-observables';
+import { FIREBASE_FIRESTORE } from '../firebase.tokens';
 
 /**
  * Service for managing event RSVPs.
@@ -22,7 +21,7 @@ import { EventRsvp } from '@arrl-co-yotc/shared/build/app/models/event.model';
   providedIn: 'root',
 })
 export class RsvpService {
-  private firestore = inject(Firestore);
+  private firestore = inject(FIREBASE_FIRESTORE);
 
   /**
    * Get all RSVPs for a specific event

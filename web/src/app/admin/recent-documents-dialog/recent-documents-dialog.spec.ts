@@ -1,11 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialog } from '@angular/material/dialog';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { provideFirestore, getFirestore, connectFirestoreEmulator } from '@angular/fire/firestore';
-import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
-import { provideStorage, getStorage, connectStorageEmulator } from '@angular/fire/storage';
 import { RecentDocumentsDialog } from './recent-documents-dialog';
-import { firebaseTestConfig } from '../../firebase-test.config';
+import { provideFirebaseTestServices } from '../../firebase-test.providers';
 
 describe('RecentDocumentsDialog', () => {
   const mockSince = new Date('2026-01-01T00:00:00');
@@ -15,20 +12,11 @@ describe('RecentDocumentsDialog', () => {
       imports: [RecentDocumentsDialog],
       providers: [
         provideAnimationsAsync(),
-        provideFirebaseApp(() => initializeApp(firebaseTestConfig)),
-        provideFirestore(() => {
-          const firestore = getFirestore();
-          connectFirestoreEmulator(firestore, '127.0.0.1', 8080);
-          return firestore;
-        }),
-        provideStorage(() => {
-          const storage = getStorage();
-          connectStorageEmulator(storage, '127.0.0.1', 9199);
-          return storage;
-        }),
         { provide: MatDialogRef, useValue: { close: () => {} } },
         { provide: MatDialog, useValue: { open: () => {} } },
         { provide: MAT_DIALOG_DATA, useValue: { since: mockSince } },
+        ...provideFirebaseTestServices('recent-documents-dialog', { firestore: true, storage: true }),
+
       ],
     }).compileComponents();
   });

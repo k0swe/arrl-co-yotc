@@ -1,6 +1,5 @@
 import { Component, ChangeDetectionStrategy, inject, signal, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { doc, getDoc, Firestore } from '@angular/fire/firestore';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -17,11 +16,13 @@ import { User } from '@arrl-co-yotc/shared/build/app/models/user.model';
 import { ClubCard } from '../clubs/club-card/club-card';
 import { catchError, of, from, forkJoin } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { doc, getDoc } from 'firebase/firestore';
 import { EditClubDialog, ClubFormData } from '../clubs/edit-club-dialog/edit-club-dialog';
 import {
   RecentDocumentsDialog,
   RecentDocumentsDialogData,
 } from './recent-documents-dialog/recent-documents-dialog';
+import { FIREBASE_FIRESTORE } from '../firebase.tokens';
 
 @Component({
   selector: 'app-admin',
@@ -44,7 +45,7 @@ import {
 export class Admin {
   private clubService = inject(ClubService);
   private storageService = inject(StorageService);
-  private firestore = inject(Firestore);
+  private firestore = inject(FIREBASE_FIRESTORE);
   private snackBar = inject(MatSnackBar);
   private destroyRef = inject(DestroyRef);
   private dialog = inject(MatDialog);

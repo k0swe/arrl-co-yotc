@@ -1,12 +1,9 @@
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { provideAuth, getAuth, connectAuthEmulator } from '@angular/fire/auth';
-import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
-import { provideFirestore, getFirestore, connectFirestoreEmulator } from '@angular/fire/firestore';
 import { profileCompleteGuard } from './profile-complete.guard';
 import { AuthService } from './auth.service';
 import { UserService } from '../services/user.service';
-import { firebaseTestConfig } from '../firebase-test.config';
+import { provideFirebaseTestServices } from '../firebase-test.providers';
 import { of } from 'rxjs';
 import { vi } from 'vitest';
 
@@ -18,17 +15,8 @@ describe('profileCompleteGuard', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        provideFirebaseApp(() => initializeApp(firebaseTestConfig)),
-        provideAuth(() => {
-          const auth = getAuth();
-          connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
-          return auth;
-        }),
-        provideFirestore(() => {
-          const firestore = getFirestore();
-          connectFirestoreEmulator(firestore, '127.0.0.1', 8080);
-          return firestore;
-        }),
+        ...provideFirebaseTestServices('profile-complete-guard', { auth: true, firestore: true }),
+
       ],
     });
     authService = TestBed.inject(AuthService);

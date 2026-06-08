@@ -1,8 +1,6 @@
 import { TestBed } from '@angular/core/testing';
-import { provideFirestore, getFirestore, connectFirestoreEmulator } from '@angular/fire/firestore';
-import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
 import { StandingsService } from './standings.service';
-import { firebaseTestConfig } from '../firebase-test.config';
+import { provideFirebaseTestServices } from '../firebase-test.providers';
 
 describe('StandingsService', () => {
   let service: StandingsService;
@@ -10,12 +8,8 @@ describe('StandingsService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        provideFirebaseApp(() => initializeApp(firebaseTestConfig)),
-        provideFirestore(() => {
-          const firestore = getFirestore();
-          connectFirestoreEmulator(firestore, '127.0.0.1', 8080);
-          return firestore;
-        }),
+        ...provideFirebaseTestServices('standings-service', { firestore: true }),
+
       ],
     });
     service = TestBed.inject(StandingsService);

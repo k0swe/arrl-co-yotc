@@ -1,23 +1,23 @@
 import { inject, Injectable, signal } from '@angular/core';
 import {
-  Auth,
   createUserWithEmailAndPassword,
+  FacebookAuthProvider,
+  GoogleAuthProvider,
+  sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
-  GoogleAuthProvider,
-  FacebookAuthProvider,
-  sendPasswordResetEmail,
   signOut,
-  user,
   User,
-} from '@angular/fire/auth';
+} from 'firebase/auth';
 import { from, Observable } from 'rxjs';
+import { authUser } from '../firebase-observables';
+import { FIREBASE_AUTH } from '../firebase.tokens';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  private auth = inject(Auth);
+  private auth = inject(FIREBASE_AUTH);
   private googleProvider = new GoogleAuthProvider();
   private facebookProvider = new FacebookAuthProvider();
 
@@ -28,7 +28,7 @@ export class AuthService {
 
   constructor() {
     // Subscribe to auth state changes
-    user(this.auth).subscribe((firebaseUser) => {
+    authUser(this.auth).subscribe((firebaseUser) => {
       this.currentUser.set(firebaseUser);
       this.isAuthenticated.set(!!firebaseUser);
 

@@ -2,20 +2,20 @@ import { inject, Injectable } from '@angular/core';
 import {
   addDoc,
   collection,
-  collectionData,
   deleteDoc,
   doc,
-  Firestore,
   getDoc,
   orderBy,
   query,
   serverTimestamp,
   updateDoc,
   where,
-} from '@angular/fire/firestore';
+} from 'firebase/firestore';
 import { from, Observable, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { Club } from '@arrl-co-yotc/shared/build/app/models/club.model';
+import { collectionData } from '../firebase-observables';
+import { FIREBASE_FIRESTORE } from '../firebase.tokens';
 
 /**
  * Service for managing club data from Firestore.
@@ -24,7 +24,7 @@ import { Club } from '@arrl-co-yotc/shared/build/app/models/club.model';
   providedIn: 'root',
 })
 export class ClubService {
-  private firestore = inject(Firestore);
+  private firestore = inject(FIREBASE_FIRESTORE);
   private clubsCollection = collection(this.firestore, 'clubs');
 
   /**

@@ -1,10 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { provideAuth, getAuth, connectAuthEmulator } from '@angular/fire/auth';
-import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
 import { adminGuard } from './admin.guard';
 import { AuthService } from './auth.service';
-import { firebaseTestConfig } from '../firebase-test.config';
+import { provideFirebaseTestServices } from '../firebase-test.providers';
 
 describe('adminGuard', () => {
   let authService: AuthService;
@@ -13,12 +11,8 @@ describe('adminGuard', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        provideFirebaseApp(() => initializeApp(firebaseTestConfig)),
-        provideAuth(() => {
-          const auth = getAuth();
-          connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
-          return auth;
-        }),
+        ...provideFirebaseTestServices('admin-guard', { auth: true }),
+
       ],
     });
     authService = TestBed.inject(AuthService);

@@ -1,17 +1,15 @@
 import { inject, Injectable } from '@angular/core';
 import {
-  Firestore,
   collection,
-  collectionData,
   collectionGroup,
-  setDoc,
   doc,
   getDoc,
   query,
-  where,
   serverTimestamp,
+  setDoc,
   updateDoc,
-} from '@angular/fire/firestore';
+  where,
+} from 'firebase/firestore';
 import { Observable, from, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import {
@@ -19,6 +17,8 @@ import {
   MembershipRole,
   MembershipStatus,
 } from '@arrl-co-yotc/shared/build/app/models/user.model';
+import { collectionData } from '../firebase-observables';
+import { FIREBASE_FIRESTORE } from '../firebase.tokens';
 
 /**
  * Service for managing club membership confirmations and data.
@@ -27,7 +27,7 @@ import {
   providedIn: 'root',
 })
 export class MembershipService {
-  private firestore = inject(Firestore);
+  private firestore = inject(FIREBASE_FIRESTORE);
 
   /**
    * Get all memberships for a specific user using collection group query

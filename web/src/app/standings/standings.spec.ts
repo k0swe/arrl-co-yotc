@@ -1,9 +1,7 @@
 import { TestBed } from '@angular/core/testing';
-import { provideFirestore, getFirestore, connectFirestoreEmulator } from '@angular/fire/firestore';
-import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { Standings } from './standings';
-import { firebaseTestConfig } from '../firebase-test.config';
+import { provideFirebaseTestServices } from '../firebase-test.providers';
 
 describe('Standings', () => {
   beforeEach(async () => {
@@ -11,12 +9,8 @@ describe('Standings', () => {
       imports: [Standings],
       providers: [
         provideAnimationsAsync(),
-        provideFirebaseApp(() => initializeApp(firebaseTestConfig)),
-        provideFirestore(() => {
-          const firestore = getFirestore();
-          connectFirestoreEmulator(firestore, '127.0.0.1', 8080);
-          return firestore;
-        }),
+        ...provideFirebaseTestServices('standings', { firestore: true }),
+
       ],
     }).compileComponents();
   });
