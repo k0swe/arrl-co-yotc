@@ -40,9 +40,11 @@ jobs:
           npm ci
           npm run build
 
-      - name: Install dependencies
+      - name: Install and build web app
         working-directory: web
-        run: npm ci
+        run: |
+          npm ci
+          npm run build
 
       - name: Install and build Cloud Run functions
         working-directory: functions
@@ -67,6 +69,4 @@ jobs:
           firebase --version
 
       - name: Deploy to Firebase
-        env:
-          FIREBASE_CLI_EXPERIMENTS: webframeworks
         run: firebase deploy --only hosting,firestore,storage,functions --project arrl-co-yotc

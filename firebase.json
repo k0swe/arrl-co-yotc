@@ -17,11 +17,17 @@
   },
   "hosting": {
     "site": "arrl-co-yotc",
-    "source": "web/",
+    "public": "web/dist/arrl-co-yotc/browser",
     "ignore": [
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
     ]
   }
 }
