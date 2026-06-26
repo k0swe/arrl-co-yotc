@@ -52,26 +52,9 @@ jobs:
           service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
           create_credentials_file: true
 
-      - name: Show auth context
+      - name: Convert credentials file to service account key
         run: |
-          echo "Auth credential file path: ${{ steps.auth.outputs.credentials_file_path }}"
-          test -f "${{ steps.auth.outputs.credentials_file_path }}"
-          python - <<'PY'
-          import json, os
-          path = os.environ["CREDENTIALS_FILE_PATH"]
-          with open(path, encoding="utf-8") as f:
-              data = json.load(f)
-          print(f"Credential type: {data.get('type', 'unknown')}")
-          print(f"Has service account impersonation URL: {'service_account_impersonation_url' in data}")
-          PY
-        env:
-          CREDENTIALS_FILE_PATH: ${{ steps.auth.outputs.credentials_file_path }}
-
-      - name: Format service account credentials for action
-        run: |
-          SERVICE_ACCOUNT_KEY=$(cat "${{ steps.auth.outputs.credentials_file_path }}" | tr -d '\n')
-          echo "::add-mask::$SERVICE_ACCOUNT_KEY"
-          echo "SERVICE_ACCOUNT_KEY=$SERVICE_ACCOUNT_KEY" >> $GITHUB_ENV
+          echo "SERVICE_ACCOUNT_KEY=$(cat "${{ steps.auth.outputs.credentials_file_path }}" | tr -d '\n')" >> $GITHUB_ENV
 
       - name: Deploy to Firebase Hosting Preview Channel
         id: firebase-preview
