@@ -37,6 +37,7 @@ jobs:
       - name: npm update
         run: |
           npx npm-check-updates -u -x typescript
+          npm install --save-dev typescript@^6
           npm install -f
           npm update
           npm install
