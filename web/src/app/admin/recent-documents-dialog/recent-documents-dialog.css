@@ -14,6 +14,17 @@ mat-dialog-content {
   font-size: 0.875rem;
 }
 
+.filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.75rem;
+  padding: 1rem;
+}
+
+.filters mat-form-field {
+  width: 100%;
+}
+
 .loading-container {
   display: flex;
   flex-direction: column;
@@ -93,8 +104,27 @@ mat-dialog-content {
   font-style: italic;
 }
 
+.event-scope-label {
+  color: #1976d2;
+  font-size: 0.875rem;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.12);
+}
+
 @media (max-width: 600px) {
   mat-dialog-content {
     min-width: 0;
+  }
+
+  .pagination {
+    flex-direction: column;
+    align-items: stretch;
   }
 }
