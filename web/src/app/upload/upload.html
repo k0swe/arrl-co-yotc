@@ -66,7 +66,7 @@
                   id="file-input"
                   multiple
                   (change)="onFileSelect($event)"
-                  accept=".adi,.adif,.pdf,.jpg,.jpeg,.png,.gif,.txt"
+                  [accept]="documentAcceptTypes"
                   class="file-input"
                   [attr.aria-label]="'Select files to upload'"
                 />
@@ -76,15 +76,18 @@
                 </label>
               </div>
 
-              @if (selectedFiles().length > 0) {
-                <div class="selected-files">
+              @if (selectedFileResults().length > 0) {
+                <div class="selected-files" aria-live="polite">
                   <h4>Selected Files:</h4>
                   <mat-list>
-                    @for (file of selectedFiles(); track file.name) {
+                    @for (result of selectedFileResults(); track result.file.name + result.file.size) {
                       <mat-list-item>
                         <mat-icon matListItemIcon>description</mat-icon>
-                        <div matListItemTitle>{{ file.name }}</div>
-                        <div matListItemLine>{{ (file.size / 1024).toFixed(2) }} KB</div>
+                        <div matListItemTitle>{{ result.file.name }}</div>
+                        <div matListItemLine>{{ formatFileSize(result.file) }}</div>
+                        @if (result.error) {
+                          <div matListItemLine class="file-error">{{ result.error }}</div>
+                        }
                       </mat-list-item>
                     }
                   </mat-list>
@@ -114,7 +117,7 @@
                 mat-raised-button
                 color="primary"
                 (click)="onUpload()"
-                [disabled]="selectedFiles().length === 0 || uploading()"
+                [disabled]="selectedFiles().length === 0 || selectedFileErrors().length > 0 || uploading()"
                 class="upload-button"
                 [attr.aria-label]="'Upload selected files'"
               >
@@ -191,7 +194,7 @@
                   id="club-file-input"
                   multiple
                   (change)="onClubFileSelect($event)"
-                  accept=".adi,.adif,.pdf,.jpg,.jpeg,.png,.gif,.txt"
+                  [accept]="documentAcceptTypes"
                   class="file-input"
                   [attr.aria-label]="'Select files to upload to club'"
                 />
@@ -201,15 +204,18 @@
                 </label>
               </div>
 
-              @if (selectedClubFiles().length > 0) {
-                <div class="selected-files">
+              @if (selectedClubFileResults().length > 0) {
+                <div class="selected-files" aria-live="polite">
                   <h4>Selected Files:</h4>
                   <mat-list>
-                    @for (file of selectedClubFiles(); track file.name) {
+                    @for (result of selectedClubFileResults(); track result.file.name + result.file.size) {
                       <mat-list-item>
                         <mat-icon matListItemIcon>description</mat-icon>
-                        <div matListItemTitle>{{ file.name }}</div>
-                        <div matListItemLine>{{ (file.size / 1024).toFixed(2) }} KB</div>
+                        <div matListItemTitle>{{ result.file.name }}</div>
+                        <div matListItemLine>{{ formatFileSize(result.file) }}</div>
+                        @if (result.error) {
+                          <div matListItemLine class="file-error">{{ result.error }}</div>
+                        }
                       </mat-list-item>
                     }
                   </mat-list>
@@ -239,7 +245,7 @@
                 mat-raised-button
                 color="primary"
                 (click)="onClubUpload()"
-                [disabled]="selectedClubFiles().length === 0 || uploading()"
+                [disabled]="selectedClubFiles().length === 0 || selectedClubFileErrors().length > 0 || uploading()"
                 class="upload-button"
                 [attr.aria-label]="'Upload selected files to club'"
               >
