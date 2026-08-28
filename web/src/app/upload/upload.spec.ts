@@ -14,9 +14,23 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 describe('Upload', () => {
   let component: Upload;
   let fixture: ComponentFixture<Upload>;
+  let authServiceMock: { currentUser: ReturnType<typeof vi.fn>; isAdmin: ReturnType<typeof vi.fn> };
+  let documentServiceMock: {
+    getEventDocuments: ReturnType<typeof vi.fn>;
+    uploadDocument: ReturnType<typeof vi.fn>;
+    getClubDocuments: ReturnType<typeof vi.fn>;
+    uploadClubDocument: ReturnType<typeof vi.fn>;
+  };
+  let snackBarMock: { open: ReturnType<typeof vi.fn> };
+
+  function createFile(name: string, type: string, size = 1): File {
+    const file = new File(['x'], name, { type });
+    Object.defineProperty(file, 'size', { value: size });
+    return file;
+  }
 
   beforeEach(async () => {
-    const authServiceMock = {
+    authServiceMock = {
       currentUser: vi.fn(),
       isAdmin: vi.fn().mockReturnValue(false),
     };
@@ -30,7 +44,7 @@ describe('Upload', () => {
       getClubById: vi.fn(),
       getActiveClubs: vi.fn().mockReturnValue(of([])),
     };
-    const documentServiceMock = {
+    documentServiceMock = {
       getEventDocuments: vi.fn(),
       uploadDocument: vi.fn(),
       getClubDocuments: vi.fn(),
@@ -39,7 +53,7 @@ describe('Upload', () => {
     const membershipServiceMock = {
       getUserMemberships: vi.fn().mockReturnValue(of([])),
     };
-    const snackBarMock = {
+    snackBarMock = {
       open: vi.fn(),
     };
 
@@ -96,5 +110,79 @@ describe('Upload', () => {
     fixture.detectChanges();
 
     expect(component['loading']()).toBe(false);
+  });
+
+  it('should validate selected event files before upload', () => {
+    const tooLargePdf = createFile('large.pdf', 'application/pdf', 50 * 1024 * 1024);
+    const unsupportedFile = createFile('archive.zip', 'application/zip');
+
+    component['selectedFiles'].set([
+      createFile('log.adi', 'application/octet-stream'),
+      createFile('report.pdf', 'application/pdf'),
+      createFile('photo.webp', 'image/webp'),
+      createFile('notes.txt', 'text/plain'),
+      createFile(
+        'document.docx',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      ),
+      tooLargePdf,
+      unsupportedFile,
+    ]);
+
+    const results = component['selectedFileResults']();
+
+    expect(results.slice(0, 5).every((result) => result.error === null)).toBe(true);
+    expect(results.find((result) => result.file === tooLargePdf)?.error).toContain(
+      'smaller than 50 MB',
+    );
+    expect(results.find((result) => result.file === unsupportedFile)?.error).toContain(
+      'Unsupported file type',
+    );
+    expect(component['selectedFileErrors']()).toHaveLength(2);
+  });
+
+  it('should not upload invalid event files', async () => {
+    const authService = component['authService'] as any;
+    const snackBar = component['snackBar'] as any;
+    const openSpy = vi.spyOn(snackBar, 'open').mockReturnValue(undefined);
+
+    authService.currentUser.mockReturnValue({ uid: 'user123' });
+    documentServiceMock.uploadDocument.mockResolvedValue(undefined);
+    component['selectedEvent'].set({
+      event: { id: 'event123', clubId: 'club123' },
+      club: { id: 'club123' },
+    } as any);
+    component['selectedFiles'].set([createFile('archive.zip', 'application/zip')]);
+
+    expect(component['selectedFileErrors']()).toHaveLength(1);
+
+    await component['onUpload']();
+
+    expect(documentServiceMock.uploadDocument).not.toHaveBeenCalled();
+    expect(openSpy).toHaveBeenCalledWith('Remove invalid files before uploading.', 'Close', {
+      duration: 5000,
+    });
+  });
+
+  it('should not upload invalid club files', async () => {
+    const authService = component['authService'] as any;
+    const snackBar = component['snackBar'] as any;
+    const openSpy = vi.spyOn(snackBar, 'open').mockReturnValue(undefined);
+
+    authService.currentUser.mockReturnValue({ uid: 'user123' });
+    documentServiceMock.uploadClubDocument.mockResolvedValue(undefined);
+    component['selectedClub'].set({ id: 'club123' } as any);
+    component['selectedClubFiles'].set([
+      createFile('large.pdf', 'application/pdf', 50 * 1024 * 1024),
+    ]);
+
+    expect(component['selectedClubFileErrors']()).toHaveLength(1);
+
+    await component['onClubUpload']();
+
+    expect(documentServiceMock.uploadClubDocument).not.toHaveBeenCalled();
+    expect(openSpy).toHaveBeenCalledWith('Remove invalid files before uploading.', 'Close', {
+      duration: 5000,
+    });
   });
 });

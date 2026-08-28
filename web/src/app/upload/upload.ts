@@ -1,6 +1,7 @@
 import {
   Component,
   ChangeDetectionStrategy,
+  computed,
   inject,
   signal,
   DestroyRef,
@@ -41,6 +42,21 @@ interface EventWithClub {
 
 type UploadMode = 'event' | 'club';
 
+interface SelectedDocumentFile {
+  file: File;
+  error: string | null;
+}
+
+const MAX_DOCUMENT_UPLOAD_SIZE_BYTES = 50 * 1024 * 1024;
+const DOCUMENT_ACCEPT_TYPES = '.adi,.adif,.pdf,.doc,.docx,image/*,text/*';
+const DOCUMENT_TYPE_DESCRIPTION =
+  'ADIF logs (.adi or .adif), PDFs, Word documents, images, or text files';
+const VALID_DOCUMENT_MIME_TYPES = new Set([
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+]);
+
 @Component({
   selector: 'app-upload',
   imports: [
@@ -79,6 +95,17 @@ export class Upload implements OnInit {
   protected readonly rsvpedEvents = signal<EventWithClub[]>([]);
   protected readonly selectedEvent = signal<EventWithClub | null>(null);
   protected readonly selectedFiles = signal<File[]>([]);
+  protected readonly selectedFileResults = computed(() =>
+    this.selectedFiles().map((file) => ({
+      file,
+      error: this.getDocumentFileValidationError(file),
+    })),
+  );
+  protected readonly selectedFileErrors = computed(() =>
+    this.selectedFileResults().filter(
+      (result): result is SelectedDocumentFile & { error: string } => result.error !== null,
+    ),
+  );
   protected readonly existingDocuments = signal<EventLog[]>([]);
   protected readonly loadingDocuments = signal(false);
 
@@ -86,8 +113,20 @@ export class Upload implements OnInit {
   protected readonly memberClubs = signal<Club[]>([]);
   protected readonly selectedClub = signal<Club | null>(null);
   protected readonly selectedClubFiles = signal<File[]>([]);
+  protected readonly selectedClubFileResults = computed(() =>
+    this.selectedClubFiles().map((file) => ({
+      file,
+      error: this.getDocumentFileValidationError(file),
+    })),
+  );
+  protected readonly selectedClubFileErrors = computed(() =>
+    this.selectedClubFileResults().filter(
+      (result): result is SelectedDocumentFile & { error: string } => result.error !== null,
+    ),
+  );
   protected readonly existingClubDocuments = signal<ClubDocument[]>([]);
   protected readonly loadingClubDocuments = signal(false);
+  protected readonly documentAcceptTypes = DOCUMENT_ACCEPT_TYPES;
 
   ngOnInit(): void {
     this.loadRsvpedEvents();
@@ -282,12 +321,55 @@ export class Upload implements OnInit {
     }
   }
 
+  protected formatFileSize(file: File): string {
+    return `${(file.size / 1024).toFixed(2)} KB`;
+  }
+
+  private getDocumentFileValidationError(file: File): string | null {
+    if (file.size >= MAX_DOCUMENT_UPLOAD_SIZE_BYTES) {
+      return 'File must be smaller than 50 MB.';
+    }
+
+    if (!this.isValidDocumentFileType(file)) {
+      return `Unsupported file type. Upload ${DOCUMENT_TYPE_DESCRIPTION}.`;
+    }
+
+    return null;
+  }
+
+  private isValidDocumentFileType(file: File): boolean {
+    if (file.name.match(/\.(adi|adif)$/)) {
+      return true;
+    }
+
+    return (
+      file.type.startsWith('image/') ||
+      file.type.startsWith('text/') ||
+      VALID_DOCUMENT_MIME_TYPES.has(file.type)
+    );
+  }
+
+  private hasInvalidFiles(invalidFiles: SelectedDocumentFile[]): boolean {
+    if (invalidFiles.length === 0) {
+      return false;
+    }
+
+    this.snackBar.open('Remove invalid files before uploading.', 'Close', {
+      duration: 5000,
+    });
+    return true;
+  }
+
   protected async onUpload(): Promise<void> {
     const currentUser = this.authService.currentUser();
     const event = this.selectedEvent();
     const files = this.selectedFiles();
 
     if (!currentUser || !event || files.length === 0) {
+      return;
+    }
+
+    if (this.hasInvalidFiles(this.selectedFileErrors())) {
       return;
     }
 
@@ -326,6 +408,10 @@ export class Upload implements OnInit {
     const files = this.selectedClubFiles();
 
     if (!currentUser || !club || files.length === 0) {
+      return;
+    }
+
+    if (this.hasInvalidFiles(this.selectedClubFileErrors())) {
       return;
     }
 

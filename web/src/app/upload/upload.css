@@ -97,6 +97,10 @@ mat-card {
   font-weight: 500;
 }
 
+.file-error {
+  color: #b00020;
+}
+
 .upload-button {
   margin-top: 1rem;
   display: flex;
