@@ -11,7 +11,7 @@ import {
   Timestamp,
   where,
 } from 'firebase/firestore';
-import { from, Observable } from 'rxjs';
+import { firstValueFrom, from, Observable } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import {
   AnyDocument,
@@ -107,7 +107,12 @@ export class DocumentService {
       uploadedAt: serverTimestamp(),
     };
 
-    await addDoc(documentsCollection, documentData);
+    try {
+      await addDoc(documentsCollection, documentData);
+    } catch (error) {
+      await this.deleteUploadedEventDocument(storagePath);
+      throw error;
+    }
   }
 
   /**
@@ -125,14 +130,19 @@ export class DocumentService {
 
     const documentsCollection = collection(this.firestore, `clubs/${clubId}/documents`);
 
-    await addDoc(documentsCollection, {
-      clubId,
-      uploadedBy: userId,
-      storagePath,
-      downloadUrl,
-      filename: file.name,
-      uploadedAt: serverTimestamp(),
-    });
+    try {
+      await addDoc(documentsCollection, {
+        clubId,
+        uploadedBy: userId,
+        storagePath,
+        downloadUrl,
+        filename: file.name,
+        uploadedAt: serverTimestamp(),
+      });
+    } catch (error) {
+      await this.deleteUploadedClubDocument(storagePath);
+      throw error;
+    }
   }
 
   /**
@@ -173,5 +183,21 @@ export class DocumentService {
     return from(deleteDoc(documentDoc)).pipe(
       switchMap(() => this.storageService.deleteClubDocument(storagePath)),
     );
+  }
+
+  private async deleteUploadedEventDocument(storagePath: string): Promise<void> {
+    try {
+      await firstValueFrom(this.storageService.deleteEventDocument(storagePath));
+    } catch (cleanupError) {
+      console.warn('Failed to clean up event document from storage:', storagePath, cleanupError);
+    }
+  }
+
+  private async deleteUploadedClubDocument(storagePath: string): Promise<void> {
+    try {
+      await firstValueFrom(this.storageService.deleteClubDocument(storagePath));
+    } catch (cleanupError) {
+      console.warn('Failed to clean up club document from storage:', storagePath, cleanupError);
+    }
   }
 }
