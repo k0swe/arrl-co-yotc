@@ -11,7 +11,7 @@ import {
   where,
 } from 'firebase/firestore';
 import { Observable, from, of } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 import {
   ClubMembership,
   MembershipRole,
@@ -19,6 +19,11 @@ import {
 } from '@arrl-co-yotc/shared/build/app/models/user.model';
 import { collectionData } from '../firebase-observables';
 import { FIREBASE_FIRESTORE } from '../firebase.tokens';
+import {
+  isClubMembership,
+  toTypedCollection,
+  toTypedDocumentWithId,
+} from './firestore-document-mapping';
 
 /**
  * Service for managing club membership confirmations and data.
@@ -35,7 +40,7 @@ export class MembershipService {
   getUserMemberships(userId: string): Observable<ClubMembership[]> {
     const membershipsGroup = collectionGroup(this.firestore, 'memberships');
     const q = query(membershipsGroup, where('userId', '==', userId));
-    return collectionData(q, { idField: 'id' }).pipe(map((data) => data as ClubMembership[]));
+    return toTypedCollection(collectionData(q, { idField: 'id' }), isClubMembership);
   }
 
   /**
@@ -64,10 +69,11 @@ export class MembershipService {
     const membershipRef = doc(this.firestore, `clubs/${clubId}/memberships/${userId}`);
     return from(getDoc(membershipRef)).pipe(
       map((docSnapshot) => {
-        const membership = docSnapshot.exists()
-          ? ({ id: docSnapshot.id, ...docSnapshot.data() } as ClubMembership)
-          : null;
-        return membership;
+        if (!docSnapshot.exists()) {
+          return null;
+        }
+
+        return toTypedDocumentWithId(docSnapshot.id, docSnapshot.data(), isClubMembership);
       }),
       catchError((error) => {
         console.error(`Error fetching membership for user ${userId} in club ${clubId}:`, error);
@@ -83,7 +89,7 @@ export class MembershipService {
   getPendingMemberships(clubId: string): Observable<ClubMembership[]> {
     const membershipsCollection = collection(this.firestore, `clubs/${clubId}/memberships`);
     const q = query(membershipsCollection, where('status', '==', MembershipStatus.Pending));
-    return collectionData(q, { idField: 'id' }) as Observable<ClubMembership[]>;
+    return toTypedCollection(collectionData(q, { idField: 'id' }), isClubMembership);
   }
 
   /**
@@ -93,7 +99,7 @@ export class MembershipService {
   getActiveMembers(clubId: string): Observable<ClubMembership[]> {
     const membershipsCollection = collection(this.firestore, `clubs/${clubId}/memberships`);
     const q = query(membershipsCollection, where('status', '==', MembershipStatus.Active));
-    return collectionData(q, { idField: 'id' }) as Observable<ClubMembership[]>;
+    return toTypedCollection(collectionData(q, { idField: 'id' }), isClubMembership);
   }
 
   /**
@@ -103,7 +109,7 @@ export class MembershipService {
   getDeniedMembers(clubId: string): Observable<ClubMembership[]> {
     const membershipsCollection = collection(this.firestore, `clubs/${clubId}/memberships`);
     const q = query(membershipsCollection, where('status', '==', MembershipStatus.Denied));
-    return collectionData(q, { idField: 'id' }) as Observable<ClubMembership[]>;
+    return toTypedCollection(collectionData(q, { idField: 'id' }), isClubMembership);
   }
 
   /**

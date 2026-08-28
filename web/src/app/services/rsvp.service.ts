@@ -12,6 +12,11 @@ import { catchError, map } from 'rxjs/operators';
 import { EventRsvp } from '@arrl-co-yotc/shared/build/app/models/event.model';
 import { collectionData } from '../firebase-observables';
 import { FIREBASE_FIRESTORE } from '../firebase.tokens';
+import {
+  isEventRsvp,
+  toTypedCollection,
+  toTypedDocumentWithId,
+} from './firestore-document-mapping';
 
 /**
  * Service for managing event RSVPs.
@@ -28,7 +33,7 @@ export class RsvpService {
    */
   getEventRsvps(clubId: string, eventId: string): Observable<EventRsvp[]> {
     const rsvpsCollection = collection(this.firestore, `clubs/${clubId}/events/${eventId}/rsvps`);
-    return collectionData(rsvpsCollection, { idField: 'id' }) as Observable<EventRsvp[]>;
+    return toTypedCollection(collectionData(rsvpsCollection, { idField: 'id' }), isEventRsvp);
   }
 
   /**
@@ -38,9 +43,11 @@ export class RsvpService {
     const rsvpRef = doc(this.firestore, `clubs/${clubId}/events/${eventId}/rsvps/${userId}`);
     return from(getDoc(rsvpRef)).pipe(
       map((docSnapshot) => {
-        return docSnapshot.exists()
-          ? ({ id: docSnapshot.id, ...docSnapshot.data() } as EventRsvp)
-          : null;
+        if (!docSnapshot.exists()) {
+          return null;
+        }
+
+        return toTypedDocumentWithId(docSnapshot.id, docSnapshot.data(), isEventRsvp);
       }),
       catchError((error) => {
         console.error(`Error fetching RSVP for user ${userId} to event ${eventId}:`, error);
