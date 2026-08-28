@@ -164,6 +164,43 @@ describe('Upload', () => {
     });
   });
 
+  it('should report partial event upload results and preserve only failed files for retry', async () => {
+    const snackBar = component['snackBar'] as any;
+    const openSpy = vi.spyOn(snackBar, 'open').mockReturnValue(undefined);
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const uploadedFile = createFile('uploaded.adi', 'application/octet-stream');
+    const failedFile = createFile('failed.adi', 'application/octet-stream');
+
+    authServiceMock.currentUser.mockReturnValue({ uid: 'user123' });
+    documentServiceMock.getEventDocuments.mockReturnValue(of([]));
+    documentServiceMock.uploadDocument.mockImplementation(
+      (_clubId: string, _eventId: string, file: File) =>
+        file === failedFile ? Promise.reject(new Error('Upload failed')) : Promise.resolve(),
+    );
+    component['selectedEvent'].set({
+      event: { id: 'event123', clubId: 'club123' },
+      club: { id: 'club123' },
+    } as any);
+    component['selectedFiles'].set([uploadedFile, failedFile]);
+
+    await component['onUpload']();
+
+    expect(documentServiceMock.uploadDocument).toHaveBeenCalledTimes(2);
+    expect(component['selectedFiles']()).toEqual([failedFile]);
+    expect(component['uploadOutcomes']()).toEqual([
+      { filename: 'uploaded.adi', success: true },
+      { filename: 'failed.adi', success: false },
+    ]);
+    expect(openSpy).toHaveBeenCalledWith(
+      'Uploaded 1 of 2 files. Failed files remain selected for retry: failed.adi',
+      'Close',
+      { duration: 7000 },
+    );
+    expect(documentServiceMock.getEventDocuments).toHaveBeenCalledWith('club123', 'event123');
+
+    consoleError.mockRestore();
+  });
+
   it('should not upload invalid club files', async () => {
     const authService = component['authService'] as any;
     const snackBar = component['snackBar'] as any;
@@ -184,5 +221,38 @@ describe('Upload', () => {
     expect(openSpy).toHaveBeenCalledWith('Remove invalid files before uploading.', 'Close', {
       duration: 5000,
     });
+  });
+
+  it('should report partial club upload results and preserve only failed files for retry', async () => {
+    const snackBar = component['snackBar'] as any;
+    const openSpy = vi.spyOn(snackBar, 'open').mockReturnValue(undefined);
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const uploadedFile = createFile('uploaded.pdf', 'application/pdf');
+    const failedFile = createFile('failed.pdf', 'application/pdf');
+
+    authServiceMock.currentUser.mockReturnValue({ uid: 'user123' });
+    documentServiceMock.getClubDocuments.mockReturnValue(of([]));
+    documentServiceMock.uploadClubDocument.mockImplementation((_clubId: string, file: File) =>
+      file === failedFile ? Promise.reject(new Error('Upload failed')) : Promise.resolve(),
+    );
+    component['selectedClub'].set({ id: 'club123' } as any);
+    component['selectedClubFiles'].set([uploadedFile, failedFile]);
+
+    await component['onClubUpload']();
+
+    expect(documentServiceMock.uploadClubDocument).toHaveBeenCalledTimes(2);
+    expect(component['selectedClubFiles']()).toEqual([failedFile]);
+    expect(component['clubUploadOutcomes']()).toEqual([
+      { filename: 'uploaded.pdf', success: true },
+      { filename: 'failed.pdf', success: false },
+    ]);
+    expect(openSpy).toHaveBeenCalledWith(
+      'Uploaded 1 of 2 files. Failed files remain selected for retry: failed.pdf',
+      'Close',
+      { duration: 7000 },
+    );
+    expect(documentServiceMock.getClubDocuments).toHaveBeenCalledWith('club123');
+
+    consoleError.mockRestore();
   });
 });

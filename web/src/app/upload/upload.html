@@ -94,6 +94,25 @@
                 </div>
               }
 
+              @if (uploadOutcomes().length > 0) {
+                <div class="upload-results" role="status" aria-live="polite">
+                  <h4>Upload Results:</h4>
+                  <mat-list>
+                    @for (outcome of uploadOutcomes(); track outcome.filename) {
+                      <mat-list-item>
+                        <mat-icon matListItemIcon>
+                          {{ outcome.success ? 'check_circle' : 'error' }}
+                        </mat-icon>
+                        <div matListItemTitle>{{ outcome.filename }}</div>
+                        <div matListItemLine>
+                          {{ outcome.success ? 'Uploaded' : 'Failed - remains selected for retry' }}
+                        </div>
+                      </mat-list-item>
+                    }
+                  </mat-list>
+                </div>
+              }
+
               <button
                 mat-raised-button
                 color="primary"
@@ -197,6 +216,25 @@
                         @if (result.error) {
                           <div matListItemLine class="file-error">{{ result.error }}</div>
                         }
+                      </mat-list-item>
+                    }
+                  </mat-list>
+                </div>
+              }
+
+              @if (clubUploadOutcomes().length > 0) {
+                <div class="upload-results" role="status" aria-live="polite">
+                  <h4>Upload Results:</h4>
+                  <mat-list>
+                    @for (outcome of clubUploadOutcomes(); track outcome.filename) {
+                      <mat-list-item>
+                        <mat-icon matListItemIcon>
+                          {{ outcome.success ? 'check_circle' : 'error' }}
+                        </mat-icon>
+                        <div matListItemTitle>{{ outcome.filename }}</div>
+                        <div matListItemLine>
+                          {{ outcome.success ? 'Uploaded' : 'Failed - remains selected for retry' }}
+                        </div>
                       </mat-list-item>
                     }
                   </mat-list>
