@@ -10,6 +10,12 @@ import { Observable } from 'rxjs';
 import { StandingEntry, StandingsColumns } from '@arrl-co-yotc/shared/build/app/models/standing.model';
 import { collectionData, docData } from '../firebase-observables';
 import { FIREBASE_FIRESTORE } from '../firebase.tokens';
+import {
+  isStandingEntry,
+  isStandingsColumns,
+  toTypedCollection,
+  toTypedOptionalDocument,
+} from './firestore-document-mapping';
 
 /**
  * Service for reading standings data from the Firestore `standings` collection.
@@ -30,7 +36,7 @@ export class StandingsService {
       this.standingsCollection,
       where(documentId(), '!=', 'columns'),
     );
-    return collectionData(rowsQuery) as Observable<StandingEntry[]>;
+    return toTypedCollection(collectionData(rowsQuery), isStandingEntry);
   }
 
   /**
@@ -40,6 +46,6 @@ export class StandingsService {
    */
   getStandingsColumns(): Observable<StandingsColumns | undefined> {
     const columnsDoc = doc(this.firestore, 'standings', 'columns');
-    return docData(columnsDoc) as Observable<StandingsColumns | undefined>;
+    return toTypedOptionalDocument(docData(columnsDoc), isStandingsColumns);
   }
 }

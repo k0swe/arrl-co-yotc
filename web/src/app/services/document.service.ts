@@ -21,6 +21,12 @@ import {
 import { StorageService } from './storage.service';
 import { collectionData } from '../firebase-observables';
 import { FIREBASE_FIRESTORE } from '../firebase.tokens';
+import {
+  isAnyDocument,
+  isClubDocument,
+  isEventLog,
+  toTypedCollection,
+} from './firestore-document-mapping';
 
 /**
  * Service for managing event document uploads and references in Firestore.
@@ -48,7 +54,7 @@ export class DocumentService {
       where('uploadedAt', '>=', Timestamp.fromDate(since)),
       orderBy('uploadedAt', 'desc'),
     );
-    return collectionData(documentsGroupQuery, { idField: 'id' }) as Observable<AnyDocument[]>;
+    return toTypedCollection(collectionData(documentsGroupQuery, { idField: 'id' }), isAnyDocument);
   }
 
   /**
@@ -59,7 +65,7 @@ export class DocumentService {
       this.firestore,
       `clubs/${clubId}/events/${eventId}/documents`,
     );
-    return collectionData(documentsCollection, { idField: 'id' }) as Observable<EventLog[]>;
+    return toTypedCollection(collectionData(documentsCollection, { idField: 'id' }), isEventLog);
   }
 
   /**
@@ -67,7 +73,7 @@ export class DocumentService {
    */
   getClubDocuments(clubId: string): Observable<ClubDocument[]> {
     const documentsCollection = collection(this.firestore, `clubs/${clubId}/documents`);
-    return collectionData(documentsCollection, { idField: 'id' }) as Observable<ClubDocument[]>;
+    return toTypedCollection(collectionData(documentsCollection, { idField: 'id' }), isClubDocument);
   }
 
   /**

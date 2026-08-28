@@ -15,6 +15,11 @@ import { from, Observable } from 'rxjs';
 import { Event } from '@arrl-co-yotc/shared/build/app/models/event.model';
 import { collectionData } from '../firebase-observables';
 import { FIREBASE_FIRESTORE } from '../firebase.tokens';
+import {
+  isEvent,
+  toTypedCollection,
+  toTypedDocumentWithId,
+} from './firestore-document-mapping';
 
 /**
  * Service for managing event data from Firestore.
@@ -34,7 +39,7 @@ export class EventService {
     return from(
       getDoc(eventDoc).then((docSnapshot) => {
         if (docSnapshot.exists()) {
-          return { id: docSnapshot.id, ...docSnapshot.data() } as Event;
+          return toTypedDocumentWithId(docSnapshot.id, docSnapshot.data(), isEvent);
         }
         return null;
       }),
@@ -47,7 +52,7 @@ export class EventService {
   getAllEvents(): Observable<Event[]> {
     const eventsGroup = collectionGroup(this.firestore, 'events');
     const q = query(eventsGroup, orderBy('startTime', 'asc'));
-    return collectionData(q, { idField: 'id' }) as Observable<Event[]>;
+    return toTypedCollection(collectionData(q, { idField: 'id' }), isEvent);
   }
 
   /**
@@ -56,7 +61,7 @@ export class EventService {
   getClubEvents(clubId: string): Observable<Event[]> {
     const eventsCollection = collection(this.firestore, `clubs/${clubId}/events`);
     const q = query(eventsCollection, orderBy('startTime', 'asc'));
-    return collectionData(q, { idField: 'id' }) as Observable<Event[]>;
+    return toTypedCollection(collectionData(q, { idField: 'id' }), isEvent);
   }
 
   /**

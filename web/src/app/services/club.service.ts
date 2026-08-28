@@ -16,6 +16,11 @@ import { map, switchMap } from 'rxjs/operators';
 import { Club } from '@arrl-co-yotc/shared/build/app/models/club.model';
 import { collectionData } from '../firebase-observables';
 import { FIREBASE_FIRESTORE } from '../firebase.tokens';
+import {
+  isClub,
+  toTypedCollection,
+  toTypedDocumentWithId,
+} from './firestore-document-mapping';
 
 /**
  * Service for managing club data from Firestore.
@@ -32,7 +37,7 @@ export class ClubService {
    */
   getActiveClubs(): Observable<Club[]> {
     const q = query(this.clubsCollection, where('isActive', '==', true), orderBy('name', 'asc'));
-    return collectionData(q, { idField: 'id' }) as Observable<Club[]>;
+    return toTypedCollection(collectionData(q, { idField: 'id' }), isClub);
   }
 
   /**
@@ -43,7 +48,7 @@ export class ClubService {
     return from(
       getDoc(clubDoc).then((docSnapshot) => {
         if (docSnapshot.exists()) {
-          return { id: docSnapshot.id, ...docSnapshot.data() } as Club;
+          return toTypedDocumentWithId(docSnapshot.id, docSnapshot.data(), isClub);
         }
         return null;
       }),
@@ -55,7 +60,7 @@ export class ClubService {
    */
   getClubBySlug(slug: string): Observable<Club | null> {
     const q = query(this.clubsCollection, where('slug', '==', slug));
-    return (collectionData(q, { idField: 'id' }) as Observable<Club[]>).pipe(
+    return toTypedCollection(collectionData(q, { idField: 'id' }), isClub).pipe(
       map((clubs) => {
         if (clubs.length > 0) {
           return clubs[0];
@@ -88,7 +93,7 @@ export class ClubService {
    */
   getAllClubs(): Observable<Club[]> {
     const q = query(this.clubsCollection, orderBy('name', 'asc'));
-    return collectionData(q, { idField: 'id' }) as Observable<Club[]>;
+    return toTypedCollection(collectionData(q, { idField: 'id' }), isClub);
   }
 
   /**
@@ -100,7 +105,7 @@ export class ClubService {
       where('isActive', '==', false),
       orderBy('createdAt', 'desc'),
     );
-    return collectionData(q, { idField: 'id' }) as Observable<Club[]>;
+    return toTypedCollection(collectionData(q, { idField: 'id' }), isClub);
   }
 
   /**
