@@ -2,30 +2,46 @@
  * Utility functions for handling Firestore timestamps
  */
 
+export interface FirestoreTimestampLike {
+  toDate(): Date;
+}
+
+function isValidDate(value: unknown): value is Date {
+  return value instanceof Date && !Number.isNaN(value.getTime());
+}
+
+function isFirestoreTimestampLike(value: unknown): value is FirestoreTimestampLike {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'toDate' in value &&
+    typeof value.toDate === 'function'
+  );
+}
+
 /**
  * Convert Firestore Timestamp to Date for display
- * @param timestamp - A Date object, Firestore Timestamp, ISO string, or null/undefined
+ * @param timestamp - A Date object, Firestore Timestamp-like value, date string, or unknown value
  * @returns A Date object or null if the input is invalid
  */
-export function toDate(
-  timestamp: Date | { toDate(): Date } | string | null | undefined,
-): Date | null {
-  if (!timestamp) {
-    return null;
-  }
-  if (timestamp instanceof Date) {
+export function toDate(timestamp: unknown): Date | null {
+  if (isValidDate(timestamp)) {
     return timestamp;
   }
-  if (
-    typeof timestamp === 'object' &&
-    'toDate' in timestamp &&
-    typeof timestamp.toDate === 'function'
-  ) {
-    return timestamp.toDate();
+
+  if (isFirestoreTimestampLike(timestamp)) {
+    try {
+      const date = timestamp.toDate();
+      return isValidDate(date) ? date : null;
+    } catch {
+      return null;
+    }
   }
+
   if (typeof timestamp === 'string') {
     const date = new Date(timestamp);
-    return isNaN(date.getTime()) ? null : date;
+    return isValidDate(date) ? date : null;
   }
+
   return null;
 }
