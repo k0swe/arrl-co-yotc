@@ -22,7 +22,7 @@ import { MembershipService } from '../../services/membership.service';
 import { UserService } from '../../services/user.service';
 import { DocumentService } from '../../services/document.service';
 import { AuthService } from '../../auth/auth.service';
-import { catchError, forkJoin, of } from 'rxjs';
+import { catchError, of } from 'rxjs';
 import { toDate } from '../../utils/timestamp.util';
 
 export interface EventDetailDialogData {
@@ -130,18 +130,19 @@ export class EventDetailDialog implements OnInit {
       return;
     }
 
-    const userObservables = userIds.map((userId) =>
-      this.userService.getUser(userId).pipe(catchError(() => of(null))),
-    );
-
-    forkJoin(userObservables)
-      .pipe(takeUntilDestroyed(this.destroyRef))
+    this.userService
+      .getUsers(userIds)
+      .pipe(
+        catchError((error) => {
+          console.error('Error loading RSVP user names:', error);
+          return of(new Map());
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
       .subscribe((users) => {
         const namesMap = new Map<string, string>();
-        users.forEach((user, index) => {
-          if (user) {
-            namesMap.set(userIds[index], `${user.name} (${user.callsign})`);
-          }
+        users.forEach((user, userId) => {
+          namesMap.set(userId, `${user.name} (${user.callsign})`);
         });
         this.userNames.set(namesMap);
       });

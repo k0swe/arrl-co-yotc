@@ -28,7 +28,7 @@ import { Event, EventRsvp } from '@arrl-co-yotc/shared/build/app/models/event.mo
 import { MembershipStatus } from '@arrl-co-yotc/shared/build/app/models/user.model';
 import { EditEventDialog, EventFormData } from '../edit-event-dialog/edit-event-dialog';
 import { ConfirmDialog } from '../confirm-dialog/confirm-dialog';
-import { catchError, of, forkJoin } from 'rxjs';
+import { catchError, of } from 'rxjs';
 
 @Component({
   selector: 'app-event-list',
@@ -193,25 +193,25 @@ export class EventList {
 
   private loadUserNames(userIds: string[]): void {
     const currentNames = this.userNames();
-    const missingUserIds = userIds.filter((id) => !currentNames.has(id));
+    const missingUserIds = [...new Set(userIds.filter((id) => !currentNames.has(id)))];
 
     if (missingUserIds.length === 0) {
       return;
     }
 
-    // Load all missing user names
-    const userObservables = missingUserIds.map((userId) =>
-      this.userService.getUser(userId).pipe(catchError(() => of(null))),
-    );
-
-    forkJoin(userObservables)
-      .pipe(takeUntilDestroyed(this.destroyRef))
+    this.userService
+      .getUsers(missingUserIds)
+      .pipe(
+        catchError((error) => {
+          console.error('Error loading attendee names:', error);
+          return of(new Map());
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
       .subscribe((users) => {
-        const updatedNames = new Map(currentNames);
-        users.forEach((user, index) => {
-          if (user) {
-            updatedNames.set(missingUserIds[index], `${user.name} (${user.callsign})`);
-          }
+        const updatedNames = new Map(this.userNames());
+        users.forEach((user, userId) => {
+          updatedNames.set(userId, `${user.name} (${user.callsign})`);
         });
         this.userNames.set(updatedNames);
       });

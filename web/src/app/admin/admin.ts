@@ -11,18 +11,15 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { FormsModule } from '@angular/forms';
 import { ClubService } from '../services/club.service';
 import { StorageService } from '../services/storage.service';
+import { UserService } from '../services/user.service';
 import { Club } from '@arrl-co-yotc/shared/build/app/models/club.model';
-import { User } from '@arrl-co-yotc/shared/build/app/models/user.model';
 import { ClubCard } from '../clubs/club-card/club-card';
-import { catchError, of, from, forkJoin } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { doc, getDoc } from 'firebase/firestore';
+import { catchError, of } from 'rxjs';
 import { EditClubDialog, ClubFormData } from '../clubs/edit-club-dialog/edit-club-dialog';
 import {
   RecentDocumentsDialog,
   RecentDocumentsDialogData,
 } from './recent-documents-dialog/recent-documents-dialog';
-import { FIREBASE_FIRESTORE } from '../firebase.tokens';
 
 @Component({
   selector: 'app-admin',
@@ -45,7 +42,7 @@ import { FIREBASE_FIRESTORE } from '../firebase.tokens';
 export class Admin {
   private clubService = inject(ClubService);
   private storageService = inject(StorageService);
-  private firestore = inject(FIREBASE_FIRESTORE);
+  private userService = inject(UserService);
   private snackBar = inject(MatSnackBar);
   private destroyRef = inject(DestroyRef);
   private dialog = inject(MatDialog);
@@ -88,41 +85,22 @@ export class Admin {
       return;
     }
 
-    // Fetch user data for each user ID using getDoc for one-time reads
-    // Note: User data could be cached in a future enhancement to avoid redundant Firestore requests
-    // across multiple loadPendingClubs() calls. However, since admin reviews are infrequent and
-    // user data rarely changes, the current implementation is acceptable.
-    const userFetches = userIds.map((userId) =>
-      from(getDoc(doc(this.firestore, 'users', userId))).pipe(
-        map((docSnap) => {
-          if (docSnap.exists()) {
-            return { id: docSnap.id, ...docSnap.data() };
-          }
-          return null;
-        }),
+    this.userService
+      .getUsers(userIds)
+      .pipe(
         catchError((error) => {
-          console.error(`Error fetching user ${userId}:`, error);
-          return of(null);
+          console.error('Error loading user names:', error);
+          return of(new Map());
         }),
-      ),
-    );
-
-    forkJoin(userFetches)
-      .pipe(takeUntilDestroyed(this.destroyRef))
+        takeUntilDestroyed(this.destroyRef),
+      )
       .subscribe({
         next: (users) => {
           const nameMap = new Map<string, string>();
-          users.forEach((user, index) => {
-            if (user && typeof user === 'object' && 'name' in user && 'callsign' in user) {
-              const userData = user as User;
-              // Display name with callsign for better identification
-              nameMap.set(userIds[index], `${userData.name} (${userData.callsign})`);
-            }
+          users.forEach((user, userId) => {
+            nameMap.set(userId, `${user.name} (${user.callsign})`);
           });
           this.userNames.set(nameMap);
-        },
-        error: (error) => {
-          console.error('Error loading user names:', error);
         },
       });
   }

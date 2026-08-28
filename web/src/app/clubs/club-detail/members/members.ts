@@ -25,7 +25,7 @@ import { ClubService } from '../../../services/club.service';
 import { AuthService } from '../../../auth/auth.service';
 import { ClubMembership } from '@arrl-co-yotc/shared/build/app/models/user.model';
 import { User } from '@arrl-co-yotc/shared/build/app/models/user.model';
-import { catchError, of, combineLatest, switchMap, map, Observable, forkJoin } from 'rxjs';
+import { catchError, of, combineLatest, switchMap, map } from 'rxjs';
 
 interface MemberWithUser {
   membership: ClubMembership;
@@ -143,20 +143,18 @@ export class Members {
     })
       .pipe(
         switchMap(({ active, pending, denied }) => {
-          // Create observables for loading users
-          const activeUsers$ =
-            active.length > 0 ? this.loadUsersForMembershipsObservable(active) : of([]);
-          const pendingUsers$ =
-            pending.length > 0 ? this.loadUsersForMembershipsObservable(pending) : of([]);
-          const deniedUsers$ =
-            denied.length > 0 ? this.loadUsersForMembershipsObservable(denied) : of([]);
-
-          // Load users for active, pending, and denied members in parallel
-          return forkJoin({
-            activeMembers: activeUsers$,
-            pendingMembers: pendingUsers$,
-            deniedMembers: deniedUsers$,
-          });
+          const memberships = [...active, ...pending, ...denied];
+          return this.userService.getUsers(memberships.map((membership) => membership.userId)).pipe(
+            catchError((error) => {
+              console.error('Error fetching users:', error);
+              return of(new Map<string, User>());
+            }),
+            map((users) => ({
+              activeMembers: this.withUsers(active, users),
+              pendingMembers: this.withUsers(pending, users),
+              deniedMembers: this.withUsers(denied, users),
+            })),
+          );
         }),
         takeUntilDestroyed(this.destroyRef),
       )
@@ -174,30 +172,14 @@ export class Members {
       });
   }
 
-  private loadUsersForMembershipsObservable(
+  private withUsers(
     memberships: ClubMembership[],
-  ): Observable<MemberWithUser[]> {
-    const userFetches = memberships.map((membership) =>
-      this.userService.getUser(membership.userId).pipe(
-        catchError((error) => {
-          console.error(`Error fetching user ${membership.userId}:`, error);
-          return of(null);
-        }),
-      ),
-    );
-
-    return forkJoin(userFetches).pipe(
-      catchError((error) => {
-        console.error('Error fetching users:', error);
-        return of(memberships.map(() => null));
-      }),
-      map((users) =>
-        memberships.map((membership, index) => ({
-          membership,
-          user: users[index],
-        })),
-      ),
-    );
+    users: ReadonlyMap<string, User>,
+  ): MemberWithUser[] {
+    return memberships.map((membership) => ({
+      membership,
+      user: users.get(membership.userId) ?? null,
+    }));
   }
 
   protected approveMembership(membershipWithUser: MemberWithUser): void {
