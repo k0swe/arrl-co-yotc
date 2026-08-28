@@ -13,7 +13,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -26,6 +25,8 @@ import { AddClubDialog } from './add-club-dialog/add-club-dialog';
 import { ClubCard } from './club-card/club-card';
 import { of, forkJoin, Subscription } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { standardDialogConfig } from '../ui/dialog-config';
+import { UiFeedback } from '../ui/ui-feedback.service';
 
 interface ClubWithMembership extends Club {
   membershipStatus?: MembershipStatus;
@@ -40,7 +41,6 @@ interface ClubWithMembership extends Club {
     MatIconModule,
     MatProgressSpinnerModule,
     MatChipsModule,
-    MatSnackBarModule,
     MatInputModule,
     MatFormFieldModule,
     ClubCard,
@@ -53,7 +53,7 @@ export class Clubs {
   private clubService = inject(ClubService);
   private membershipService = inject(MembershipService);
   private authService = inject(AuthService);
-  private snackBar = inject(MatSnackBar);
+  private feedback = inject(UiFeedback);
   private dialog = inject(MatDialog);
   private destroyRef = inject(DestroyRef);
 
@@ -181,12 +181,8 @@ export class Clubs {
       });
   }
 
-  private showSnackBar(message: string, action: string = 'Close'): void {
-    try {
-      this.snackBar.open(message, action, { duration: 3000 });
-    } catch {
-      // Silently handle if injector is destroyed
-    }
+  private showSnackBar(message: string): void {
+    this.feedback.info(message);
   }
 
   protected applyForMembership(club: ClubWithMembership): void {
@@ -270,11 +266,7 @@ export class Clubs {
       return;
     }
 
-    const dialogRef = this.dialog.open(AddClubDialog, {
-      width: '600px',
-      maxWidth: '90vw',
-      disableClose: false,
-    });
+    const dialogRef = this.dialog.open(AddClubDialog, standardDialogConfig());
 
     dialogRef
       .afterClosed()

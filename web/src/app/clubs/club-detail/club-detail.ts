@@ -13,7 +13,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ClubService } from '../../services/club.service';
 import { MembershipService } from '../../services/membership.service';
 import { AuthService } from '../../auth/auth.service';
@@ -24,6 +23,8 @@ import { EventList } from './event-list/event-list';
 import { Club } from '@arrl-co-yotc/shared/build/app/models/club.model';
 import { MembershipStatus } from '@arrl-co-yotc/shared/build/app/models/user.model';
 import { catchError, of, switchMap } from 'rxjs';
+import { standardDialogConfig } from '../../ui/dialog-config';
+import { UiFeedback } from '../../ui/ui-feedback.service';
 
 @Component({
   selector: 'app-club-detail',
@@ -33,7 +34,6 @@ import { catchError, of, switchMap } from 'rxjs';
     MatIconModule,
     MatButtonModule,
     MatDialogModule,
-    MatSnackBarModule,
     ClubCard,
     Members,
     EventList,
@@ -48,7 +48,7 @@ export class ClubDetail {
   private membershipService = inject(MembershipService);
   private authService = inject(AuthService);
   private dialog = inject(MatDialog);
-  private snackBar = inject(MatSnackBar);
+  private feedback = inject(UiFeedback);
   private destroyRef = inject(DestroyRef);
 
   protected readonly loading = signal(true);
@@ -199,10 +199,7 @@ export class ClubDetail {
       return;
     }
 
-    const dialogRef = this.dialog.open(EditClubDialog, {
-      width: '600px',
-      data: { club: currentClub },
-    });
+    const dialogRef = this.dialog.open(EditClubDialog, standardDialogConfig({ club: currentClub }));
 
     dialogRef
       .afterClosed()
@@ -215,16 +212,14 @@ export class ClubDetail {
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
               next: () => {
-                this.snackBar.open(`${result.name} has been updated!`, 'Close', {
-                  duration: 3000,
-                });
+                this.feedback.success(`${result.name} has been updated!`);
                 // Update the local club data with the new values
                 this.club.set({ ...currentClub, ...result });
                 this.loading.set(false);
               },
               error: (error) => {
                 console.error('Error updating club:', error);
-                this.snackBar.open('Failed to update club', 'Close', { duration: 3000 });
+                this.feedback.error('Failed to update club');
                 this.loading.set(false);
               },
             });

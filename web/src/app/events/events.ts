@@ -16,6 +16,7 @@ import { catchError, forkJoin, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { EventDetailDialog } from './event-detail-dialog/event-detail-dialog';
 import { toDate } from '../utils/timestamp.util';
+import { standardDialogConfig } from '../ui/dialog-config';
 
 interface EventWithClub extends Event {
   club?: Club;
@@ -137,13 +138,13 @@ export class Events {
       return;
     }
 
-    this.dialog.open(EventDetailDialog, {
-      width: '600px',
-      data: {
+    this.dialog.open(
+      EventDetailDialog,
+      standardDialogConfig({
         event,
         club: event.club,
-      },
-    });
+      }),
+    );
   }
 
   protected readonly toDate = toDate;
