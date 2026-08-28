@@ -1,7 +1,93 @@
 <h2 mat-dialog-title>Recent Document Uploads</h2>
-<p class="dialog-subtitle">Documents uploaded on or after {{ data.since | date: 'mediumDate' }}</p>
+<p class="dialog-subtitle">
+  Documents uploaded between {{ sinceDate() | date: 'mediumDate' }}
+  and
+  {{ untilDate() ? (untilDate() | date: 'mediumDate') : 'now' }}
+</p>
 
 <mat-dialog-content>
+  <div class="filters" aria-label="Document search filters">
+    <mat-form-field appearance="outline">
+      <mat-label>Scope</mat-label>
+      <mat-select
+        [ngModel]="filters().scope"
+        (ngModelChange)="onFilterChange({ scope: $event })"
+        aria-label="Filter by upload scope"
+      >
+        <mat-option value="all">All uploads</mat-option>
+        <mat-option value="event">Event uploads</mat-option>
+        <mat-option value="club">Club-level uploads</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Club</mat-label>
+      <mat-select
+        [ngModel]="filters().clubId"
+        (ngModelChange)="onFilterChange({ clubId: $event })"
+        aria-label="Filter by club"
+      >
+        <mat-option value="">All clubs</mat-option>
+        @for (clubId of clubFilterOptions(); track clubId) {
+          <mat-option [value]="clubId">{{ getClubNameById(clubId) }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Event</mat-label>
+      <mat-select
+        [ngModel]="filters().eventId"
+        (ngModelChange)="onFilterChange({ eventId: $event })"
+        aria-label="Filter by event"
+        [disabled]="filters().scope === 'club'"
+      >
+        <mat-option value="">All events</mat-option>
+        @for (eventKey of eventFilterOptions(); track eventKey) {
+          <mat-option [value]="getEventFilterValue(eventKey)">
+            {{ getEventOptionName(eventKey) }}
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Uploader</mat-label>
+      <mat-select
+        [ngModel]="filters().uploadedBy"
+        (ngModelChange)="onFilterChange({ uploadedBy: $event })"
+        aria-label="Filter by uploader"
+      >
+        <mat-option value="">All uploaders</mat-option>
+        @for (uploaderId of uploaderFilterOptions(); track uploaderId) {
+          <mat-option [value]="uploaderId">{{ getUploaderName(uploaderId) }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Uploaded on or after</mat-label>
+      <input
+        matInput
+        type="date"
+        [ngModel]="filters().since"
+        (ngModelChange)="onFilterChange({ since: $event })"
+        aria-label="Filter by start date"
+      />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Uploaded on or before</mat-label>
+      <input
+        matInput
+        type="date"
+        [ngModel]="filters().until"
+        (ngModelChange)="onFilterChange({ until: $event })"
+        aria-label="Filter by end date"
+      />
+    </mat-form-field>
+  </div>
+
   @if (loading()) {
     <div class="loading-container" role="status" aria-live="polite">
       <mat-spinner [diameter]="40"></mat-spinner>
@@ -10,7 +96,7 @@
   } @else if (documents().length === 0) {
     <div class="empty-state" role="status">
       <mat-icon class="empty-icon">folder_open</mat-icon>
-      <p>No documents uploaded since {{ data.since | date: 'mediumDate' }}.</p>
+      <p>No documents found for the selected filters.</p>
     </div>
   } @else {
     <table mat-table [dataSource]="documents()" class="documents-table" aria-label="Recent document uploads">
@@ -31,9 +117,25 @@
         </td>
       </ng-container>
 
+      <ng-container matColumnDef="scope">
+        <th mat-header-cell *matHeaderCellDef>Scope</th>
+        <td mat-cell *matCellDef="let doc">
+          @if (isEventDocument(doc)) {
+            <span class="event-scope-label">Event</span>
+          } @else {
+            <span class="club-level-label">Club-level</span>
+          }
+        </td>
+      </ng-container>
+
       <ng-container matColumnDef="club">
         <th mat-header-cell *matHeaderCellDef>Club</th>
         <td mat-cell *matCellDef="let doc">{{ getClubName(doc) }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="uploader">
+        <th mat-header-cell *matHeaderCellDef>Uploader</th>
+        <td mat-cell *matCellDef="let doc">{{ getUploaderName(doc.uploadedBy) }}</td>
       </ng-container>
 
       <ng-container matColumnDef="actions">
@@ -64,6 +166,26 @@
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
     </table>
+
+    <div class="pagination">
+      <button
+        mat-button
+        (click)="onPreviousPage()"
+        [disabled]="!hasPreviousPage()"
+        aria-label="Show previous page of upload results"
+      >
+        Previous
+      </button>
+      <span>Page {{ pageIndex() + 1 }} of {{ totalPages() }} ({{ totalDocuments() }} results)</span>
+      <button
+        mat-button
+        (click)="onNextPage()"
+        [disabled]="!hasNextPage()"
+        aria-label="Show next page of upload results"
+      >
+        Next
+      </button>
+    </div>
   }
 </mat-dialog-content>
 

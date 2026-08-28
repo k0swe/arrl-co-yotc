@@ -6,17 +6,19 @@ import {
   deleteDoc,
   doc,
   orderBy,
+  QueryConstraint,
   query,
   serverTimestamp,
   Timestamp,
   where,
 } from 'firebase/firestore';
 import { firstValueFrom, from, Observable } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { map, switchMap } from 'rxjs/operators';
 import {
   AnyDocument,
   ClubDocument,
   EventLog,
+  isEventDocument,
 } from '@arrl-co-yotc/shared/build/app/models/event.model';
 import { StorageService } from './storage.service';
 import { collectionData } from '../firebase-observables';
@@ -49,6 +51,47 @@ export class DocumentService {
       orderBy('uploadedAt', 'desc'),
     );
     return collectionData(documentsGroupQuery, { idField: 'id' }) as Observable<AnyDocument[]>;
+  }
+
+  getRecentDocuments(search: {
+    since: Date;
+    until?: Date | null;
+    clubId?: string | null;
+    eventId?: string | null;
+    uploadedBy?: string | null;
+    scope?: 'all' | 'event' | 'club';
+    pageIndex?: number;
+    pageSize?: number;
+  }): Observable<{ documents: AnyDocument[]; total: number }> {
+    const constraints: QueryConstraint[] = [where('uploadedAt', '>=', Timestamp.fromDate(search.since))];
+    if (search.until) {
+      constraints.push(where('uploadedAt', '<=', Timestamp.fromDate(search.until)));
+    }
+    if (search.clubId) {
+      constraints.push(where('clubId', '==', search.clubId));
+    }
+    if (search.uploadedBy) {
+      constraints.push(where('uploadedBy', '==', search.uploadedBy));
+    }
+    constraints.push(orderBy('uploadedAt', 'desc'));
+
+    const documentsGroupQuery = query(collectionGroup(this.firestore, 'documents'), ...constraints);
+
+    return (collectionData(documentsGroupQuery, { idField: 'id' }) as Observable<AnyDocument[]>).pipe(
+      map((documents) => {
+        const filtered = this.filterRecentDocuments(documents, search.scope, search.eventId);
+        if (search.pageSize === undefined) {
+          return { documents: filtered, total: filtered.length };
+        }
+        const pageSize = Math.max(1, search.pageSize ?? 25);
+        const pageIndex = Math.max(0, search.pageIndex ?? 0);
+        const start = pageIndex * pageSize;
+        return {
+          documents: filtered.slice(start, start + pageSize),
+          total: filtered.length,
+        };
+      }),
+    );
   }
 
   /**
@@ -199,5 +242,22 @@ export class DocumentService {
     } catch (cleanupError) {
       console.warn('Failed to clean up club document from storage:', storagePath, cleanupError);
     }
+  }
+
+  private filterRecentDocuments(
+    documents: AnyDocument[],
+    scope: 'all' | 'event' | 'club' | undefined,
+    eventId: string | null | undefined,
+  ): AnyDocument[] {
+    let filtered = documents;
+    if (scope === 'event') {
+      filtered = filtered.filter(isEventDocument);
+    } else if (scope === 'club') {
+      filtered = filtered.filter((doc) => !isEventDocument(doc));
+    }
+    if (eventId) {
+      filtered = filtered.filter((doc) => isEventDocument(doc) && doc.eventId === eventId);
+    }
+    return filtered;
   }
 }
