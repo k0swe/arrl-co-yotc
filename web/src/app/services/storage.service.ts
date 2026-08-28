@@ -66,7 +66,14 @@ export class StorageService {
     const storageRef = ref(this.storage, storagePath);
 
     const uploadResult = await uploadBytes(storageRef, file);
-    const downloadUrl = await getDownloadURL(uploadResult.ref);
+    let downloadUrl: string;
+
+    try {
+      downloadUrl = await getDownloadURL(uploadResult.ref);
+    } catch (error) {
+      await this.deleteUploadedFile(uploadResult.ref, storagePath);
+      throw error;
+    }
 
     return { storagePath, downloadUrl };
   }
@@ -87,7 +94,14 @@ export class StorageService {
     const storageRef = ref(this.storage, storagePath);
 
     const uploadResult = await uploadBytes(storageRef, file);
-    const downloadUrl = await getDownloadURL(uploadResult.ref);
+    let downloadUrl: string;
+
+    try {
+      downloadUrl = await getDownloadURL(uploadResult.ref);
+    } catch (error) {
+      await this.deleteUploadedFile(uploadResult.ref, storagePath);
+      throw error;
+    }
 
     return { storagePath, downloadUrl };
   }
@@ -135,6 +149,17 @@ export class StorageService {
       // If path parsing fails, just resolve without error
       console.warn('Failed to delete document from storage:', storagePath, error);
       return from(Promise.resolve());
+    }
+  }
+
+  private async deleteUploadedFile(
+    storageRef: ReturnType<typeof ref>,
+    storagePath: string,
+  ): Promise<void> {
+    try {
+      await deleteObject(storageRef);
+    } catch (cleanupError) {
+      console.warn('Failed to clean up uploaded file from storage:', storagePath, cleanupError);
     }
   }
 }
