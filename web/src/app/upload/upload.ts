@@ -41,6 +41,11 @@ interface EventWithClub {
 
 type UploadMode = 'event' | 'club';
 
+interface UploadOutcome {
+  filename: string;
+  success: boolean;
+}
+
 @Component({
   selector: 'app-upload',
   imports: [
@@ -79,6 +84,7 @@ export class Upload implements OnInit {
   protected readonly rsvpedEvents = signal<EventWithClub[]>([]);
   protected readonly selectedEvent = signal<EventWithClub | null>(null);
   protected readonly selectedFiles = signal<File[]>([]);
+  protected readonly uploadOutcomes = signal<UploadOutcome[]>([]);
   protected readonly existingDocuments = signal<EventLog[]>([]);
   protected readonly loadingDocuments = signal(false);
 
@@ -86,6 +92,7 @@ export class Upload implements OnInit {
   protected readonly memberClubs = signal<Club[]>([]);
   protected readonly selectedClub = signal<Club | null>(null);
   protected readonly selectedClubFiles = signal<File[]>([]);
+  protected readonly clubUploadOutcomes = signal<UploadOutcome[]>([]);
   protected readonly existingClubDocuments = signal<ClubDocument[]>([]);
   protected readonly loadingClubDocuments = signal(false);
 
@@ -217,6 +224,8 @@ export class Upload implements OnInit {
     this.uploadMode.set(newMode);
     this.selectedFiles.set([]);
     this.selectedClubFiles.set([]);
+    this.uploadOutcomes.set([]);
+    this.clubUploadOutcomes.set([]);
     if (newMode === 'club' && this.memberClubs().length === 0) {
       this.loadMemberClubs();
     }
@@ -225,12 +234,14 @@ export class Upload implements OnInit {
   protected onEventSelect(eventWithClub: EventWithClub): void {
     this.selectedEvent.set(eventWithClub);
     this.selectedFiles.set([]);
+    this.uploadOutcomes.set([]);
     this.loadExistingDocuments(eventWithClub.event);
   }
 
   protected onClubSelect(club: Club): void {
     this.selectedClub.set(club);
     this.selectedClubFiles.set([]);
+    this.clubUploadOutcomes.set([]);
     this.loadExistingClubDocuments(club.id);
   }
 
@@ -272,6 +283,7 @@ export class Upload implements OnInit {
     const input = event.target as HTMLInputElement;
     if (input.files) {
       this.selectedFiles.set(Array.from(input.files));
+      this.uploadOutcomes.set([]);
     }
   }
 
@@ -279,7 +291,49 @@ export class Upload implements OnInit {
     const input = event.target as HTMLInputElement;
     if (input.files) {
       this.selectedClubFiles.set(Array.from(input.files));
+      this.clubUploadOutcomes.set([]);
     }
+  }
+
+  private async uploadFiles(
+    files: File[],
+    uploadFile: (file: File) => Promise<void>,
+  ): Promise<UploadOutcome[]> {
+    const outcomes: UploadOutcome[] = [];
+
+    for (const file of files) {
+      try {
+        await uploadFile(file);
+        outcomes.push({ filename: file.name, success: true });
+      } catch (error) {
+        console.error(`Error uploading ${file.name}:`, error);
+        outcomes.push({ filename: file.name, success: false });
+      }
+    }
+
+    return outcomes;
+  }
+
+  private showUploadOutcome(outcomes: UploadOutcome[]): void {
+    const uploadedCount = outcomes.filter((outcome) => outcome.success).length;
+    const failedOutcomes = outcomes.filter((outcome) => !outcome.success);
+
+    if (failedOutcomes.length === 0) {
+      this.snackBar.open('Files uploaded successfully!', 'Close', {
+        duration: 3000,
+      });
+      return;
+    }
+
+    const failedNames = failedOutcomes.map((outcome) => outcome.filename).join(', ');
+    const message =
+      uploadedCount > 0
+        ? `Uploaded ${uploadedCount} of ${outcomes.length} files. Failed files remain selected for retry: ${failedNames}`
+        : `No files uploaded. Failed files remain selected for retry: ${failedNames}`;
+
+    this.snackBar.open(message, 'Close', {
+      duration: 7000,
+    });
   }
 
   protected async onUpload(): Promise<void> {
@@ -294,27 +348,23 @@ export class Upload implements OnInit {
     this.uploading.set(true);
 
     try {
-      for (const file of files) {
-        await this.documentService.uploadDocument(
+      const outcomes = await this.uploadFiles(files, (file) =>
+        this.documentService.uploadDocument(
           event.event.clubId,
           event.event.id,
           file,
           currentUser.uid,
-        );
+        ),
+      );
+      const failedFiles = files.filter((_, index) => !outcomes[index].success);
+
+      this.uploadOutcomes.set(outcomes);
+      this.selectedFiles.set(failedFiles);
+      this.showUploadOutcome(outcomes);
+
+      if (failedFiles.length < files.length) {
+        this.loadExistingDocuments(event.event);
       }
-
-      this.snackBar.open('Files uploaded successfully!', 'Close', {
-        duration: 3000,
-      });
-
-      this.selectedFiles.set([]);
-      // Reload existing documents
-      this.loadExistingDocuments(event.event);
-    } catch (error) {
-      console.error('Error uploading files:', error);
-      this.snackBar.open('Error uploading files. Please try again.', 'Close', {
-        duration: 5000,
-      });
     } finally {
       this.uploading.set(false);
     }
@@ -332,21 +382,18 @@ export class Upload implements OnInit {
     this.uploading.set(true);
 
     try {
-      for (const file of files) {
-        await this.documentService.uploadClubDocument(club.id, file, currentUser.uid);
+      const outcomes = await this.uploadFiles(files, (file) =>
+        this.documentService.uploadClubDocument(club.id, file, currentUser.uid),
+      );
+      const failedFiles = files.filter((_, index) => !outcomes[index].success);
+
+      this.clubUploadOutcomes.set(outcomes);
+      this.selectedClubFiles.set(failedFiles);
+      this.showUploadOutcome(outcomes);
+
+      if (failedFiles.length < files.length) {
+        this.loadExistingClubDocuments(club.id);
       }
-
-      this.snackBar.open('Files uploaded successfully!', 'Close', {
-        duration: 3000,
-      });
-
-      this.selectedClubFiles.set([]);
-      this.loadExistingClubDocuments(club.id);
-    } catch (error) {
-      console.error('Error uploading club files:', error);
-      this.snackBar.open('Error uploading files. Please try again.', 'Close', {
-        duration: 5000,
-      });
     } finally {
       this.uploading.set(false);
     }
