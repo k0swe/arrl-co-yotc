@@ -66,7 +66,7 @@ service firebase.storage {
     // Browsers send .adi/.adif files as application/octet-stream because there
     // is no registered MIME type for ADIF, so we allow these by filename instead.
     function isValidAdifFile() {
-      return request.resource.name.matches('.*\\.(adi|adif)$');
+      return request.resource.name.matches('.*\\.[aA][dD][iI][fF]?$');
     }
     
     // Validate logo file size (max 5MB)
