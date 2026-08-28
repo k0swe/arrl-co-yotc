@@ -12,9 +12,9 @@ control:
   to check if a user is a club leader by verifying write access to the parent club document
 - **`clubs/{clubId}/events/{eventId}`**: Events as sub-collections automatically inherit club-based
   permissions
-- **`events/{eventId}/rsvps/{rsvpId}`**: RSVPs as sub-collections of events enable event-scoped
+- **`clubs/{clubId}/events/{eventId}/rsvps/{rsvpId}`**: RSVPs as sub-collections of events enable event-scoped
   access control
-- **`events/{eventId}/documents/{documentId}`**: Event verification documents as sub-collections 
+- **`clubs/{clubId}/events/{eventId}/documents/{documentId}`**: Event verification documents as sub-collections
   enable RSVP-based upload permissions
 
 This structure allows security rules to enforce club leader permissions without queries:
@@ -155,7 +155,7 @@ inheritance.
 
 ---
 
-### `events/{eventId}/rsvps` (sub-collection)
+### `clubs/{clubId}/events/{eventId}/rsvps` (sub-collection)
 
 Stores user RSVPs for a specific event. The full path is
 `clubs/{clubId}/events/{eventId}/rsvps/{rsvpId}`.
@@ -185,7 +185,7 @@ Stores user RSVPs for a specific event. The full path is
 
 ---
 
-### `events/{eventId}/logs` (sub-collection)
+### `clubs/{clubId}/events/{eventId}/logs` (sub-collection)
 
 **DEPRECATED**: This sub-collection is being phased out in favor of the more flexible `documents` sub-collection. Kept for backward compatibility.
 
@@ -219,7 +219,7 @@ Stores ADIF log files uploaded for a specific event. The full path is
 
 ---
 
-### `events/{eventId}/documents` (sub-collection)
+### `clubs/{clubId}/events/{eventId}/documents` (sub-collection)
 
 Stores event verification documents (ADIF logs, photos, PDFs, etc.) uploaded for a specific event. 
 This flexible sub-collection supports various types of event verification beyond just ADIF logs,
