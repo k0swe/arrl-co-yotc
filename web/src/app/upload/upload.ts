@@ -41,6 +41,11 @@ interface EventWithClub {
 
 type UploadMode = 'event' | 'club';
 
+interface UploadOutcome {
+  filename: string;
+  succeeded: boolean;
+}
+
 @Component({
   selector: 'app-upload',
   imports: [
@@ -79,6 +84,7 @@ export class Upload implements OnInit {
   protected readonly rsvpedEvents = signal<EventWithClub[]>([]);
   protected readonly selectedEvent = signal<EventWithClub | null>(null);
   protected readonly selectedFiles = signal<File[]>([]);
+  protected readonly eventUploadOutcomes = signal<UploadOutcome[]>([]);
   protected readonly existingDocuments = signal<EventLog[]>([]);
   protected readonly loadingDocuments = signal(false);
 
@@ -86,6 +92,7 @@ export class Upload implements OnInit {
   protected readonly memberClubs = signal<Club[]>([]);
   protected readonly selectedClub = signal<Club | null>(null);
   protected readonly selectedClubFiles = signal<File[]>([]);
+  protected readonly clubUploadOutcomes = signal<UploadOutcome[]>([]);
   protected readonly existingClubDocuments = signal<ClubDocument[]>([]);
   protected readonly loadingClubDocuments = signal(false);
 
@@ -217,6 +224,8 @@ export class Upload implements OnInit {
     this.uploadMode.set(newMode);
     this.selectedFiles.set([]);
     this.selectedClubFiles.set([]);
+    this.eventUploadOutcomes.set([]);
+    this.clubUploadOutcomes.set([]);
     if (newMode === 'club' && this.memberClubs().length === 0) {
       this.loadMemberClubs();
     }
@@ -225,12 +234,14 @@ export class Upload implements OnInit {
   protected onEventSelect(eventWithClub: EventWithClub): void {
     this.selectedEvent.set(eventWithClub);
     this.selectedFiles.set([]);
+    this.eventUploadOutcomes.set([]);
     this.loadExistingDocuments(eventWithClub.event);
   }
 
   protected onClubSelect(club: Club): void {
     this.selectedClub.set(club);
     this.selectedClubFiles.set([]);
+    this.clubUploadOutcomes.set([]);
     this.loadExistingClubDocuments(club.id);
   }
 
@@ -272,6 +283,7 @@ export class Upload implements OnInit {
     const input = event.target as HTMLInputElement;
     if (input.files) {
       this.selectedFiles.set(Array.from(input.files));
+      this.eventUploadOutcomes.set([]);
     }
   }
 
@@ -279,6 +291,7 @@ export class Upload implements OnInit {
     const input = event.target as HTMLInputElement;
     if (input.files) {
       this.selectedClubFiles.set(Array.from(input.files));
+      this.clubUploadOutcomes.set([]);
     }
   }
 
@@ -294,27 +307,18 @@ export class Upload implements OnInit {
     this.uploading.set(true);
 
     try {
-      for (const file of files) {
-        await this.documentService.uploadDocument(
+      const outcomes = await this.uploadFiles(files, (file) =>
+        this.documentService.uploadDocument(
           event.event.clubId,
           event.event.id,
           file,
           currentUser.uid,
-        );
-      }
-
-      this.snackBar.open('Files uploaded successfully!', 'Close', {
-        duration: 3000,
-      });
-
-      this.selectedFiles.set([]);
-      // Reload existing documents
+        ),
+      );
+      this.eventUploadOutcomes.set(outcomes);
+      this.selectedFiles.set(this.failedFiles(files, outcomes));
+      this.showUploadResult(outcomes);
       this.loadExistingDocuments(event.event);
-    } catch (error) {
-      console.error('Error uploading files:', error);
-      this.snackBar.open('Error uploading files. Please try again.', 'Close', {
-        duration: 5000,
-      });
     } finally {
       this.uploading.set(false);
     }
@@ -332,24 +336,50 @@ export class Upload implements OnInit {
     this.uploading.set(true);
 
     try {
-      for (const file of files) {
-        await this.documentService.uploadClubDocument(club.id, file, currentUser.uid);
-      }
-
-      this.snackBar.open('Files uploaded successfully!', 'Close', {
-        duration: 3000,
-      });
-
-      this.selectedClubFiles.set([]);
+      const outcomes = await this.uploadFiles(files, (file) =>
+        this.documentService.uploadClubDocument(club.id, file, currentUser.uid),
+      );
+      this.clubUploadOutcomes.set(outcomes);
+      this.selectedClubFiles.set(this.failedFiles(files, outcomes));
+      this.showUploadResult(outcomes);
       this.loadExistingClubDocuments(club.id);
-    } catch (error) {
-      console.error('Error uploading club files:', error);
-      this.snackBar.open('Error uploading files. Please try again.', 'Close', {
-        duration: 5000,
-      });
     } finally {
       this.uploading.set(false);
     }
+  }
+
+  private async uploadFiles(
+    files: File[],
+    upload: (file: File) => Promise<void>,
+  ): Promise<UploadOutcome[]> {
+    const outcomes: UploadOutcome[] = [];
+    for (const file of files) {
+      try {
+        await upload(file);
+        outcomes.push({ filename: file.name, succeeded: true });
+      } catch (error: unknown) {
+        console.error(`Error uploading ${file.name}:`, error);
+        outcomes.push({ filename: file.name, succeeded: false });
+      }
+    }
+    return outcomes;
+  }
+
+  private failedFiles(files: File[], outcomes: UploadOutcome[]): File[] {
+    return files.filter((_, index) => !outcomes[index].succeeded);
+  }
+
+  private showUploadResult(outcomes: UploadOutcome[]): void {
+    const succeeded = outcomes.filter((outcome) => outcome.succeeded).length;
+    const failed = outcomes.length - succeeded;
+    const files = succeeded === 1 ? 'file' : 'files';
+    const message =
+      failed === 0
+        ? `${succeeded} ${files} uploaded successfully.`
+        : succeeded === 0
+          ? `${failed} ${files} could not be uploaded. Only failed files remain for retry.`
+          : `${succeeded} uploaded; ${failed} failed. Only failed files remain for retry.`;
+    this.snackBar.open(message, 'Close', { duration: failed === 0 ? 3000 : 5000 });
   }
 
   protected readonly toDate = toDate;
