@@ -44,6 +44,11 @@ describe('Admin', () => {
     expect(headingTexts.some((t) => t.includes('Upload Standings'))).toBe(true);
   });
 
+  it('should explain that standings uploads are manual snapshots', () => {
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.textContent).toContain('it does not sync the online spreadsheet');
+  });
+
   it('should render the recent uploads section heading', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     const headings = compiled.querySelectorAll('h2');

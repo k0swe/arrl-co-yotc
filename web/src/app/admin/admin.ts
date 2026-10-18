@@ -9,8 +9,12 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { FormsModule } from '@angular/forms';
+import { Subscription } from 'rxjs';
+import { takeWhile } from 'rxjs/operators';
 import { ClubService } from '../services/club.service';
 import { StorageService } from '../services/storage.service';
+import { StandingsService } from '../services/standings.service';
+import { StandingsUploadStatus } from '@arrl-co-yotc/shared/build/app/models/standing.model';
 import { Club } from '@arrl-co-yotc/shared/build/app/models/club.model';
 import { User } from '@arrl-co-yotc/shared/build/app/models/user.model';
 import { ClubCard } from '../clubs/club-card/club-card';
@@ -45,16 +49,20 @@ import { FIREBASE_FIRESTORE } from '../firebase.tokens';
 export class Admin {
   private clubService = inject(ClubService);
   private storageService = inject(StorageService);
+  private standingsService = inject(StandingsService);
   private firestore = inject(FIREBASE_FIRESTORE);
   private snackBar = inject(MatSnackBar);
   private destroyRef = inject(DestroyRef);
   private dialog = inject(MatDialog);
+  private standingsStatusSubscription?: Subscription;
 
   protected readonly loading = signal(true);
   protected readonly pendingClubs = signal<Club[]>([]);
   protected readonly processingClubIds = signal<Set<string>>(new Set());
   protected readonly userNames = signal<Map<string, string>>(new Map());
   protected readonly standingsUploading = signal(false);
+  protected readonly standingsUploadWaiting = signal(false);
+  protected readonly standingsUploadStatus = signal<StandingsUploadStatus | undefined>(undefined);
   protected readonly sinceDate = signal<string>(this.defaultSinceDate());
 
   constructor() {
@@ -273,9 +281,39 @@ export class Admin {
       .uploadStandingsFile(file)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: () => {
-          this.showSnackBar('Standings file uploaded. Processing will begin shortly.');
+        next: (storagePath) => {
+          const uploadId = storagePath.slice('standings-uploads/'.length);
+          this.standingsStatusSubscription?.unsubscribe();
+          this.standingsUploadStatus.set(undefined);
+          this.standingsUploadWaiting.set(true);
           this.standingsUploading.set(false);
+          this.standingsStatusSubscription = this.standingsService
+            .getUploadStatus(uploadId)
+            .pipe(
+              takeUntilDestroyed(this.destroyRef),
+              takeWhile(
+                (status) => status?.status !== 'succeeded' && status?.status !== 'failed',
+                true,
+              ),
+            )
+            .subscribe({
+              next: (status) => {
+                this.standingsUploadStatus.set(status);
+                this.standingsUploadWaiting.set(status === undefined);
+                if (status?.status === 'succeeded') {
+                  this.showSnackBar(
+                    `Published ${status.rowCount} standings row(s) from "${status.worksheetName}".`,
+                  );
+                } else if (status?.status === 'failed') {
+                  this.showSnackBar(`Standings upload rejected: ${status.error}`);
+                }
+              },
+              error: (error) => {
+                console.error('Error checking standings upload status:', error);
+                this.standingsUploadWaiting.set(false);
+                this.showSnackBar('Upload completed, but its processing result could not be loaded.');
+              },
+            });
           // Reset the file input so the same file can be re-uploaded if needed.
           input.value = '';
         },
@@ -285,5 +323,23 @@ export class Admin {
           this.standingsUploading.set(false);
         },
       });
+  }
+
+  protected standingsUploadMessage(): string {
+    if (this.standingsUploadWaiting()) {
+      return 'Workbook uploaded. Waiting for the processing result…';
+    }
+
+    const status = this.standingsUploadStatus();
+    if (status?.status === 'processing') {
+      return 'Workbook is being validated and published…';
+    }
+    if (status?.status === 'succeeded') {
+      return `Published ${status.rowCount} row(s) from worksheet "${status.worksheetName}".`;
+    }
+    if (status?.status === 'failed') {
+      return status.error ?? 'The workbook was rejected. Review it and try again.';
+    }
+    return '';
   }
 }

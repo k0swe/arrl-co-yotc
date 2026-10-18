@@ -5,6 +5,7 @@ import {
   isClub,
   isClubMembership,
   isStandingsColumns,
+  isStandingsUploadStatus,
   toTypedCollection,
   toTypedDocumentWithId,
   toTypedOptionalDocument,
@@ -63,5 +64,18 @@ describe('firestore-document-mapping', () => {
     );
 
     expect(result).toBeUndefined();
+  });
+
+  it('accepts valid standings upload status and rejects incomplete status', () => {
+    expect(
+      isStandingsUploadStatus({
+        status: 'succeeded',
+        fileName: 'standings.xlsx',
+        worksheetName: 'Scores',
+        rowCount: 42,
+        updatedAt: '2026-10-18T12:00:00.000Z',
+      }),
+    ).toBe(true);
+    expect(isStandingsUploadStatus({ status: 'succeeded' })).toBe(false);
   });
 });

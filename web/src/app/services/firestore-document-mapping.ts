@@ -12,7 +12,11 @@ import {
   MembershipRole,
   MembershipStatus,
 } from '@arrl-co-yotc/shared/build/app/models/user.model';
-import { StandingEntry, StandingsColumns } from '@arrl-co-yotc/shared/build/app/models/standing.model';
+import {
+  StandingEntry,
+  StandingsColumns,
+  StandingsUploadStatus,
+} from '@arrl-co-yotc/shared/build/app/models/standing.model';
 
 const membershipRoles = new Set<string>(Object.values(MembershipRole));
 const membershipStatuses = new Set<string>(Object.values(MembershipStatus));
@@ -198,5 +202,20 @@ export function isStandingsColumns(value: unknown): value is StandingsColumns {
     Array.isArray(value['columns']) &&
     (value['columns'] as unknown[]).every((column) => typeof column === 'string') &&
     typeof value['updatedAt'] === 'string'
+  );
+}
+
+export function isStandingsUploadStatus(value: unknown): value is StandingsUploadStatus {
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  return (
+    ['processing', 'succeeded', 'failed'].includes(String(value['status'])) &&
+    hasString(value, 'fileName') &&
+    hasString(value, 'updatedAt') &&
+    (value['worksheetName'] === undefined || typeof value['worksheetName'] === 'string') &&
+    (value['rowCount'] === undefined || typeof value['rowCount'] === 'number') &&
+    (value['error'] === undefined || typeof value['error'] === 'string')
   );
 }
