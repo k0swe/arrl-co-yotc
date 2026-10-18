@@ -57,6 +57,13 @@ describe('prepareStandingsUpload', () => {
     );
   });
 
+  it('rejects duplicate column headers', () => {
+    const workbook = new ExcelJS.Workbook();
+    workbook.addWorksheet('Standings').addRow([...headers, 'STATION_CALLSIGN']);
+
+    expect(() => prepareStandingsUpload(workbook, 0)).toThrow(/Duplicate column/);
+  });
+
   it('rejects populated rows without a station callsign', () => {
     const workbook = workbookWithRows([null]);
 

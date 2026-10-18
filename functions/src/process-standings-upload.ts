@@ -70,6 +70,17 @@ function missingRequiredHeaders(headers: string[]): string[] {
   return REQUIRED_HEADERS.filter((header) => !normalizedHeaders.has(header.toLowerCase()));
 }
 
+function duplicateHeaders(headers: string[]): string[] {
+  const seen = new Set<string>();
+  const duplicates = new Set<string>();
+  for (const header of headers.filter(Boolean)) {
+    const normalizedHeader = header.toLowerCase();
+    if (seen.has(normalizedHeader)) duplicates.add(header);
+    seen.add(normalizedHeader);
+  }
+  return [...duplicates];
+}
+
 /**
  * Validates and prepares a complete snapshot before any Firestore writes occur.
  */
@@ -81,21 +92,31 @@ export function prepareStandingsUpload(
     worksheet,
     headers: worksheetHeaders(worksheet),
   }));
-  const matchingSheet = candidates.find(({ headers }) => missingRequiredHeaders(headers).length === 0);
+  const matchingSheet = candidates.find(
+    ({ headers }) =>
+      missingRequiredHeaders(headers).length === 0 && duplicateHeaders(headers).length === 0,
+  );
 
   if (!matchingSheet) {
     const bestCandidate = candidates
       .map((candidate) => ({
         ...candidate,
         missing: missingRequiredHeaders(candidate.headers),
+        duplicates: duplicateHeaders(candidate.headers),
       }))
-      .sort((a, b) => a.missing.length - b.missing.length)[0];
+      .sort(
+        (a, b) =>
+          a.missing.length + a.duplicates.length - (b.missing.length + b.duplicates.length),
+      )[0];
     const sheetDescription = bestCandidate ? ` in worksheet "${bestCandidate.worksheet.name}"` : '';
     const missing = bestCandidate?.missing.length
       ? ` Missing required column(s): ${bestCandidate.missing.join(', ')}.`
       : '';
+    const duplicates = bestCandidate?.duplicates.length
+      ? ` Duplicate column(s): ${bestCandidate.duplicates.join(', ')}.`
+      : '';
     throw new StandingsUploadValidationError(
-      `No worksheet contains all required standings columns${sheetDescription}.${missing}`,
+      `No worksheet contains valid standings columns${sheetDescription}.${missing}${duplicates}`,
       bestCandidate?.worksheet.name,
     );
   }
@@ -115,6 +136,12 @@ export function prepareStandingsUpload(
       value: toPrimitive(row.getCell(index + 1).value),
     }));
     if (values.every(({ value }) => value === null || String(value).trim() === '')) return;
+    if (values.some(({ header, value }) => !header && value !== null && String(value).trim())) {
+      throw new StandingsUploadValidationError(
+        `Worksheet "${worksheet.name}" contains data on row ${rowNumber} under a blank column header.`,
+        worksheet.name,
+      );
+    }
 
     const callsign = String(values[callsignIndex]?.value ?? '').trim();
     if (!callsign) {
@@ -195,6 +222,7 @@ export const processStandingsUpload = onObjectFinalized(
 
     await uploadStatusRef.set({ status: 'processing', fileName, updatedAt: updatedAt() });
 
+    let prepared: PreparedStandings | undefined;
     try {
       const bucket = getStorage().bucket(event.data.bucket);
       const file = bucket.file(filePath);
@@ -208,7 +236,7 @@ export const processStandingsUpload = onObjectFinalized(
       await workbook.xlsx.load(arrayBuffer);
       const existingRefs = await standingsCollection.listDocuments();
       const existingRowCount = existingRefs.filter((ref) => ref.id !== 'columns').length;
-      const prepared = prepareStandingsUpload(workbook, existingRowCount);
+      prepared = prepareStandingsUpload(workbook, existingRowCount);
       const batch = db.batch();
 
       batch.set(standingsCollection.doc('columns'), {
@@ -225,16 +253,6 @@ export const processStandingsUpload = onObjectFinalized(
       }
 
       await batch.commit();
-      await uploadStatusRef.set({
-        status: 'succeeded',
-        fileName,
-        worksheetName: prepared.worksheetName,
-        rowCount: prepared.rowCount,
-        updatedAt: updatedAt(),
-      });
-      console.log(
-        `Standings ETL complete: ${prepared.rowCount} row(s) written from "${prepared.worksheetName}".`,
-      );
     } catch (error) {
       const message =
         error instanceof Error ? error.message : 'Standings upload could not be processed.';
@@ -248,6 +266,19 @@ export const processStandingsUpload = onObjectFinalized(
         updatedAt: updatedAt(),
       });
       console.error(`Standings upload rejected: ${message}`);
+      return;
     }
+
+    if (!prepared) return;
+    await uploadStatusRef.set({
+      status: 'succeeded',
+      fileName,
+      worksheetName: prepared.worksheetName,
+      rowCount: prepared.rowCount,
+      updatedAt: updatedAt(),
+    });
+    console.log(
+      `Standings ETL complete: ${prepared.rowCount} row(s) written from "${prepared.worksheetName}".`,
+    );
   },
 );

@@ -10,6 +10,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
+import { takeWhile } from 'rxjs/operators';
 import { ClubService } from '../services/club.service';
 import { StorageService } from '../services/storage.service';
 import { StandingsService } from '../services/standings.service';
@@ -288,7 +289,13 @@ export class Admin {
           this.standingsUploading.set(false);
           this.standingsStatusSubscription = this.standingsService
             .getUploadStatus(uploadId)
-            .pipe(takeUntilDestroyed(this.destroyRef))
+            .pipe(
+              takeUntilDestroyed(this.destroyRef),
+              takeWhile(
+                (status) => status?.status !== 'succeeded' && status?.status !== 'failed',
+                true,
+              ),
+            )
             .subscribe({
               next: (status) => {
                 this.standingsUploadStatus.set(status);
