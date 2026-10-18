@@ -131,6 +131,20 @@ export function prepareStandingsUpload(
   worksheet.eachRow((row, rowNumber) => {
     if (rowNumber === 1) return;
 
+    row.eachCell((cell, columnNumber) => {
+      const value = toPrimitive(cell.value);
+      if (
+        columnNumber > headers.length &&
+        value !== null &&
+        String(value).trim() !== ''
+      ) {
+        throw new StandingsUploadValidationError(
+          `Worksheet "${worksheet.name}" contains data on row ${rowNumber} beyond the last column header.`,
+          worksheet.name,
+        );
+      }
+    });
+
     const values = headers.map((header, index) => ({
       header,
       value: toPrimitive(row.getCell(index + 1).value),
@@ -182,7 +196,7 @@ export function prepareStandingsUpload(
     );
   }
 
-  if (rowCount + existingRowCount + 1 > MAX_STANDINGS_BATCH_WRITES) {
+  if (rowCount + existingRowCount + 2 > MAX_STANDINGS_BATCH_WRITES) {
     throw new StandingsUploadValidationError(
       `Upload is too large to publish safely in one transaction (${rowCount} station rows).`,
       worksheet.name,
@@ -217,6 +231,7 @@ export const processStandingsUpload = onObjectFinalized(
     if (!uploadId || uploadId.includes('/')) return;
     const uploadStatusRef = db.collection('standings-upload-jobs').doc(uploadId);
     const standingsCollection = db.collection('standings');
+    const uploadGenerationRef = db.collection('standings-upload-locks').doc('snapshot');
     const fileName = uploadId.split('/').at(-1) ?? uploadId;
     const updatedAt = () => new Date().toISOString();
 
@@ -234,25 +249,29 @@ export const processStandingsUpload = onObjectFinalized(
 
       const workbook = new ExcelJS.Workbook();
       await workbook.xlsx.load(arrayBuffer);
-      const existingRefs = await standingsCollection.listDocuments();
-      const existingRowCount = existingRefs.filter((ref) => ref.id !== 'columns').length;
-      prepared = prepareStandingsUpload(workbook, existingRowCount);
-      const batch = db.batch();
+      await db.runTransaction(async (transaction) => {
+        const generationSnapshot = await transaction.get(uploadGenerationRef);
+        const existingSnapshot = await transaction.get(standingsCollection);
+        const existingDocs = existingSnapshot.docs.filter((doc) => doc.id !== 'columns');
+        prepared = prepareStandingsUpload(workbook, existingDocs.length);
 
-      batch.set(standingsCollection.doc('columns'), {
-        columns: prepared.headers,
-        updatedAt: updatedAt(),
+        transaction.set(uploadGenerationRef, {
+          generation: Number(generationSnapshot.get('generation') ?? 0) + 1,
+          updatedAt: updatedAt(),
+        });
+        transaction.set(standingsCollection.doc('columns'), {
+          columns: prepared.headers,
+          updatedAt: updatedAt(),
+        });
+        for (const [docId, fields] of Object.entries(prepared.rowDocs)) {
+          transaction.set(standingsCollection.doc(docId), fields);
+        }
+
+        const incomingIds = new Set(['columns', ...Object.keys(prepared.rowDocs)]);
+        for (const doc of existingDocs) {
+          if (!incomingIds.has(doc.id)) transaction.delete(doc.ref);
+        }
       });
-      for (const [docId, fields] of Object.entries(prepared.rowDocs)) {
-        batch.set(standingsCollection.doc(docId), fields);
-      }
-
-      const incomingIds = new Set(['columns', ...Object.keys(prepared.rowDocs)]);
-      for (const ref of existingRefs) {
-        if (!incomingIds.has(ref.id)) batch.delete(ref);
-      }
-
-      await batch.commit();
     } catch (error) {
       const message =
         error instanceof Error ? error.message : 'Standings upload could not be processed.';

@@ -72,6 +72,15 @@ describe('prepareStandingsUpload', () => {
     );
   });
 
+  it('rejects populated cells beyond the last column header', () => {
+    const workbook = workbookWithRows(['N0POH']);
+    workbook.worksheets[0].getRow(2).getCell(headers.length + 1).value = 'unmapped data';
+
+    expect(() => prepareStandingsUpload(workbook, 0)).toThrow(
+      /beyond the last column header/,
+    );
+  });
+
   it('rejects snapshots that would remove more than half of published rows', () => {
     const workbook = workbookWithRows(['N0POH']);
 
