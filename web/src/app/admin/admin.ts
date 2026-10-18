@@ -9,6 +9,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { FormsModule } from '@angular/forms';
+import { Subscription } from 'rxjs';
 import { ClubService } from '../services/club.service';
 import { StorageService } from '../services/storage.service';
 import { StandingsService } from '../services/standings.service';
@@ -52,6 +53,7 @@ export class Admin {
   private snackBar = inject(MatSnackBar);
   private destroyRef = inject(DestroyRef);
   private dialog = inject(MatDialog);
+  private standingsStatusSubscription?: Subscription;
 
   protected readonly loading = signal(true);
   protected readonly pendingClubs = signal<Club[]>([]);
@@ -280,10 +282,11 @@ export class Admin {
       .subscribe({
         next: (storagePath) => {
           const uploadId = storagePath.slice('standings-uploads/'.length);
+          this.standingsStatusSubscription?.unsubscribe();
           this.standingsUploadStatus.set(undefined);
           this.standingsUploadWaiting.set(true);
           this.standingsUploading.set(false);
-          this.standingsService
+          this.standingsStatusSubscription = this.standingsService
             .getUploadStatus(uploadId)
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({

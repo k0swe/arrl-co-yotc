@@ -66,8 +66,8 @@ function worksheetHeaders(worksheet: ExcelJS.Worksheet): string[] {
 }
 
 function missingRequiredHeaders(headers: string[]): string[] {
-  const normalizedHeaders = new Set(headers.map((header) => header.toLocaleLowerCase()));
-  return REQUIRED_HEADERS.filter((header) => !normalizedHeaders.has(header.toLocaleLowerCase()));
+  const normalizedHeaders = new Set(headers.map((header) => header.toLowerCase()));
+  return REQUIRED_HEADERS.filter((header) => !normalizedHeaders.has(header.toLowerCase()));
 }
 
 /**
@@ -102,9 +102,9 @@ export function prepareStandingsUpload(
 
   const { worksheet, headers } = matchingSheet;
   const callsignIndex = headers.findIndex(
-    (header) => header.toLocaleLowerCase() === 'station_callsign',
+    (header) => header.toLowerCase() === 'station_callsign',
   );
-  const rowDocs: Record<string, StandingsRow> = {};
+  const rowDocs = Object.create(null) as Record<string, StandingsRow>;
   let rowCount = 0;
 
   worksheet.eachRow((row, rowNumber) => {
@@ -124,8 +124,8 @@ export function prepareStandingsUpload(
       );
     }
 
-    const docId = callsign.toLocaleUpperCase();
-    if (docId.includes('/') || docId === 'COLUMNS' || rowDocs[docId]) {
+    const docId = callsign.toUpperCase();
+    if (docId.includes('/') || docId === 'COLUMNS' || Object.hasOwn(rowDocs, docId)) {
       throw new StandingsUploadValidationError(
         `Worksheet "${worksheet.name}" contains an invalid or duplicate station callsign on row ${rowNumber}: "${callsign}".`,
         worksheet.name,

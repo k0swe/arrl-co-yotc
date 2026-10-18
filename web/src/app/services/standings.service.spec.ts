@@ -40,4 +40,10 @@ describe('StandingsService', () => {
     expect(result).toBeDefined();
     expect(result.subscribe).toBeDefined();
   });
+
+  it('should return an observable from getUploadStatus', () => {
+    const result = service.getUploadStatus('upload.xlsx');
+    expect(result).toBeDefined();
+    expect(result.subscribe).toBeDefined();
+  });
 });
