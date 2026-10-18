@@ -130,8 +130,9 @@
     <mat-card>
       <mat-card-content>
         <p>
-          Upload an Excel file exported from the ARRL Colorado Section Year of the Club spreadsheet.
-          The file will be processed automatically and the standings page will be updated.
+          Upload a complete Excel snapshot exported from the ARRL Colorado Section Year of the Club
+          spreadsheet. Uploading manually publishes this snapshot; it does not sync the online
+          spreadsheet. The workbook is validated before the standings page is replaced.
         </p>
         <p class="upload-note">
           <mat-icon aria-hidden="true">info</mat-icon>
@@ -167,6 +168,11 @@
           (change)="onStandingsFileSelect($event)"
         />
       </mat-card-actions>
+      @if (standingsUploadWaiting() || standingsUploadStatus()) {
+        <mat-card-content role="status" aria-live="polite">
+          <p>{{ standingsUploadMessage() }}</p>
+        </mat-card-content>
+      }
     </mat-card>
   </section>
 </div>

@@ -7,12 +7,17 @@ import {
   where,
 } from 'firebase/firestore';
 import { Observable } from 'rxjs';
-import { StandingEntry, StandingsColumns } from '@arrl-co-yotc/shared/build/app/models/standing.model';
+import {
+  StandingEntry,
+  StandingsColumns,
+  StandingsUploadStatus,
+} from '@arrl-co-yotc/shared/build/app/models/standing.model';
 import { collectionData, docData } from '../firebase-observables';
 import { FIREBASE_FIRESTORE } from '../firebase.tokens';
 import {
   isStandingEntry,
   isStandingsColumns,
+  isStandingsUploadStatus,
   toTypedCollection,
   toTypedOptionalDocument,
 } from './firestore-document-mapping';
@@ -47,5 +52,13 @@ export class StandingsService {
   getStandingsColumns(): Observable<StandingsColumns | undefined> {
     const columnsDoc = doc(this.firestore, 'standings', 'columns');
     return toTypedOptionalDocument(docData(columnsDoc), isStandingsColumns);
+  }
+
+  /**
+   * Watches the Cloud Function result for an uploaded standings workbook.
+   */
+  getUploadStatus(uploadId: string): Observable<StandingsUploadStatus | undefined> {
+    const statusDoc = doc(this.firestore, 'standings-upload-jobs', uploadId);
+    return toTypedOptionalDocument(docData(statusDoc), isStandingsUploadStatus);
   }
 }

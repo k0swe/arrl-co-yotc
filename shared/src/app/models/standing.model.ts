@@ -14,3 +14,12 @@ export type StandingsColumns = {
   columns: string[];
   updatedAt: string;
 };
+
+export type StandingsUploadStatus = {
+  status: 'processing' | 'succeeded' | 'failed';
+  fileName: string;
+  updatedAt: string;
+  worksheetName?: string;
+  rowCount?: number;
+  error?: string;
+};
